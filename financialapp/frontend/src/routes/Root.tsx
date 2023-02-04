@@ -1,14 +1,14 @@
 import { useState } from "react";
 import Home from "./Home";
-import Login from "./Login";
+import SignIn from "./SignIn";
 
 function Root() {
   const [authContext, setAuthContext] = useState({
-    isAuthenticated: false,
+    isAuthenticated: true,
   });
   return (
     <div className="Root">
-      {authContext.isAuthenticated ? <Home /> : <Login />}
+      {authContext.isAuthenticated ? <Home /> : <SignIn />}
     </div>
   );
 }

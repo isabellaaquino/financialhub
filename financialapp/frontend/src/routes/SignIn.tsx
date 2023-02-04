@@ -1,6 +1,6 @@
 function Login() {
   return (
-    <div className="Login flex justify-center items-center h-screen">
+    <div className="Login flex justify-center items-center m-10">
       <div className="flex flex-col w-80">
       <label className="text-sm text-gray-700">Email</label>
         <input
