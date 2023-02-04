@@ -7,7 +7,7 @@ interface Props {
 function Banner(props: Props) {
   return (
     <div className="Banner">
-      <div className="bg-blue-900/20 mr-6 rounded-md mt-4 p-2">
+      <div className="bg-yellow-100 mr-6 rounded-md mt-4 p-2 text-sm">
         <p>{props.text}</p>
       </div>
     </div>

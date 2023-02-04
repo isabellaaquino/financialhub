@@ -50,7 +50,7 @@ function Tab() {
               key={category}
               className={({ selected }) =>
                 classNames(
-                  "w-full rounded-md py-1.5 text-sm font-medium leading-5 text-blue-700",
+                  "w-full rounded-md py-1 text-sm font-medium leading-5 text-blue-700",
                   "ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2",
                   selected
                     ? "bg-white shadow"

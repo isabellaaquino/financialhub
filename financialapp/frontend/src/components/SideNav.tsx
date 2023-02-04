@@ -17,16 +17,16 @@ function SideNav(props: Props) {
           paddingLeft: !props.state ? 0 : 30,
           alignItems: !props.state ? "center" : "start",
         }}
-        className={`h-screen bg-yellow-100 flex flex-col justify-between items-start py-10`}
+        className={`h-screen bg-blue-800 flex flex-col justify-between items-start py-10`}
       >
         <div
           className={
-            "flex flex-col text-black" + !props.state
+            "flex flex-col text-white" + !props.state
               ? "items-center"
               : "items-start"
           }
         >
-          <a href="#" className="flex items-center">
+          <a href="#" className="flex items-center text-white">
             <span className="material-symbols-rounded">home</span>
             <p
               style={{ marginLeft: !props.state ? 0 : 10 }}
@@ -35,7 +35,7 @@ function SideNav(props: Props) {
               Home
             </p>
           </a>
-          <a href="#" className="mt-10 flex items-center">
+          <a href="#" className="mt-10 flex items-center text-white">
             <span className="material-symbols-rounded">monitoring</span>
             <p
               style={{ marginLeft: !props.state ? 0 : 10 }}
@@ -44,7 +44,7 @@ function SideNav(props: Props) {
               Dashboard
             </p>
           </a>
-          <a href="#" className="mt-10 flex items-center">
+          <a href="#" className="mt-10 flex items-center text-white">
             <span className="material-symbols-rounded">leaderboard</span>
             <p
               style={{ marginLeft: !props.state ? 0 : 10 }}
@@ -55,7 +55,7 @@ function SideNav(props: Props) {
           </a>
         </div>
         <div>
-          <a onClick={handleSideNav}>
+          <a onClick={handleSideNav} className="text-white">
             <span className="material-symbols-rounded text-3xl">
               exit_to_app
             </span>

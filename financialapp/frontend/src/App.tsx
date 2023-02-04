@@ -8,6 +8,7 @@ import QuickAccess from "./components/QuickAcess";
 import SideNav from "./components/SideNav";
 import Tab from "./components/Tab";
 import Title from "./components/Title";
+import TopNav from "./components/TopNav";
 
 function App() {
   const [currentBalance, setCurrentBalance] = useState<number>(2000.5);
@@ -22,10 +23,11 @@ function App() {
   return (
     <div className="App">
       <SideNav state={isSideNavOpen} handleState={handleSideNav} />
-      <div className="flex flex-col md:flex-row justify-between">
-        <main style={{marginLeft: !isSideNavOpen ? "80px": "330px"}} className="ml-20 py-5 flex-1 w-[1200px] mr-6">
+      <TopNav/>
+      <div className="grid grid-cols-[1fr_500px] gap-6">
+        <main style={{marginLeft: !isSideNavOpen ? "120px": "370px"}} className="ml-20 mr-6 py-14">
           <div className="CurrentBalance text-left">
-            <h2 className="text-lg text-gray-500">Balance</h2>
+            <h2 className="text-md text-gray-500">Balance</h2>
             <span className="font-medium text-4xl">
               ${currentBalance.toFixed(2)}
             </span>
@@ -44,7 +46,7 @@ function App() {
 
           {/* <Banner text="Needing insights for your finances? Generate free customized reports of your transactions." /> */}
         </main>
-        <div className="hidden lg:block flex-1 bg-yellow-100 p-14 h-screen">
+        <div className="hidden lg:block bg-yellow-100 p-14 h-screen">
           <LatestTransactions />
           <div className="mt-10">
             <Title text="Profile" />
