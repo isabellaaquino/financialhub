@@ -15,6 +15,7 @@ function App() {
   const [incomeBalance, setIncomeBalance] = useState<number>(1000.2);
   const [debtBalance, setDebtBalance] = useState<number>(2000.5);
   const [isSideNavOpen, setIsSideNavOpen] = useState(false);
+  const [userHasSavings, setUserHasSavings] = useState(false);
 
   function handleSideNav(state: boolean) {
     setIsSideNavOpen(state);
@@ -23,9 +24,12 @@ function App() {
   return (
     <div className="App">
       <SideNav state={isSideNavOpen} handleState={handleSideNav} />
-      <TopNav/>
+      <TopNav />
       <div className="grid grid-cols-[1fr_500px] gap-6">
-        <main style={{marginLeft: !isSideNavOpen ? "120px": "370px"}} className="ml-20 mr-6 py-14">
+        <main
+          style={{ marginLeft: !isSideNavOpen ? "120px" : "370px" }}
+          className="ml-20 mr-6 py-14"
+        >
           <div className="CurrentBalance text-left">
             <h2 className="text-md text-gray-500">Balance</h2>
             <span className="font-medium text-4xl">
@@ -35,13 +39,31 @@ function App() {
 
           <QuickAccess />
 
-          <Banner text="Planning a trip? Start a personalized SavingPlan now" />
+          {/* <Banner text="Planning a trip? Start a personalized SavingPlan now" /> */}
 
-          <div className="ThisMonth mt-10 mr-6">
+          <div className="Summary mt-10 mr-6">
             <Title text="Summary" />
             <div className="flex sm:flex-col justify-center xl:flex-row mr-6">
               <Tab />
             </div>
+          </div>
+
+          <div className="Savings mt-10 mr-6">
+            <Title text="My Savings" />
+            {!userHasSavings ? (
+              <div className="bg-blue-100 p-5 rounded-md">
+                <span className="text-gray-500 text-sm">
+                  Your SavingsPlan will be displayed here.
+                  <a className="text-blue-800 cursor-pointer">
+                    {" "}
+                    Create new SavingPlan
+                  </a>
+                  .
+                </span>
+              </div>
+            ) : (
+              <div></div>
+            )}
           </div>
 
           {/* <Banner text="Needing insights for your finances? Generate free customized reports of your transactions." /> */}
