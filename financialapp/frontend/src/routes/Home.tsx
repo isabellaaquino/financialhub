@@ -23,8 +23,6 @@ function App() {
     setIsSideNavOpen(state);
   }
 
-  function handleSummaryOptionChange() {}
-
   return (
     <div className="App">
       <SideNav state={isSideNavOpen} handleState={handleSideNav} />
@@ -43,7 +41,7 @@ function App() {
 
           <QuickAccess />
 
-          <Banner text="Planning a trip? Start a personalized SavingPlan now" />
+          {/* <Banner text="Planning a trip? Start a personalized SavingPlan now" /> */}
 
           <div className="Summary mt-10 mr-6">
             <div className="flex flex-row justify-between items-center">
