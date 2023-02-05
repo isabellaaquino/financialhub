@@ -6,29 +6,39 @@ function CurrentMonthChart() {
     options: {
       chart: {
         toolbar: { show: false },
-        id: "line",
+        id: "bar",
       },
       xaxis: {
-        categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999],
-        labels: { show: false }
+        categories: Array.from({ length: 30 }, (_, i) => i + 1), //1 to 30
+        labels: { show: true },
       },
+      yaxis: {
+        labels: { show: false },
+      },
+      grid: {
+        show: false,
+      },
+      dataLabels: {enabled: false}
     },
     series: [
       {
         name: "series-1",
-        data: [30, 40, 45, 50, 49, 60, 70, 91],
+        data: Array.from(
+          { length: 30 },
+          (_) => Math.floor(Math.random() * (1000 - 100) + 100) / 100
+        ),
       },
     ],
   });
 
   return (
-    <div className="CurrentMonthChart">
+    <div className="CurrentMonthChart relative z-[-1]">
       <Chart
         options={state.options}
         series={state.series}
-        type="line"
-        width="370"
-
+        type="bar"
+        width="1000"
+        height="200"
       />
     </div>
   );
