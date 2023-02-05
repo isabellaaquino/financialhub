@@ -6,7 +6,6 @@ import ProfileChart from "../components/charts/ProfileChart";
 import LatestTransactions from "../components/LatestTransactions";
 import QuickAccess from "../components/QuickAcess";
 import SideNav from "../components/SideNav";
-import Tab from "../components/Tab";
 import Title from "../components/Title";
 import TopNav from "../components/TopNav";
 import { SummaryOption } from "../model/summary";
