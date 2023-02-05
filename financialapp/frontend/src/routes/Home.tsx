@@ -15,6 +15,7 @@ function App() {
   const [incomeBalance, setIncomeBalance] = useState<number>(1000.2);
   const [debtBalance, setDebtBalance] = useState<number>(2000.5);
   const [isSideNavOpen, setIsSideNavOpen] = useState(false);
+  const [userHasSavings, setUserHasSavings] = useState(false);
   const [summaryOptionSelected, setSummaryOptionSelected] =
     useState<SummaryOption>(SummaryOption.Month);
 
@@ -22,9 +23,7 @@ function App() {
     setIsSideNavOpen(state);
   }
 
-  function handleSummaryOptionChange() {
-    
-  }
+  function handleSummaryOptionChange() {}
 
   return (
     <div className="App">
@@ -46,7 +45,7 @@ function App() {
 
           <Banner text="Planning a trip? Start a personalized SavingPlan now" />
 
-          <div className="ThisMonth mt-10 mr-6">
+          <div className="Summary mt-10 mr-6">
             <div className="flex flex-row justify-between items-center">
               <Title text="Summary" />
               <Options
@@ -78,6 +77,23 @@ function App() {
             </div>
           </div>
 
+          <div className="Savings mt-10 mr-6">
+            <Title text="My Savings" />
+            {!userHasSavings ? (
+              <div className="bg-blue-100 p-5 rounded-md">
+                <span className="text-gray-500 text-sm">
+                  Your SavingsPlan will be displayed here.
+                  <a className="text-blue-800 cursor-pointer">
+                    {" "}
+                    Create new SavingPlan
+                  </a>
+                  .
+                </span>
+              </div>
+            ) : (
+              <div></div>
+            )}
+          </div>
           {/* <Banner text="Needing insights for your finances? Generate free customized reports of your transactions." /> */}
         </main>
         <div className="hidden lg:block bg-yellow-100 p-14 h-screen">
