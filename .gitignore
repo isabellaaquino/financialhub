@@ -183,7 +183,7 @@ yarn-error.log
 .gitignore
 package.json
 package-lock.json
-Pipefile.lock
+Pipfile.lock
 Pipfile
 .vscode
 .gitignore
