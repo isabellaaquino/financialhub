@@ -3,7 +3,10 @@ from django.contrib.auth.models import AbstractBaseUser
 
 # Create your models here.
 class HubUser(AbstractBaseUser):
+    USERNAME_FIELD = 'email'
+
     avatar = models.ImageField(null=True, blank=True, upload_to="images/")
+    
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     email = models.EmailField(
