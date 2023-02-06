@@ -23,7 +23,7 @@ class Wallet(Model):
         that has their `date` less than 3 months ago and ordered by date
         """
         three_months = date.today() + relativedelta(months=+3)
-        return Transaction.objects.filter(wallet_id=self.pk, date__ls_than=three_months)
+        return Transaction.objects.filter(wallet_id=self.pk, date__ls_than=three_months).order_by('date')
 
     def get_saving_plans(self):
         """
@@ -41,11 +41,11 @@ class Transaction(Model):
         ('INCOME', 'Income'),
     ]
 
-    wallet_id = ForeignKey(Wallet, on_delete=CASCADE, null=True) 
+    wallet_id = ForeignKey(Wallet, on_delete=CASCADE, null=False) 
     value = DecimalField(decimal_places=2, max_digits=15)
     date = DateField(auto_now=True)
     type = CharField(max_length=100, choices=TRANSACTION_TYPES)
-    label = CharField(max_length=30) # TODO: Implement user be able to create and store their own labels
+    user_label = CharField(max_length=30, blank=True, null=True) # TODO: Implement user be able to create and store their own labels
     from_user = CharField(max_length=50, blank=True, null=True) # Django convention is to avoid setting null=True to CharFields
     to_user = CharField(max_length=100, blank=True, null=True)
     description = CharField(max_length=200)
@@ -61,10 +61,5 @@ class SavingPlan(Model):
     description = CharField(max_length=200)
 
     def toggle_active(self):
-        if self.active:
-            self.active = False
-        else:
-            self.active = True
-
-    def add_amount(self, amount):
-        self.amount += amount
+        self.active = not self.active
+        self.save(update_fields=['active'])
