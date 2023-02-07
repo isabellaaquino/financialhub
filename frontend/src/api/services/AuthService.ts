@@ -1,12 +1,8 @@
 import { User } from "../../models/User";
 import { api } from "./Api";
 
-interface Response {
-  refresh: string;
-  access: string;
-}
 class AuthService {
-  async signIn(email: string, password: string): Promise<Response | undefined> {
+  async signIn(email: string, password: string) {
     try {
       const response = await api.post("/token/", {
         email: email,
@@ -21,7 +17,19 @@ class AuthService {
 
   async signUp(user: User) {
     try {
-      console.log("sign out");
+      console.log("sign up");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async refreshToken(token: string) {
+    try {
+      const response = await api.post("/token/refresh/", {
+        refresh: token,
+      });
+      const data = await response.data;
+      return data;
     } catch (error) {
       console.log(error);
     }

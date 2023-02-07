@@ -18,7 +18,7 @@ function App() {
   const [userHasSavings, setUserHasSavings] = useState(false);
   const [summaryOptionSelected, setSummaryOptionSelected] =
     useState<SummaryOption>(SummaryOption.Month);
-
+    
   function handleSideNav(state: boolean) {
     setIsSideNavOpen(state);
   }

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "../hooks/useAuth";
 import UserDropdown from "./UserDropdown";
 
 function TopNav() {

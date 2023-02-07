@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 interface UserInput {
@@ -7,7 +8,8 @@ interface UserInput {
 }
 
 function Login() {
-  const authContext = useAuth();
+  let navigate = useNavigate();
+  const { SignIn, user } = useAuth();
   const [userInput, setUserInput] = useState<UserInput>({
     email: "",
     password: "",
@@ -16,8 +18,9 @@ function Login() {
   function handleSubmit(event: any) {
     event.preventDefault();
     try {
-      authContext.SignIn(userInput.email, userInput.password);
-      setUserInput({ email: "", password: "" });
+      SignIn(userInput.email, userInput.password);
+      // setUserInput({ email: "", password: "" });
+      navigate("/");
     } catch (error) {
       !error ? console.log("No server response") : console.log(error);
     }
