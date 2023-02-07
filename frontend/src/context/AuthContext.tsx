@@ -6,7 +6,7 @@ import { User } from "../models/User";
 interface AuthContextData {
   user: User | null;
   setLoggedUser: any;
-  SignIn(username: string, password: string): void;
+  SignIn(email: string, password: string): void;
   SignOut(): void;
   isAuthenticated: boolean;
 }
@@ -17,20 +17,12 @@ interface Props {
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 export const AuthProvider = ({ children }: Props) => {
+  let [authTokens, setAuthTokens] = useState(null);
   let [loggedUser, setLoggedUser] = useState<User | null>(null);
 
-  async function SignIn(username: string, password: string) {
-    const response = await authService.signIn(username, password);
-    if (response != null) {
-      setLoggedUser({
-        firstname: response.firstname,
-        lastname: response.lastname,
-        token: response.token,
-        email: response.email,
-        avatar: response.avatar,
-      } as User);
-      api.defaults.headers.Authorization = `Bearer ${response.token}`;
-    }
+  async function SignIn(email: string, password: string) {
+    const response = await authService.signIn(email, password);
+    console.log(JSON.stringify(response));
   }
 
   async function SignOut() {

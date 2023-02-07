@@ -4,7 +4,7 @@ import SignIn from "./SignIn";
 
 function Root() {
   const [authContext, setAuthContext] = useState({
-    isAuthenticated: true,
+    isAuthenticated: false,
   });
   return (
     <div className="Root">
