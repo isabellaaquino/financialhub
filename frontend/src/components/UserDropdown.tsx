@@ -1,18 +1,18 @@
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useRef, useState } from "react";
+import { useAuth } from "../hooks/useAuth";
 import avatar from "../img/img_avatar.png";
 
 export default function Example() {
-  const [loggedUser, setLoggedUser] = useState({
-    name: "Pedro",
-  });
+  const { user, SignOut } = useAuth();
+  
   return (
     <div className="w-56 text-right">
       <Menu as="div" className="relative inline-block text-left">
         <div className="flex flex-row items-center">
           <img src={avatar} className="w-10 rounded-full" alt="Avatar" />
           <Menu.Button className="inline-flex items-center w-full justify-center rounded-md px-4 py-2 text-sm text-black hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
-            {loggedUser.name}
+            {user && user.first_name + " " + user.last_name}
             <span className="material-symbols-rounded text-xl pl-1">
               expand_more
             </span>
@@ -32,7 +32,8 @@ export default function Example() {
               <Menu.Item>
                 {({ active }) => (
                   <button className="group flex w-full items-center rounded-md px-2 py-2 text-sm">
-                    <span className="material-symbols-rounded pr-2">build</span> Settings
+                    <span className="material-symbols-rounded pr-2">build</span>{" "}
+                    Settings
                   </button>
                 )}
               </Menu.Item>
@@ -40,11 +41,11 @@ export default function Example() {
             <div className="px-1 py-1">
               <Menu.Item>
                 {({ active }) => (
-                  <button className="group flex w-full items-center rounded-md px-2 py-2 text-sm">
+                  <button onClick={SignOut} className="group flex w-full items-center rounded-md px-2 py-2 text-sm">
                     <span className="material-symbols-rounded pr-2">
                       logout
                     </span>
-                    Logout
+                    Sign Out
                   </button>
                 )}
               </Menu.Item>
