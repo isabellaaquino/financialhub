@@ -1,7 +1,7 @@
 from django.contrib.auth.base_user import BaseUserManager
 
 
-class UserManager(BaseUserManager):
+class HubUserManager(BaseUserManager):
     use_in_migrations = True
 
     def _create_user(self, email, password, **extra_fields):
@@ -22,6 +22,7 @@ class UserManager(BaseUserManager):
 
     def create_superuser(self, email, password, **extra_fields):
         extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_staff', True)
 
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
