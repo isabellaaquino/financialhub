@@ -185,5 +185,4 @@ package-lock.json
 Pipfile.lock
 Pipfile
 .vscode
-.gitignore
 .python-version
