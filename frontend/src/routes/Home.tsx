@@ -8,7 +8,7 @@ import QuickAccess from "../components/QuickAcess";
 import SideNav from "../components/SideNav";
 import Title from "../components/Title";
 import TopNav from "../components/TopNav";
-import { SummaryOption } from "../model/summary";
+import { SummaryOption } from "../models/Summary";
 
 function App() {
   const [currentBalance, setCurrentBalance] = useState<number>(2000.5);
@@ -18,7 +18,7 @@ function App() {
   const [userHasSavings, setUserHasSavings] = useState(false);
   const [summaryOptionSelected, setSummaryOptionSelected] =
     useState<SummaryOption>(SummaryOption.Month);
-
+    
   function handleSideNav(state: boolean) {
     setIsSideNavOpen(state);
   }

@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import { Listbox, Transition } from "@headlessui/react";
-import { SummaryOption } from "../../model/summary";
+import { SummaryOption } from "../../models/Summary";
 
 const options = Object.values(SummaryOption);
 
