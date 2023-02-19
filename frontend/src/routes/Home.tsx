@@ -26,8 +26,8 @@ function App() {
   const [summaryOptionSelected, setSummaryOptionSelected] =
     useState<SummaryOption>(SummaryOption.Month);
   const [lineChartData, setLineChartData] = useState<
-    { [id: string]: string }[] | null
-  >(null);
+    { x: string; y: string | number }[]
+  >([]);
 
   useEffect(() => {
     //user is not logged out when token expires
@@ -44,9 +44,22 @@ function App() {
   }, []);
 
   useEffect(() => {
+    let categories: string[] = [];
     const result = createLineChartData();
-    setLineChartData(result);
+
+    result.map((transaction) => {
+      categories.push(transaction.date);
+    });
+
+    const dataSet = categories.map((c) => {
+      const data = result.find(({ date, value }) => date === c);
+      return { x: c, y: data ? data.value : 0 };
+    });
+
+    setLineChartData(dataSet);
   }, [transactions]);
+
+  console.log(lineChartData);
 
   function createLineChartData() {
     let dataSet: { [id: string]: string }[] = [];
@@ -127,7 +140,8 @@ function App() {
                 </div>
               </div>
               <div>
-                {lineChartData && <CurrentMonthChart data={lineChartData} />}
+                <CurrentMonthChart data={lineChartData} />
+                {/* {lineChartData && <CurrentMonthChart data={lineChartData} />} */}
               </div>
             </div>
           </div>
