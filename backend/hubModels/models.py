@@ -94,7 +94,7 @@ class Transaction(models.Model):
 
     wallet_id = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False) 
     value = models.DecimalField(decimal_places=2, max_digits=15)
-    date = models.DateField(auto_now=True)
+    date = models.DateTimeField(auto_now=True)
     type = models.CharField(max_length=100, choices=TRANSACTION_TYPES)
     user_label = models.CharField(max_length=30, blank=True, null=True) # TODO: Implement user be able to create and store their own labels
     from_user = models.CharField(max_length=50, blank=True, null=True) # Django convention is to avoid setting null=True to CharFields

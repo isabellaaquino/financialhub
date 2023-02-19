@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { isatty } from "node:tty";
+import { useContext, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import Home from "./Home";
 import SignIn from "./SignIn";
 
 function Root() {
-  const { isAuthenticated } = useAuth();
-  return <div className="Root">{isAuthenticated ? <Home /> : <SignIn />}</div>;
+  let { user } = useAuth();
+
+  return <div className="Root">{user ? <Home /> : <SignIn />}</div>;
 }
 
 export default Root;
