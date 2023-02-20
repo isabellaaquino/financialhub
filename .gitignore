@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/django,vuejs
-# Edit at https://www.toptal.com/developers/gitignore?templates=django,vuejs
+# Created by https://www.toptal.com/developers/gitignore/api/django
+# Edit at https://www.toptal.com/developers/gitignore?templates=django
 
 ### Django ###
 *.log
@@ -171,20 +171,24 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-### Vuejs ###
-# Recommended template: Node.gitignore
+# End of https://www.toptal.com/developers/gitignore/api/django
+# Created by https://www.toptal.com/developers/gitignore/api/react
+# Edit at https://www.toptal.com/developers/gitignore?templates=react
 
-node_modules/
-npm-debug.log
-yarn-error.log
+### react ###
+.DS_*
+*.log
+logs
+**/*.backup.*
+**/*.back.*
 
-# End of https://www.toptal.com/developers/gitignore/api/django,vuejs
-.idea
-.gitignore
-package.json
-package-lock.json
-Pipfile.lock
-Pipfile
-.vscode
-.gitignore
-.python-version
+node_modules
+bower_components
+
+*.sublime*
+
+psd
+thumb
+sketch
+
+# End of https://www.toptal.com/developers/gitignore/api/react
