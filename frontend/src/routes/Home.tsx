@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import dateService from "../api/services/DateService";
 import transactionService, {
   Transaction,
 } from "../api/services/TransactionService";
@@ -18,16 +19,13 @@ import { SummaryOption } from "../models/Summary";
 function App() {
   const { authTokens } = useAuth();
   const [currentBalance, setCurrentBalance] = useState<number>(-1.0);
-  const [transactions, setTransactions] = useState<Transaction[] | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[] | null>();
   const [incomeBalance, setIncomeBalance] = useState<number>(1000.2);
   const [debtBalance, setDebtBalance] = useState<number>(2000.5);
   const [isSideNavOpen, setIsSideNavOpen] = useState(false);
   const [userHasSavings, setUserHasSavings] = useState(false);
   const [summaryOptionSelected, setSummaryOptionSelected] =
     useState<SummaryOption>(SummaryOption.Month);
-  const [lineChartData, setLineChartData] = useState<
-    { x: string; y: string | number }[]
-  >([]);
 
   useEffect(() => {
     //user is not logged out when token expires
@@ -37,55 +35,13 @@ function App() {
     });
 
     transactionService
-      .getUserLoggedTransactions(authTokens!.access)
+      .getUserLoggedTransactions(authTokens!.access, dateService.currentYear())
       .then((transactions) => {
         setTransactions(transactions!);
       });
   }, []);
 
-  useEffect(() => {
-    let categories: string[] = [];
-    const result = createLineChartData();
-
-    result.map((transaction) => {
-      categories.push(transaction.date);
-    });
-
-    const dataSet = categories.map((c) => {
-      const data = result.find(({ date, value }) => date === c);
-      return { x: c, y: data ? data.value : 0 };
-    });
-
-    setLineChartData(dataSet);
-  }, [transactions]);
-
-  console.log(lineChartData);
-
-  function createLineChartData() {
-    let dataSet: { [id: string]: string }[] = [];
-
-    transactions?.map((transaction) => {
-      let dict: { [id: string]: string } = {};
-      dict["date"] = new Date(
-        Date.parse(transaction.date)
-      ).toLocaleDateString();
-      dict["value"] = transaction.value.toString();
-      dataSet.push(dict);
-    });
-
-    const map = dataSet.reduce((acc, { date, value }) => {
-      let val = Number(value) + (Number(acc[date]) || 0);
-      acc[date] = val.toFixed(2);
-      return acc;
-    }, {});
-
-    let result: { [id: string]: string }[] = [];
-    Object.entries(map).map(([key, value]) => {
-      result.push({ date: key, value: value });
-    });
-
-    return result;
-  }
+  useEffect(() => {}, [transactions]);
 
   function handleSideNav(state: boolean) {
     setIsSideNavOpen(state);
@@ -140,8 +96,12 @@ function App() {
                 </div>
               </div>
               <div>
-                <CurrentMonthChart data={lineChartData} />
-                {/* {lineChartData && <CurrentMonthChart data={lineChartData} />} */}
+                {transactions && (
+                  <CurrentMonthChart
+                    data={transactions}
+                    option={summaryOptionSelected}
+                  />
+                )}
               </div>
             </div>
           </div>

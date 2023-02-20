@@ -10,9 +10,11 @@ export interface Transaction {
 }
 
 class TransactionService {
-  async getUserLoggedTransactions(accessToken: string) {
+  async getUserLoggedTransactions(accessToken: string, year: number = 0) {
     try {
-      const response = await api.get("/transactions/", {
+      const endpoint =
+        year === 0 ? "/transactions/" : `/transactions?year=${year}`;
+      const response = await api.get(endpoint, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,

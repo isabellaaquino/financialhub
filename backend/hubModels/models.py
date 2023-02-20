@@ -28,7 +28,6 @@ class HubUser(AbstractBaseUser, PermissionsMixin):
         verbose_name = 'user'
         verbose_name_plural = 'users'
 
-
     def get_wallet(self) -> 'Wallet':
         '''
         Returns the wallet related to that user.
@@ -68,6 +67,12 @@ class Wallet(models.Model):
         """
         return Transaction.objects.filter(wallet_id=self.pk)
 
+    def get_transactions_by_year(self, year) -> QuerySet['Transaction']:
+        """
+        Return a QuerySet of all Transactions related to a Wallet from specific year
+        """
+        return Transaction.objects.filter(wallet_id=self.pk, date__year=year).order_by('date')
+
     def get_latest_transactions(self) -> QuerySet['Transaction']:
         """
         Return a QuerySett of all Transactions related to a Wallet
@@ -92,12 +97,14 @@ class Transaction(models.Model):
         ('INCOME', 'Income'),
     ]
 
-    wallet_id = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False) 
+    wallet_id = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False)
     value = models.DecimalField(decimal_places=2, max_digits=15)
     date = models.DateTimeField(auto_now=True)
     type = models.CharField(max_length=100, choices=TRANSACTION_TYPES)
-    user_label = models.CharField(max_length=30, blank=True, null=True) # TODO: Implement user be able to create and store their own labels
-    from_user = models.CharField(max_length=50, blank=True, null=True) # Django convention is to avoid setting null=True to CharFields
+    # TODO: Implement user be able to create and store their own labels
+    user_label = models.CharField(max_length=30, blank=True, null=True)
+    # Django convention is to avoid setting null=True to CharFields
+    from_user = models.CharField(max_length=50, blank=True, null=True)
     to_user = models.CharField(max_length=100, blank=True, null=True)
     description = models.CharField(max_length=200)
     update_wallet = models.BooleanField(default=True)
