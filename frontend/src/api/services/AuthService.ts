@@ -23,7 +23,7 @@ class AuthService {
     }
   }
 
-  async refreshToken(token: string) {
+  async refreshToken(token: string | undefined) {
     try {
       const response = await api.post("/token/refresh/", {
         refresh: token,

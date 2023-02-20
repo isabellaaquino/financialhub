@@ -1,4 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import dateService from "../api/services/DateService";
+import transactionService, {
+  Transaction,
+} from "../api/services/TransactionService";
+import walletService from "../api/services/WalletService";
 import Banner from "../components/Banner";
 import CurrentMonthChart from "../components/charts/CurrentMonthChart";
 import Options from "../components/charts/Options";
@@ -8,17 +13,36 @@ import QuickAccess from "../components/QuickAcess";
 import SideNav from "../components/SideNav";
 import Title from "../components/Title";
 import TopNav from "../components/TopNav";
+import { useAuth } from "../hooks/useAuth";
 import { SummaryOption } from "../models/Summary";
 
 function App() {
-  const [currentBalance, setCurrentBalance] = useState<number>(2000.5);
+  const { authTokens } = useAuth();
+  const [currentBalance, setCurrentBalance] = useState<number>(-1.0);
+  const [transactions, setTransactions] = useState<Transaction[] | null>();
   const [incomeBalance, setIncomeBalance] = useState<number>(1000.2);
   const [debtBalance, setDebtBalance] = useState<number>(2000.5);
   const [isSideNavOpen, setIsSideNavOpen] = useState(false);
   const [userHasSavings, setUserHasSavings] = useState(false);
   const [summaryOptionSelected, setSummaryOptionSelected] =
     useState<SummaryOption>(SummaryOption.Month);
-    
+
+  useEffect(() => {
+    //user is not logged out when token expires
+    //fetch data using Promise.all to get all in parallel
+    walletService.getUserLoggedWallet(authTokens!.access).then((wallet) => {
+      setCurrentBalance(Number(wallet!.current_amount));
+    });
+
+    transactionService
+      .getUserLoggedTransactions(authTokens!.access, dateService.currentYear())
+      .then((transactions) => {
+        setTransactions(transactions!);
+      });
+  }, []);
+
+  useEffect(() => {}, [transactions]);
+
   function handleSideNav(state: boolean) {
     setIsSideNavOpen(state);
   }
@@ -32,12 +56,14 @@ function App() {
           style={{ marginLeft: !isSideNavOpen ? "120px" : "370px" }}
           className="ml-20 mr-6 py-14"
         >
-          <div className="CurrentBalance text-left">
-            <h2 className="text-md text-gray-500">Balance</h2>
-            <span className="font-medium text-4xl">
-              ${currentBalance.toFixed(2)}
-            </span>
-          </div>
+          {currentBalance >= 0 && (
+            <div className="CurrentBalance text-left">
+              <h2 className="text-md text-gray-500">Balance</h2>
+              <span className="font-medium text-4xl">
+                ${currentBalance.toFixed(2)}
+              </span>
+            </div>
+          )}
 
           <QuickAccess />
 
@@ -70,7 +96,12 @@ function App() {
                 </div>
               </div>
               <div>
-                <CurrentMonthChart />
+                {transactions && (
+                  <CurrentMonthChart
+                    data={transactions}
+                    option={summaryOptionSelected}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -95,7 +126,15 @@ function App() {
           {/* <Banner text="Needing insights for your finances? Generate free customized reports of your transactions." /> */}
         </main>
         <div className="hidden lg:block bg-yellow-100 p-14 h-screen">
-          <LatestTransactions />
+          <div>
+            {transactions && <LatestTransactions data={transactions} />}
+            <button
+              type="button"
+              className="w-full mt-3 rounded-md p-2 text-sm bg-blue-800 text-white"
+            >
+              Show more
+            </button>
+          </div>
           <div className="mt-10">
             <div className="flex flex-row justify-between">
               <Title text="Profile" />

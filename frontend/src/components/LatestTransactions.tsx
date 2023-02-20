@@ -1,34 +1,12 @@
 import { useState } from "react";
+import { Transaction } from "../api/services/TransactionService";
 import Title from "./Title";
 
-function LatestTransactions() {
-  const [latestTransactions, setLatestTransactions] = useState([
-    {
-      description: "McDonalds",
-      date: new Date(),
-      type: "EXPENSE",
-      value: 20.0,
-    },
-    {
-      description: "Spotify",
-      date: new Date(),
-      type: "EXPENSE",
-      value: 30.0,
-    },
-    {
-      description: "Spotify",
-      date: new Date(),
-      type: "EXPENSE",
-      value: 30.0,
-    },
-    {
-      description: "Spotify",
-      date: new Date(),
-      type: "EXPENSE",
-      value: 30.0,
-    },
-  ]);
-
+const MAX_ROWS = 5;
+interface Props {
+  data: Transaction[];
+}
+function LatestTransactions(props: Props) {
   return (
     <div className="LatestTransactions ml-20 mt-10 md:ml-0">
       <Title text="Latest Transactions" />
@@ -37,16 +15,16 @@ function LatestTransactions() {
         placeholder="Search"
         type="text"
       />
-      {latestTransactions.map((l, i) => {
+      {props.data.slice(0, MAX_ROWS).map((l, i) => {
         return (
-          <div className="text-left hover:bg-gray-300 p-3 rounded-md" key={i}>
+          <div className="text-left hover:bg-gray-300 py-3 rounded-md" key={i}>
             <div className="flex flex-row justify-between items-center text-sm">
               <div>
                 <p>{l.description}</p>
                 <span className="text-gray-500">{l.date.toLocaleString()}</span>
               </div>
               <div>
-                <span>${l.value.toFixed(2)}</span>
+                <span>${Number(l.value).toFixed(2)}</span>
               </div>
             </div>
           </div>

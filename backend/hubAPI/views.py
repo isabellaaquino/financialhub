@@ -1,4 +1,5 @@
 from django.http import JsonResponse
+from django.db.models import QuerySet
 from hubModels.serializers import MyTokenObtainPairSerializer
 from hubModels.models import HubUser, Wallet
 from rest_framework.response import Response
@@ -13,14 +14,13 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
-    
+
 
 # class GetUsersSavingPlansView(APIView):
 #     def get_queryset(self):
 #         user : HubUser = self.request.user
 
 #         return user.get_wallet().get_saving_plans()
-    
 
 
 @api_view(['GET'])
@@ -48,7 +48,6 @@ def get_wallet(request):
     return Response(wallet_serialized.data)
 
 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_saving_plans(request):
@@ -64,10 +63,16 @@ def get_saving_plans(request):
 @permission_classes([IsAuthenticated])
 def get_transactions(request):
     user: HubUser = request.user
+    print(request.query_params.get('year'))
+    transactions: QuerySet
+    if (request.query_params.get('year') != ""):
+        transactions = user.get_wallet().get_transactions_by_year(
+            request.query_params.get('year'))
+    else:
+        transactions = user.get_wallet().get_transactions()
 
-    transactions = user.get_wallet().get_transactions()
+    print(transactions.count())
     transactions_serialized = TransactionSerializer(transactions, many=True)
-
     return Response(transactions_serialized.data)
 
 
@@ -77,9 +82,7 @@ def get_latest_transactions(request):
     user: HubUser = request.user
 
     latest_transactions = user.get_wallet().get_latest_transactions()
-    latest_transactions_serialized = TransactionSerializer(latest_transactions, many=True)
+    latest_transactions_serialized = TransactionSerializer(
+        latest_transactions, many=True)
 
     return Response(latest_transactions_serialized.data)
-
-
-

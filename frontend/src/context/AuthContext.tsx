@@ -2,14 +2,13 @@ import { createContext, useEffect, useState } from "react";
 import { api } from "../api/services/Api";
 import authService from "../api/services/AuthService";
 import { User } from "../models/User";
-
 import jwt_decode from "jwt-decode";
-import { useNavigate } from "react-router-dom";
+
 interface AuthContextData {
   user: User | null;
   SignIn(email: string, password: string): void;
   SignOut(): void;
-  isAuthenticated: boolean;
+  authTokens: AuthTokens | null;
 }
 
 interface Props {
@@ -49,22 +48,28 @@ export const AuthProvider = ({ children }: Props) => {
   }
 
   async function RefreshToken() {
-    if (authTokens) {
+    try {
       const response = (await authService.refreshToken(
-        authTokens.refresh
+        authTokens?.refresh
       )) as AuthTokens;
+
       setAuthTokens(response);
       setLoggedUser(jwt_decode(response.access));
       localStorage.setItem("authTokens", JSON.stringify(response));
-    } else {
+    } catch {
       SignOut();
     }
+
+    if (loading) setLoading(false);
   }
 
   useEffect(() => {
+    if (loading) RefreshToken();
+
     let interval = setInterval(() => {
       if (authTokens) RefreshToken();
-    }, 1000 * 60 * 5); //5 minutes
+    }, 1000 * 60 * 4); //5 minutes
+
     return () => clearInterval(interval);
   }, [authTokens, loading]);
 
@@ -72,12 +77,12 @@ export const AuthProvider = ({ children }: Props) => {
     <AuthContext.Provider
       value={{
         user: loggedUser,
-        isAuthenticated: Boolean(loggedUser),
         SignIn,
         SignOut,
+        authTokens,
       }}
     >
-      {children}
+      {loading ? null : children}
     </AuthContext.Provider>
   );
 };

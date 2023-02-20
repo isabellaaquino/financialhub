@@ -3,9 +3,9 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import avatar from "../img/img_avatar.png";
 
-export default function Example() {
+export default function UserDropdown() {
   const { user, SignOut } = useAuth();
-  
+
   return (
     <div className="w-56 text-right">
       <Menu as="div" className="relative inline-block text-left">
@@ -41,7 +41,10 @@ export default function Example() {
             <div className="px-1 py-1">
               <Menu.Item>
                 {({ active }) => (
-                  <button onClick={SignOut} className="group flex w-full items-center rounded-md px-2 py-2 text-sm">
+                  <button
+                    onClick={SignOut}
+                    className="group flex w-full items-center rounded-md px-2 py-2 text-sm"
+                  >
                     <span className="material-symbols-rounded pr-2">
                       logout
                     </span>

@@ -19,12 +19,14 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 class WalletSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Wallet
-        fields = ('current_amount')
+        fields = ('current_amount',)
+
 
 class TransactionSerializer(serializers.ModelSerializer):
+    date = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S")
 
     class Meta:
         model = Transaction
