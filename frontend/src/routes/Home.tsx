@@ -29,8 +29,6 @@ function App() {
   const [summaryOptionSelected, setSummaryOptionSelected] =
     useState<SummaryOption>(SummaryOption.Month);
 
-<<<<<<< HEAD
-=======
   useEffect(() => {
     //user is not logged out when token expires
     //fetch data using Promise.all to get all in parallel
@@ -47,7 +45,6 @@ function App() {
 
   useEffect(() => {}, [transactions]);
 
->>>>>>> develop
   function handleSideNav(state: boolean) {
     setIsSideNavOpen(state);
   }
@@ -66,21 +63,6 @@ function App() {
           style={{ marginLeft: !isSideNavOpen ? "120px" : "370px" }}
           className="ml-20 mr-6 py-14"
         >
-<<<<<<< HEAD
-          <div className="CurrentBalance text-left">
-            <h2 className="text-md text-gray-500">Balance</h2>
-            <div className="flex items-center gap-4">
-              <span className="font-medium text-4xl">
-                ${currentBalance.toFixed(2)}
-              </span>
-              <button onClick={openBalanceEditor} className="cursor-pointer">
-                <span className="material-symbols-rounded text-sm text-gray-700 p-1 rounded-md hover:bg-blue-200">
-                  edit
-                </span>
-              </button>
-            </div>
-          </div>
-=======
           {currentBalance >= 0 && (
             <div className="CurrentBalance text-left">
               <h2 className="text-md text-gray-500">Balance</h2>
@@ -89,7 +71,6 @@ function App() {
               </span>
             </div>
           )}
->>>>>>> develop
 
           <QuickAccess />
 
