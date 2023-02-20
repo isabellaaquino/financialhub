@@ -3,6 +3,7 @@ import Banner from "../components/Banner";
 import CurrentMonthChart from "../components/charts/CurrentMonthChart";
 import Options from "../components/charts/Options";
 import ProfileChart from "../components/charts/ProfileChart";
+import EditBalance from "../components/EditBalance";
 import LatestTransactions from "../components/LatestTransactions";
 import QuickAccess from "../components/QuickAcess";
 import SideNav from "../components/SideNav";
@@ -16,15 +17,21 @@ function App() {
   const [debtBalance, setDebtBalance] = useState<number>(2000.5);
   const [isSideNavOpen, setIsSideNavOpen] = useState(false);
   const [userHasSavings, setUserHasSavings] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [summaryOptionSelected, setSummaryOptionSelected] =
     useState<SummaryOption>(SummaryOption.Month);
-    
+
   function handleSideNav(state: boolean) {
     setIsSideNavOpen(state);
   }
 
+  function openBalanceEditor() {
+    setIsOpen(true);
+  }
+
   return (
     <div className="App">
+      <EditBalance isOpen={isOpen} handleState={setIsOpen} />
       <SideNav state={isSideNavOpen} handleState={handleSideNav} />
       <TopNav />
       <div className="grid grid-cols-[1fr_500px] gap-6">
@@ -34,9 +41,16 @@ function App() {
         >
           <div className="CurrentBalance text-left">
             <h2 className="text-md text-gray-500">Balance</h2>
-            <span className="font-medium text-4xl">
-              ${currentBalance.toFixed(2)}
-            </span>
+            <div className="flex items-center gap-4">
+              <span className="font-medium text-4xl">
+                ${currentBalance.toFixed(2)}
+              </span>
+              <button onClick={openBalanceEditor} className="cursor-pointer">
+                <span className="material-symbols-rounded text-sm text-gray-700 p-1 rounded-md hover:bg-blue-200">
+                  edit
+                </span>
+              </button>
+            </div>
           </div>
 
           <QuickAccess />
