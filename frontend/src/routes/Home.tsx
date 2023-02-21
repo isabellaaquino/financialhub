@@ -55,7 +55,12 @@ function App() {
 
   return (
     <div className="App">
-      <EditBalance isOpen={isOpen} handleState={setIsOpen} />
+      <EditBalance
+        isOpen={isOpen}
+        handleState={setIsOpen}
+        currentBalance={currentBalance}
+        handleCurrentBalance={setCurrentBalance}
+      />
       <SideNav state={isSideNavOpen} handleState={handleSideNav} />
       <TopNav />
       <div className="grid grid-cols-[1fr_500px] gap-6">
@@ -66,9 +71,14 @@ function App() {
           {currentBalance >= 0 && (
             <div className="CurrentBalance text-left">
               <h2 className="text-md text-gray-500">Balance</h2>
-              <span className="font-medium text-4xl">
-                ${currentBalance.toFixed(2)}
-              </span>
+              <div className="flex items-center gap-4">
+                <span className="font-medium text-4xl">${currentBalance}</span>
+                <button onClick={openBalanceEditor} className="cursor-pointer">
+                  <span className="material-symbols-rounded text-sm text-gray-700 p-1 rounded-md hover:bg-blue-200">
+                    edit
+                  </span>
+                </button>
+              </div>
             </div>
           )}
 
