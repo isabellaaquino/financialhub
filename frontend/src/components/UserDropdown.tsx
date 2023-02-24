@@ -7,7 +7,7 @@ export default function UserDropdown() {
   const { user, SignOut } = useAuth();
 
   return (
-    <div className="w-56 text-right">
+    <div className="fixed w-56 text-right z-10">
       <Menu as="div" className="relative inline-block text-left">
         <div className="flex flex-row items-center">
           <img src={avatar} className="w-10 rounded-full" alt="Avatar" />

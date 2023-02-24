@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Transaction } from "../api/services/TransactionService";
+import { Transaction } from "../models/Transaction";
 import Title from "./Title";
 
 const MAX_ROWS = 5;

@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import dateService from "../api/services/DateService";
-import transactionService, {
-  Transaction,
-} from "../api/services/TransactionService";
+import transactionService from "../api/services/TransactionService";
 import walletService from "../api/services/WalletService";
-import Banner from "../components/Banner";
 import CurrentMonthChart from "../components/charts/CurrentMonthChart";
 import Options from "../components/charts/Options";
 import ProfileChart from "../components/charts/ProfileChart";
@@ -16,6 +14,7 @@ import Title from "../components/Title";
 import TopNav from "../components/TopNav";
 import { useAuth } from "../hooks/useAuth";
 import { SummaryOption } from "../models/Summary";
+import { Transaction } from "../models/Transaction";
 
 function App() {
   const { authTokens } = useAuth();
@@ -55,14 +54,14 @@ function App() {
 
   return (
     <div className="App">
+      <SideNav state={isSideNavOpen} handleState={handleSideNav} />
+      <TopNav />
       <EditBalance
         isOpen={isOpen}
         handleState={setIsOpen}
         currentBalance={currentBalance}
         handleCurrentBalance={setCurrentBalance}
       />
-      <SideNav state={isSideNavOpen} handleState={handleSideNav} />
-      <TopNav />
       <div className="grid grid-cols-[1fr_500px] gap-6">
         <main
           style={{ marginLeft: !isSideNavOpen ? "120px" : "370px" }}
@@ -145,12 +144,11 @@ function App() {
         <div className="hidden lg:block bg-yellow-100 p-14 h-screen">
           <div>
             {transactions && <LatestTransactions data={transactions} />}
-            <button
-              type="button"
-              className="w-full mt-3 rounded-md p-2 text-sm bg-blue-800 text-white"
-            >
-              Show more
-            </button>
+            <Link to={"/transactions"}>
+              <button className="mt-3 w-full bg-blue-800 rounded-md p-2 text-center text-sm text-white">
+                Show more
+              </button>
+            </Link>
           </div>
           <div className="mt-10">
             <div className="flex flex-row justify-between">

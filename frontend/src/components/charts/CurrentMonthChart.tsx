@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
 import dateService, { MONTHS_IN_YEAR } from "../../api/services/DateService";
-import { Transaction } from "../../api/services/TransactionService";
 import { SummaryOption } from "../../models/Summary";
+import { Transaction } from "../../models/Transaction";
 
 interface Props {
   data: Transaction[];
