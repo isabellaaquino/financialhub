@@ -1,13 +1,6 @@
 import axios from "axios";
+import { Transaction } from "../../models/Transaction";
 import { api } from "./Api";
-
-export interface Transaction {
-  value: number;
-  date: string;
-  to_user: string;
-  description: string;
-  type: "EXPENSE" | "TRANSFER" | "INCOME";
-}
 
 class TransactionService {
   async getUserLoggedTransactions(accessToken: string, year: number = 0) {

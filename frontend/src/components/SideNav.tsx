@@ -10,7 +10,7 @@ function SideNav(props: Props) {
   }
 
   return (
-    <div className="SideNav absolute">
+    <div className="SideNav fixed">
       <nav
         style={{
           width: !props.state ? "56px" : "300px",
