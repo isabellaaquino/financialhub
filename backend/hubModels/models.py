@@ -28,6 +28,19 @@ class HubUser(AbstractBaseUser, PermissionsMixin):
         verbose_name = 'user'
         verbose_name_plural = 'users'
 
+    def create_from_json(data):
+        user = HubUser()
+        if data["firstName"]:
+            user.first_name = data["firstName"]
+        if data["lastName"]:
+            user.last_name = data["lastName"]
+        if data["password"]:
+            user.set_password(data["password"])
+        if data["email"]:
+            user.email = data["email"]
+        user.save()
+        return user
+
     def get_wallet(self) -> 'Wallet':
         '''
         Returns the wallet related to that user.

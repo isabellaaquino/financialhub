@@ -3,10 +3,12 @@ import { api } from "../api/services/Api";
 import authService from "../api/services/AuthService";
 import { User } from "../models/User";
 import jwt_decode from "jwt-decode";
+import { UserInput } from "../routes/SignUp";
 
 interface AuthContextData {
   user: User | null;
-  SignIn(email: string, password: string): void;
+  SignIn(email: string, password: string): Promise<void>;
+  SignUp(user: UserInput): Promise<string | null>;
   SignOut(): void;
   authTokens: AuthTokens | null;
 }
@@ -39,6 +41,10 @@ export const AuthProvider = ({ children }: Props) => {
     setAuthTokens(response);
     setLoggedUser(jwt_decode(response.access));
     localStorage.setItem("authTokens", JSON.stringify(response));
+  }
+
+  async function SignUp(user: UserInput) {
+    return await authService.signUp(user);
   }
 
   function SignOut() {
@@ -78,6 +84,7 @@ export const AuthProvider = ({ children }: Props) => {
       value={{
         user: loggedUser,
         SignIn,
+        SignUp,
         SignOut,
         authTokens,
       }}
