@@ -1,6 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
-import walletService from "../api/services/WalletService";
 
 interface Props {
   isOpen: boolean;

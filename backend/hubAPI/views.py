@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
-
+from rest_framework.parsers import JSONParser
 from hubModels.serializers import SavingPlanSerializer, WalletSerializer, TransactionSerializer
 
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -28,6 +28,7 @@ def get_routes(request):
     routes = [
         '/api/token',
         '/api/token/refresh',
+        '/api/register',
         '/api/wallet',
         '/api/savingplans',
         '/api/transactions',
@@ -46,6 +47,14 @@ def get_wallet(request):
     wallet_serialized = WalletSerializer(wallet)
 
     return Response(wallet_serialized.data)
+
+
+@api_view(['POST'])
+# @permission_classes([IsAuthenticated])
+def create_user(request):
+    data = JSONParser().parse(request)
+    user = HubUser.create_from_json(data)
+    return Response("ok")
 
 
 @api_view(['GET'])
