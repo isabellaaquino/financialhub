@@ -14,7 +14,7 @@ function SignUp() {
   const navigate = useNavigate();
   const { SignUp } = useAuth();
   const [error, setError] = useState("");
-  const [userInput, setUsetInput] = useState<UserInput>({
+  const [userInput, setUserInput] = useState<UserInput>({
     firstName: "",
     lastName: "",
     password: "",
@@ -23,7 +23,7 @@ function SignUp() {
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setUsetInput((prevState) => {
+      setUserInput((prevState) => {
         return { ...prevState, [e.target.name]: e.target.value };
       });
     },

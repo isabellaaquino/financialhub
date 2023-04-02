@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.db.models import QuerySet
 from hubModels.serializers import MyTokenObtainPairSerializer
-from hubModels.models import HubUser, Wallet
+from hubModels.models import HubUser, Wallet, Transaction
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.views import APIView
@@ -32,7 +32,8 @@ def get_routes(request):
         '/api/wallet',
         '/api/savingplans',
         '/api/transactions',
-        '/api/latesttransactions'
+        '/api/latesttransactions',
+        '/api/create_transaction'
     ]
 
     return Response(routes)
@@ -55,6 +56,17 @@ def create_user(request):
     data = JSONParser().parse(request)
     user = HubUser.create_from_json(data)
     return Response("ok")
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_transaction(request):
+    user: HubUser = request.user
+
+    data = JSONParser().parse(request)
+    transaction = Transaction.create_from_json(data, user_pk=user.pk)
+
+    return Response(data=TransactionSerializer(instance=transaction).data)
 
 
 @api_view(['GET'])

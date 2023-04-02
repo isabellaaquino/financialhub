@@ -1,8 +1,17 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState } from "react";
+import { Fragment, useCallback, useState } from "react";
 import { TypeOption, TypeOptionType } from "../models/Transaction";
 import TypeDropdown from "./TypeDropdown";
 import ToolTip from "./Tooltip";
+
+export interface TransactionInput {
+  title?: string;
+  description?: string;
+  value: number;
+  date: Date;
+  updateWallet: boolean;
+  type: TypeOptionType;
+}
 
 interface Props {
   isOpen: boolean;
@@ -10,6 +19,32 @@ interface Props {
 }
 
 export default function AddTransaction(props: Props) {
+  const [selectedType, setSelectedType] = useState(TypeOption.EXPENSE);
+  const [error, setError] = useState("");
+  const [transactionInput, setTransactionInput] = useState<TransactionInput>({
+    title: "",
+    description: "",
+    value: 0,
+    date: new Date(),
+    type: selectedType,
+    updateWallet: false,
+  });
+
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setTransactionInput((prevState) => {
+        console.log(transactionInput)
+        return { ...prevState, [e.target.name]: e.target.value };
+      });
+    },
+    [transactionInput]
+  );
+
+  const createTransaction = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    closeModal();
+  };
+
   function capitalize(type: TypeOptionType) {
     const typeStr = type.toString().toLowerCase();
     return typeStr.charAt(0).toUpperCase() + typeStr.slice(1);
@@ -18,12 +53,6 @@ export default function AddTransaction(props: Props) {
   function closeModal() {
     props.handleState(false);
   }
-
-  function createTransaction() {
-    closeModal();
-  }
-
-  const [selectedType, setSelectedType] = useState(TypeOption.EXPENSE);
 
   return (
     <>
@@ -59,28 +88,41 @@ export default function AddTransaction(props: Props) {
                   >
                     Add transaction
                   </Dialog.Title>
-                  <form className="mt-2 mb-4">
+                  <form
+                    onSubmit={(e) => createTransaction(e)}
+                    className="mt-2 mb-4"
+                  >
                     <div className="flex flex-row mt-6 mb-6 justify-between">
                       <div>
                         <div className="flex flex-col gap-1 items-center mb-6">
                           <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
                             Title:
                           </label>
-                          <input className="shadow appearance-none border rounded py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline" />
+                          <input
+                            name="title"
+                            className="shadow appearance-none border rounded py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
+                            onChange={handleInputChange}
+                          />
                         </div>
                         <div className="flex flex-col gap-1 items-center mb-6">
                           <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
                             Description:
                           </label>
-                          <textarea className="shadow appearance-none border rounded py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline" />
+                          <input
+                            name="description"
+                            className="shadow appearance-none border rounded py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
+                            onChange={handleInputChange}
+                          />
                         </div>
                         <div className="flex flex-col gap-1 items-center mb-6">
                           <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
                             Date:
                           </label>
                           <input
+                            name="date"
                             type="date"
                             className="shadow appearance-none border rounded py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
+                            onChange={handleInputChange}
                           />
                         </div>
                       </div>
@@ -92,8 +134,10 @@ export default function AddTransaction(props: Props) {
                           <div className="flex flex-row items-center gap-1">
                             <span>$</span>
                             <input
+                              name="value"
                               className="w-16 text-center shadow appearance-none border rounded py-2 px-1 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
                               placeholder="0.00"
+                              onChange={handleInputChange}
                             />
                           </div>
                         </div>
@@ -112,8 +156,10 @@ export default function AddTransaction(props: Props) {
                             <ToolTip content="Check if you want this transaction to update your current balance." />
                           </label>
                           <input
+                            name="updateWallet"
                             type="checkbox"
                             className="mt-4 leading-tight"
+                            onChange={handleInputChange}
                           />
                         </div>
                       </div>
@@ -121,10 +167,9 @@ export default function AddTransaction(props: Props) {
                   </form>
                   <div>
                     <button
-                      type="button"
+                      type="submit"
                       className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-3 py-2 text-sm font-medium text-blue-900 hover:bg-gray-200 focus:outline-none 
 											focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                      onClick={createTransaction}
                     >
                       Create {capitalize(selectedType)}
                     </button>
