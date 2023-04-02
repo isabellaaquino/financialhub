@@ -15,6 +15,14 @@ class HubUserManager(BaseUserManager):
                           last_name=last_name, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
+
+        # TODO: create a user's wallet as soon as the user is saved on the db
+        # wallet = Wallet.objects.create(
+        #     user_id=user.id,
+        #     current_amount = 0
+        # )
+        # wallet.save()
+        
         return user
 
     def create_user(self, first_name, last_name, email, password=None, **extra_fields):

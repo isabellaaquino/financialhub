@@ -7,7 +7,9 @@ export interface Transaction {
 }
 
 export enum TypeOption {
-  EXPENSE = "EXPENSE",
-  TRANSFER = "TRANSFER",
-  INCOME = "INCOME",
+  EXPENSE = "Expense",
+  TRANSFER = "Transfer",
+  INCOME = "Income",
 }
+
+export type TypeOptionType = typeof TypeOption[keyof typeof TypeOption]
