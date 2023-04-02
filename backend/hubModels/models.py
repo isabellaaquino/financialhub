@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from django.db.models import QuerySet
 from django.core.mail import send_mail
@@ -28,7 +29,9 @@ class HubUser(AbstractBaseUser, PermissionsMixin):
         verbose_name = 'user'
         verbose_name_plural = 'users'
 
-    def create_from_json(data):
+    @staticmethod
+    def create_from_json(data: dict):
+        # TODO: Field validations
         user = HubUser()
         if data["firstName"]:
             user.first_name = data["firstName"]
@@ -38,7 +41,17 @@ class HubUser(AbstractBaseUser, PermissionsMixin):
             user.set_password(data["password"])
         if data["email"]:
             user.email = data["email"]
+
         user.save()
+
+        # Creation of a related wallet for the created user
+        user_wallet = Wallet.objects.create(
+            user_id=user,
+            current_amount=0
+        )
+
+        user_wallet.save()
+
         return user
 
     def get_wallet(self) -> 'Wallet':
@@ -70,6 +83,10 @@ class HubUser(AbstractBaseUser, PermissionsMixin):
 class Wallet(models.Model):
     user_id = models.ForeignKey(HubUser, on_delete=models.CASCADE)
     current_amount = models.DecimalField(decimal_places=2, max_digits=15)
+
+    def update_balance(self, value: Decimal):
+        self.current_amount = self.current_amount + value
+        self.save(update_fields=['current_amount'])
 
     def get_current_amount(self):
         return self.current_amount
@@ -110,7 +127,8 @@ class Transaction(models.Model):
         ('INCOME', 'Income'),
     ]
 
-    wallet_id = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False)
+    title = models.CharField(max_length=200, default='Amazong Prime')
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False)
     value = models.DecimalField(decimal_places=2, max_digits=15)
     date = models.DateTimeField(auto_now=True)
     type = models.CharField(max_length=100, choices=TRANSACTION_TYPES)
@@ -119,8 +137,46 @@ class Transaction(models.Model):
     # Django convention is to avoid setting null=True to CharFields
     from_user = models.CharField(max_length=50, blank=True, null=True)
     to_user = models.CharField(max_length=100, blank=True, null=True)
-    description = models.CharField(max_length=200)
+    description = models.CharField(max_length=200, blank=True, null=True)
     update_wallet = models.BooleanField(default=True)
+
+    def save(self):
+        if self.update_wallet:
+            self.wallet.update_balance(self.value)
+
+        self.save()
+
+    @staticmethod
+    def create_from_json(data: dict, user_pk: int):
+        """
+        Creates a transaction from a frontend request
+        @params: 
+            data : dict
+        """
+        # TODO: Field validations
+        user = HubUser.objects.get(pk=user_pk)
+        user_wallet = user.get_wallet()
+
+        transaction = Transaction.objects.create(
+            wallet_id=user_wallet
+        )
+
+        if data["title"]:
+            transaction.title = data["title"]
+        if data["description"]:
+            transaction.description = data["description"]
+        if data["value"]:
+            transaction.value = data["value"]
+        if data["type"]:
+            transaction.type = data["type"]
+        if data["date"]:
+            transaction.date = data["date"]
+        if data["updateWallet"]:
+            transaction.update_wallet = data["updateWallet"]
+
+        transaction.save()
+
+        return transaction
 
 
 class SavingPlan(models.Model):

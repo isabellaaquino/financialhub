@@ -1,6 +1,7 @@
 import axios from "axios";
 import { Transaction } from "../../models/Transaction";
 import { api } from "./Api";
+import { TransactionInput } from "../../components/AddTransaction";
 
 class TransactionService {
   async getUserLoggedTransactions(accessToken: string, year: number = 0) {
@@ -18,6 +19,18 @@ class TransactionService {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  async createTransactionAPI(transaction: TransactionInput): Promise<string | null> {
+    try {
+      const response = await api.post("/create_transaction/", transaction);
+      if (response.status !== 200) return null;
+      return (await response.data) as string;
+    } catch (error) {
+      console.log(error);
+    }
+
+    return null;
   }
 }
 
