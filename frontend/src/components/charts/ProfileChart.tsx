@@ -2,12 +2,10 @@ import { ApexOptions } from "apexcharts";
 import React, { Component, useState } from "react";
 import Chart from "react-apexcharts";
 
-
-
 function ProfileChart() {
   var legend: ApexLegend = {
-    show: true,
-    position: "bottom"
+    show: false,
+    position: "bottom",
   };
 
   const [state, setState] = useState({
@@ -19,10 +17,13 @@ function ProfileChart() {
       dataLabels: {
         enabled: false,
       },
-      legend: legend
+      legend: legend,
     },
-    series: [44, 55, 41, 17, 15],
-    labels: ["A", "B", "C", "D", "E"],
+    series: [],
+    labels: [],
+    noData: {
+      text: "No data found",
+    },
   });
 
   return (

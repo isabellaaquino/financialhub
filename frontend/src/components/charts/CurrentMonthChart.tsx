@@ -44,9 +44,6 @@ function CurrentMonthChart(props: Props) {
         show: false,
       },
       dataLabels: { enabled: false },
-      // noData: {
-      //   text: "Loading...",
-      // },
     },
     series: [
       {
