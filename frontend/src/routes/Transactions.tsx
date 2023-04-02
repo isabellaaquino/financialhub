@@ -64,7 +64,7 @@ function Transactions() {
       <TopNav />
       <div className="flex flex-row divide-x">
         <div
-          className="py-24 w-[1000px]"
+          className="py-24"
           style={{ marginLeft: !isSideNavOpen ? "120px" : "370px" }}
         >
           {/* <Title text="Latest Transactions" /> */}
