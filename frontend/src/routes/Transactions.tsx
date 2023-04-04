@@ -84,47 +84,53 @@ function Transactions() {
               Search
             </button>
           </form>
-          <table className="table-auto divide-y w-full text-left text-sm mt-5">
-            <thead className="">
-              <tr className="text-gray-600">
-                <th className="font-medium w-52 p-2">Name</th>
-                <th className="font-medium w-52">Date</th>
-                <th className="font-medium w-52">Type</th>
-                <th className="font-medium w-52">Amount</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {filteredTransactions &&
-                filteredTransactions.map((l, i) => {
-                  return (
-                    <tr
-                      onClick={() => handleRowClick(i)}
-                      key={i}
-                      className="hover:bg-blue-100 rounded-md cursor-pointer"
-                    >
-                      <td className="p-2 py-3">{l.title}</td>
-                      <td className="text-gray-500">
-                        {dateService.formatDateValue(l.date.toLocaleString())}
-                      </td>
-                      <td className="text-gray-500">
-                        <span
-                          className={
-                            l.type === TypeOption.EXPENSE
-                              ? `bg-red-100 p-1 rounded-md text-red-400 font-medium`
-                              : l.type === TypeOption.TRANSFER
-                              ? `bg-purple-100 p-1 rounded-md text-purple-400 font-medium`
-                              : `bg-green-100 p-1 rounded-md text-green-400 font-medium`
-                          }
-                        >
-                          {l.type}
-                        </span>
-                      </td>
-                      <td>${Number(l.value).toFixed(2)}</td>
-                    </tr>
-                  );
-                })}
-            </tbody>
-          </table>
+          {filteredTransactions && filteredTransactions.length > 0 ? (
+            <table className="table-auto divide-y w-full text-left text-sm mt-5">
+              <thead className="">
+                <tr className="text-gray-600">
+                  <th className="font-medium w-52 p-2">Name</th>
+                  <th className="font-medium w-52">Date</th>
+                  <th className="font-medium w-52">Type</th>
+                  <th className="font-medium w-52">Amount</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {filteredTransactions &&
+                  filteredTransactions.map((l, i) => {
+                    return (
+                      <tr
+                        onClick={() => handleRowClick(i)}
+                        key={i}
+                        className="hover:bg-blue-100 rounded-md cursor-pointer"
+                      >
+                        <td className="p-2 py-3">{l.description}</td>
+                        <td className="text-gray-500">
+                          {dateService.formatDateValue(l.date.toLocaleString())}
+                        </td>
+                        <td className="text-gray-500">
+                          <span
+                            className={
+                              l.type === TypeOption.EXPENSE
+                                ? `bg-red-100 p-1 rounded-md text-red-400 font-medium`
+                                : l.type === TypeOption.TRANSFER
+                                ? `bg-purple-100 p-1 rounded-md text-purple-400 font-medium`
+                                : `bg-green-100 p-1 rounded-md text-green-400 font-medium`
+                            }
+                          >
+                            {l.type}
+                          </span>
+                        </td>
+                        <td>${Number(l.value).toFixed(2)}</td>
+                      </tr>
+                    );
+                  })}
+              </tbody>
+            </table>
+          ) : (
+            <p className="text-center text-gray-500 text-sm my-5">
+              No data found
+            </p>
+          )}
         </div>
         <div className="max-w-2xl w-[768px] py-24 fixed right-0 h-full">
           {selectedTransaction && (
