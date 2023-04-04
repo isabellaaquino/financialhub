@@ -81,7 +81,7 @@ class HubUser(AbstractBaseUser, PermissionsMixin):
 
 
 class Wallet(models.Model):
-    user_id = models.ForeignKey(HubUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(HubUser, on_delete=models.CASCADE)
     current_amount = models.DecimalField(decimal_places=2, max_digits=15)
 
     def update_balance(self, value: Decimal):

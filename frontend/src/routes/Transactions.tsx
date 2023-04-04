@@ -88,10 +88,10 @@ function Transactions() {
             <table className="table-auto divide-y w-full text-left text-sm mt-5">
               <thead className="">
                 <tr className="text-gray-600">
-                  <th className="font-medium w-52 p-2">Name</th>
-                  <th className="font-medium w-52">Date</th>
-                  <th className="font-medium w-52">Type</th>
-                  <th className="font-medium w-52">Amount</th>
+                  <th className="text-md font-bold w-52 p-2">Name</th>
+                  <th className="text-md font-bold w-52">Date</th>
+                  <th className="text-md font-bold w-52">Type</th>
+                  <th className="text-md font-bold w-52">Amount</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -103,7 +103,7 @@ function Transactions() {
                         key={i}
                         className="hover:bg-blue-100 rounded-md cursor-pointer"
                       >
-                        <td className="p-2 py-3">{l.description}</td>
+                        <td className="p-2 py-3">{l.title}</td>
                         <td className="text-gray-500">
                           {dateService.formatDateValue(l.date.toLocaleString())}
                         </td>
