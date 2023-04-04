@@ -53,7 +53,7 @@ def get_wallet(request):
 @api_view(['POST'])
 # @permission_classes([IsAuthenticated])
 def create_user(request):
-    data = JSONParser().parse(request)
+    data = request.data
     user = HubUser.create_from_json(data)
     return Response("ok")
 
@@ -63,10 +63,10 @@ def create_user(request):
 def create_transaction(request):
     user: HubUser = request.user
 
-    data = JSONParser().parse(request)
+    data = request.data
     transaction = Transaction.create_from_json(data, user_pk=user.pk)
 
-    return Response(data=TransactionSerializer(instance=transaction).data)
+    return Response(TransactionSerializer(instance=transaction).data)
 
 
 @api_view(['GET'])
@@ -84,7 +84,6 @@ def get_saving_plans(request):
 @permission_classes([IsAuthenticated])
 def get_transactions(request):
     user: HubUser = request.user
-    print(request.query_params.get('year'))
     transactions: QuerySet
     if (request.query_params.get('year') != ""):
         transactions = user.get_wallet().get_transactions_by_year(
@@ -92,7 +91,6 @@ def get_transactions(request):
     else:
         transactions = user.get_wallet().get_transactions()
 
-    print(transactions.count())
     transactions_serialized = TransactionSerializer(transactions, many=True)
     return Response(transactions_serialized.data)
 

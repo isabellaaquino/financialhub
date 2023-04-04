@@ -26,7 +26,7 @@ function LatestTransactions(props: Props) {
             >
               <div className="flex flex-row justify-between items-center text-sm">
                 <div>
-                  <p>{l.description}</p>
+                  <p>{l.title}</p>
                   <span className="text-gray-500">
                     {l.date.toLocaleString()}
                   </span>

@@ -33,14 +33,14 @@ class HubUser(AbstractBaseUser, PermissionsMixin):
     def create_from_json(data: dict):
         # TODO: Field validations
         user = HubUser()
-        if data["firstName"]:
-            user.first_name = data["firstName"]
-        if data["lastName"]:
-            user.last_name = data["lastName"]
-        if data["password"]:
-            user.set_password(data["password"])
-        if data["email"]:
-            user.email = data["email"]
+        if data.get("firstName"):
+            user.first_name = data.get("firstName")
+        if data.get("lastName"):
+            user.last_name = data.get("lastName")
+        if data.get("password"):
+            user.set_password(data.get("password"))
+        if data.get("email"):
+            user.email = data.get("email")
 
         user.save()
 
@@ -81,7 +81,7 @@ class HubUser(AbstractBaseUser, PermissionsMixin):
 
 
 class Wallet(models.Model):
-    user_id = models.ForeignKey(HubUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(HubUser, on_delete=models.CASCADE)
     current_amount = models.DecimalField(decimal_places=2, max_digits=15)
 
     def update_balance(self, value: Decimal):
@@ -130,7 +130,7 @@ class Transaction(models.Model):
     title = models.CharField(max_length=200, default='Amazong Prime')
     wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False)
     value = models.DecimalField(decimal_places=2, max_digits=15)
-    date = models.DateTimeField(auto_now=True)
+    date = models.DateTimeField(auto_now=False)
     type = models.CharField(max_length=100, choices=TRANSACTION_TYPES)
     # TODO: Implement user be able to create and store their own labels
     user_label = models.CharField(max_length=30, blank=True, null=True)
@@ -140,11 +140,11 @@ class Transaction(models.Model):
     description = models.CharField(max_length=200, blank=True, null=True)
     update_wallet = models.BooleanField(default=True)
 
-    def save(self):
-        if self.update_wallet:
-            self.wallet.update_balance(self.value)
+    # def save(self):
+    #     if self.update_wallet:
+    #         self.wallet.update_balance(self.value)
 
-        self.save()
+    #     self.save()
 
     @staticmethod
     def create_from_json(data: dict, user_pk: int):
@@ -155,24 +155,29 @@ class Transaction(models.Model):
         """
         # TODO: Field validations
         user = HubUser.objects.get(pk=user_pk)
+        if not user:
+            raise PermissionError()
+        
         user_wallet = user.get_wallet()
+        
+        if not user_wallet:
+            raise PermissionError()
 
-        transaction = Transaction.objects.create(
-            wallet_id=user_wallet
-        )
+        transaction = Transaction()
+        transaction.wallet = user_wallet
 
-        if data["title"]:
-            transaction.title = data["title"]
-        if data["description"]:
-            transaction.description = data["description"]
-        if data["value"]:
-            transaction.value = data["value"]
-        if data["type"]:
-            transaction.type = data["type"]
-        if data["date"]:
-            transaction.date = data["date"]
-        if data["updateWallet"]:
-            transaction.update_wallet = data["updateWallet"]
+        if data.get("title"):
+            transaction.title = data.get("title")
+        if data.get("description"):
+            transaction.description = data.get("description")
+        if data.get("value"):
+            transaction.value = data.get("value")
+        if data.get("type"):
+            transaction.type = data.get("type")
+        if data.get("date"):
+            transaction.date = data.get("date")
+        if data.get("updateWallet") is not None:
+            transaction.update_wallet = data.get("updateWallet")
 
         transaction.save()
 

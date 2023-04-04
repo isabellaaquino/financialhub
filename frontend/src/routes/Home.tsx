@@ -36,33 +36,34 @@ function Home(props: Props) {
       setCurrentBalance(Number(wallet!.current_amount));
     });
 
-    // transactionService
-    //   .getUserLoggedTransactions(authTokens!.access, dateService.currentYear())
-    //   .then((transactions) => {
-    //     setTransactions(transactions!);
-    //   });
+    transactionService
+      .getUserLoggedTransactions(authTokens!.access, dateService.currentYear())
+      .then((transactions) => {
+        setTransactions(transactions!);
+      });
 
-    // const walletPromise = walletService.getUserLoggedWallet(authTokens!.access);
-    // const transactionPromise = transactionService.getUserLoggedTransactions(
-    //   authTokens!.access,
-    //   dateService.currentYear()
-    // );
+    const walletPromise = walletService.getUserLoggedWallet(authTokens!.access);
+    const transactionPromise = transactionService.getUserLoggedTransactions(
+      authTokens!.access,
+      dateService.currentYear()
+    );
 
-    // Promise.all([walletPromise, transactionPromise]).then((responses) => {
-    //   responses.map((res) => {
-    //     if (res?.status === 200) {
-    //       if (res?.config.url === "/wallet/") {
-    //         setCurrentBalance(Number(res.current_amount));
-    //       } else if (res?.config.url.includes("/transactions")) {
-    //         setTransactions(res);
-    //       }
-    //     } else {
-    //       setError(
-    //         "Oops! Unable to fetch data. Please check your internet connection and try again."
-    //       );
-    //     }
-    //   });
-    // });
+    Promise.all([walletPromise, transactionPromise]).then((responses) => {
+      responses.map((res) => {
+        if (res?.status === 200) {
+          if (res?.config.url === "/wallet/") {
+            setCurrentBalance(Number(res.current_amount));
+          } else if (res?.config.url.includes("/transactions")) {
+            setTransactions(res);
+          }
+        } 
+        // else {
+        //   console.log(
+        //     "Oops! Unable to fetch data. Please check your internet connection and try again."
+        //   );
+        // }
+      });
+    });
   }, []);
 
   function openBalanceEditor() {

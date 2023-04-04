@@ -33,9 +33,7 @@ function Transactions() {
 
   function handleSearchChange(event: any) {
     const filtered = transactions?.filter((t) => {
-      return t.description
-        .toUpperCase()
-        .startsWith(event.target.value.toUpperCase());
+      return t.title.toUpperCase().startsWith(event.target.value.toUpperCase());
     });
     setFilteredTransactions(filtered);
   }
@@ -90,10 +88,10 @@ function Transactions() {
             <table className="table-auto divide-y w-full text-left text-sm mt-5">
               <thead className="">
                 <tr className="text-gray-600">
-                  <th className="font-medium w-52 p-2">Name</th>
-                  <th className="font-medium w-52">Date</th>
-                  <th className="font-medium w-52">Type</th>
-                  <th className="font-medium w-52">Amount</th>
+                  <th className="text-md font-bold w-52 p-2">Name</th>
+                  <th className="text-md font-bold w-52">Date</th>
+                  <th className="text-md font-bold w-52">Type</th>
+                  <th className="text-md font-bold w-52">Amount</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -105,7 +103,7 @@ function Transactions() {
                         key={i}
                         className="hover:bg-blue-100 rounded-md cursor-pointer"
                       >
-                        <td className="p-2 py-3">{l.description}</td>
+                        <td className="p-2 py-3">{l.title}</td>
                         <td className="text-gray-500">
                           {dateService.formatDateValue(l.date.toLocaleString())}
                         </td>
@@ -147,6 +145,14 @@ function Transactions() {
               </div>
               <div className="border-t border-gray-200">
                 <dl>
+                <div className="bg-blue-100 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt className="text-sm font-medium text-gray-500">
+                      Title
+                    </dt>
+                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                      {selectedTransaction.title}
+                    </dd>
+                  </div>
                   <div className="bg-blue-100 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt className="text-sm font-medium text-gray-500">Amout</dt>
                     <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
@@ -156,7 +162,7 @@ function Transactions() {
                   <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt className="text-sm font-medium text-gray-500">To</dt>
                     <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                      {selectedTransaction.description}
+                      {selectedTransaction?.to_user}
                     </dd>
                   </div>
                   <div className="bg-blue-100 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -176,7 +182,7 @@ function Transactions() {
                       Description
                     </dt>
                     <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                      {selectedTransaction.description}
+                      {selectedTransaction?.description}
                     </dd>
                   </div>
                 </dl>

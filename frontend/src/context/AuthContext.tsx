@@ -69,8 +69,6 @@ export const AuthProvider = ({ children }: Props) => {
     if (loading) setLoading(false);
   }
 
-  console.log(authTokens);
-
   useEffect(() => {
     if (loading) RefreshToken();
 

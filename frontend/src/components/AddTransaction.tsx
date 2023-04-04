@@ -1,16 +1,19 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useCallback, useState } from "react";
 import { TypeOption, TypeOptionType } from "../models/Transaction";
+import transactionService from "../api/services/TransactionService";
 import TypeDropdown from "./TypeDropdown";
 import ToolTip from "./Tooltip";
+import { capitalizeType } from "./utils";
+import { useAuth } from "../hooks/useAuth";
 
 export interface TransactionInput {
   title?: string;
   description?: string;
   value: number;
-  date: Date;
+  date?: string;
   updateWallet: boolean;
-  type: TypeOptionType;
+  type: TypeOption;
 }
 
 interface Props {
@@ -19,22 +22,42 @@ interface Props {
 }
 
 export default function AddTransaction(props: Props) {
+  const { authTokens } = useAuth();
+
+  function closeModal() {
+    props.handleState(false);
+  }
+
   const [selectedType, setSelectedType] = useState(TypeOption.EXPENSE);
+
+  const handleTypeChange = (type: TypeOption) => {
+    setSelectedType(type);
+    setTransactionInput((prevState) => {
+      return { ...prevState, ["type"]: type };
+    });
+  };
+
   const [error, setError] = useState("");
+
   const [transactionInput, setTransactionInput] = useState<TransactionInput>({
     title: "",
     description: "",
     value: 0,
-    date: new Date(),
+    date: new Date().toISOString(),
     type: selectedType,
     updateWallet: false,
   });
 
   const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: React.ChangeEvent<any>) => {
       setTransactionInput((prevState) => {
-        console.log(transactionInput)
-        return { ...prevState, [e.target.name]: e.target.value };
+        let value = e.target.value
+        if (e.target.name === "value") {
+          value = parseFloat(e.target.value)
+        } else if (e.target.name === "updateWallet") {
+          value = e.target.checked
+        }
+        return { ...prevState, [e.target.name]: value };
       });
     },
     [transactionInput]
@@ -42,17 +65,13 @@ export default function AddTransaction(props: Props) {
 
   const createTransaction = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    closeModal();
+    const response = await transactionService.createTransactionAPI(
+      authTokens!.access,
+      transactionInput
+    );
+    if (response) closeModal();
+    else setError("Register error");
   };
-
-  function capitalize(type: TypeOptionType) {
-    const typeStr = type.toString().toLowerCase();
-    return typeStr.charAt(0).toUpperCase() + typeStr.slice(1);
-  }
-
-  function closeModal() {
-    props.handleState(false);
-  }
 
   return (
     <>
@@ -147,7 +166,7 @@ export default function AddTransaction(props: Props) {
                           </label>
                           <TypeDropdown
                             selectedType={selectedType}
-                            handleType={setSelectedType}
+                            handleType={(e: TypeOption) => handleTypeChange(e)}
                           />
                         </div>
                         <div className="flex flex-col gap-1 items-center mb-6">
@@ -164,16 +183,14 @@ export default function AddTransaction(props: Props) {
                         </div>
                       </div>
                     </div>
-                  </form>
-                  <div>
                     <button
                       type="submit"
                       className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-3 py-2 text-sm font-medium text-blue-900 hover:bg-gray-200 focus:outline-none 
 											focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                     >
-                      Create {capitalize(selectedType)}
+                      Create {capitalizeType(selectedType)}
                     </button>
-                  </div>
+                  </form>
                 </Dialog.Panel>
               </Transition.Child>
             </div>
