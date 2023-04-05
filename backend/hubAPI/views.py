@@ -16,11 +16,34 @@ class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 
-# class GetUsersSavingPlansView(APIView):
-#     def get_queryset(self):
-#         user : HubUser = self.request.user
+class TransactionDetail(APIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = TransactionSerializer
 
-#         return user.get_wallet().get_saving_plans()
+    def post(self, request):
+        user: HubUser = request.user
+
+        data = request.data
+        transaction = Transaction.create_from_json(data, user_pk=user.pk)
+
+        # TODO: Change response to message string
+        return Response(TransactionSerializer(instance=transaction).data)
+
+    def delete(self, request, transaction_pk):
+        user: HubUser = request.user
+
+        if not transaction_pk:
+            raise PermissionError()
+
+        transaction = Transaction.objects.get(pk=transaction_pk)
+
+        # Transaction does not belong to the requesting user
+        if not transaction.wallet.pk == user.get_wallet().pk:
+            raise PermissionError()
+
+        transaction.delete()
+
+        return Response("ok")
 
 
 @api_view(['GET'])
@@ -33,7 +56,7 @@ def get_routes(request):
         '/api/savingplans',
         '/api/transactions',
         '/api/latesttransactions',
-        '/api/create_transaction'
+        '/api/transaction',
     ]
 
     return Response(routes)
@@ -56,17 +79,6 @@ def create_user(request):
     data = request.data
     user = HubUser.create_from_json(data)
     return Response("ok")
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def create_transaction(request):
-    user: HubUser = request.user
-
-    data = request.data
-    transaction = Transaction.create_from_json(data, user_pk=user.pk)
-
-    return Response(TransactionSerializer(instance=transaction).data)
 
 
 @api_view(['GET'])
