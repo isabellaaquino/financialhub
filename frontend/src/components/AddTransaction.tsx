@@ -1,6 +1,6 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useCallback, useState } from "react";
-import { TypeOption, TypeOptionType } from "../models/Transaction";
+import { TypeOption } from "../models/Transaction";
 import transactionService from "../api/services/TransactionService";
 import TypeDropdown from "./TypeDropdown";
 import ToolTip from "./Tooltip";
@@ -51,11 +51,11 @@ export default function AddTransaction(props: Props) {
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<any>) => {
       setTransactionInput((prevState) => {
-        let value = e.target.value
+        let value = e.target.value;
         if (e.target.name === "value") {
-          value = parseFloat(e.target.value)
+          value = parseFloat(e.target.value);
         } else if (e.target.name === "updateWallet") {
-          value = e.target.checked
+          value = e.target.checked;
         }
         return { ...prevState, [e.target.name]: value };
       });

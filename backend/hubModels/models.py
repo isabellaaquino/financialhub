@@ -46,7 +46,7 @@ class HubUser(AbstractBaseUser, PermissionsMixin):
 
         # Creation of a related wallet for the created user
         user_wallet = Wallet.objects.create(
-            user_id=user,
+            user_id=user.pk,
             current_amount=0
         )
 
@@ -157,9 +157,9 @@ class Transaction(models.Model):
         user = HubUser.objects.get(pk=user_pk)
         if not user:
             raise PermissionError()
-        
+
         user_wallet = user.get_wallet()
-        
+
         if not user_wallet:
             raise PermissionError()
 
@@ -185,7 +185,7 @@ class Transaction(models.Model):
 
 
 class SavingPlan(models.Model):
-    wallet_id = models.ForeignKey(Wallet, on_delete=models.CASCADE)
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE)
     title = models.CharField(max_length=50)
     amount = models.DecimalField(decimal_places=2, max_digits=15)
     active = models.BooleanField(default=True)

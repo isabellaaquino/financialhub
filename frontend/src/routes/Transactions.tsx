@@ -6,6 +6,7 @@ import TopNav from "../components/TopNav";
 import YearDropdown from "../components/YearDropdown";
 import { useAuth } from "../hooks/useAuth";
 import { Transaction, TypeOption } from "../models/Transaction";
+import ConfirmModal from "../components/ConfirmModal";
 
 function Transactions() {
   const { authTokens } = useAuth();
@@ -17,6 +18,7 @@ function Transactions() {
     dateService.currentYear()
   );
   const [isSideNavOpen, setIsSideNavOpen] = useState(false);
+  const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] =
     useState<Transaction | null>(null);
 
@@ -30,6 +32,37 @@ function Transactions() {
       ? setSelectedTransaction(transaction)
       : console.log("Error fetching transaction");
   }
+
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
+
+  function openConfirmModal(
+    event: React.MouseEvent<HTMLSpanElement, MouseEvent>,
+    index: number
+  ) {
+    setSelectedIndex(index);
+    setConfirmModalOpen(true);
+  }
+
+  const handleDeleteTransaction = async (
+    event: React.MouseEvent<HTMLSpanElement, MouseEvent>,
+    index: number
+  ) => {
+    event.preventDefault();
+    const transactionId = transactions?.at(index)?.id;
+    if (transactionId) {
+      event.preventDefault();
+      const response: string | null = await transactionService
+        .deleteTransactionAPI(authTokens!.access, transactionId)
+        .then((response) => {
+          searchTransactions();
+          return response;
+        });
+      if (response) {
+        console.log(response);
+        setConfirmModalOpen(false);
+      }
+    }
+  };
 
   function handleSearchChange(event: any) {
     const filtered = transactions?.filter((t) => {
@@ -83,6 +116,12 @@ function Transactions() {
             <button className="bg-blue-700 p-2 text-white rounded-md text-sm">
               Search
             </button>
+            <ConfirmModal
+              isOpen={isConfirmModalOpen}
+              handleState={setConfirmModalOpen}
+              index={selectedIndex}
+              submitDeletion={handleDeleteTransaction}
+            />
           </form>
           {filteredTransactions && filteredTransactions.length > 0 ? (
             <table className="table-auto divide-y w-full text-left text-sm mt-5">
@@ -92,6 +131,7 @@ function Transactions() {
                   <th className="text-md font-bold w-52">Date</th>
                   <th className="text-md font-bold w-52">Type</th>
                   <th className="text-md font-bold w-52">Amount</th>
+                  <th className="text-md font-bold w-52"></th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -121,6 +161,14 @@ function Transactions() {
                           </span>
                         </td>
                         <td>${Number(l.value).toFixed(2)}</td>
+                        <td data-transaction-pk={l.id}>
+                          <span
+                            onClick={(e) => openConfirmModal(e, i)}
+                            className="material-symbols-rounded opacity-50"
+                          >
+                            delete
+                          </span>
+                        </td>
                       </tr>
                     );
                   })}
@@ -145,10 +193,8 @@ function Transactions() {
               </div>
               <div className="border-t border-gray-200">
                 <dl>
-                <div className="bg-blue-100 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                    <dt className="text-sm font-medium text-gray-500">
-                      Title
-                    </dt>
+                  <div className="bg-blue-100 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt className="text-sm font-medium text-gray-500">Title</dt>
                     <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
                       {selectedTransaction.title}
                     </dd>

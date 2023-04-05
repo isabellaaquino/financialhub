@@ -19,13 +19,13 @@ class HubUserManager(BaseUserManager):
 
         # Creation of a related wallet for the created user
         wallet_model = apps.get_model('hubModels', 'Wallet')
-        
+
         wallet = wallet_model.objects.create(
-            user_id=user,
-            current_amount = 0
+            user_id=user.pk,
+            current_amount=0
         )
         wallet.save()
-        
+
         return user
 
     def create_user(self, first_name, last_name, email, password=None, **extra_fields):

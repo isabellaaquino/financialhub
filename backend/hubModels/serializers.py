@@ -30,7 +30,7 @@ class TransactionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Transaction
-        fields = ('value', 'date', 'type', 'title', 'description')
+        fields = ('id', 'value', 'date', 'type', 'title', 'description')
 
 
 class SavingPlanSerializer(serializers.ModelSerializer):
