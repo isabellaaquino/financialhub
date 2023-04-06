@@ -21,9 +21,37 @@ class TransactionService {
     }
   }
 
-  async createTransactionAPI(transaction: TransactionInput): Promise<string | null> {
+  async createTransactionAPI(
+    accessToken: string,
+    transaction: TransactionInput
+  ): Promise<string | null> {
     try {
-      const response = await api.post("/create_transaction/", transaction);
+      const response = await api.post("/transaction/", transaction, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      if (response.status !== 200) return null;
+      return (await response.data) as string;
+    } catch (error) {
+      console.log(error);
+    }
+
+    return null;
+  }
+
+  async deleteTransactionAPI(
+    accessToken: string,
+    transaction_pk: number
+  ): Promise<string | null> {
+    try {
+      const response = await api.delete(`/transaction/${transaction_pk}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       if (response.status !== 200) return null;
       return (await response.data) as string;
     } catch (error) {
