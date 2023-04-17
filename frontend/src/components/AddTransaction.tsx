@@ -19,6 +19,7 @@ export interface TransactionInput {
 interface Props {
   isOpen: boolean;
   handleState(state: boolean): void;
+  handleAlert(message: string, type: string): void;
 }
 
 export default function AddTransaction(props: Props) {
@@ -65,11 +66,14 @@ export default function AddTransaction(props: Props) {
 
   const createTransaction = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    closeModal();
     const response = await transactionService.createTransactionAPI(
       authTokens!.access,
       transactionInput
     );
-    if (response) closeModal();
+    if (response) {
+      props.handleAlert(response.message, response.success)
+    }
     else setError("Register error");
   };
 

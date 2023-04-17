@@ -1,7 +1,11 @@
 import { useState } from "react";
 import AddTransaction from "./AddTransaction";
 
-function QuickAccess() {
+interface Props {
+  showAlert(message: string, type: string): void;
+}
+
+function QuickAccess(props: Props) {
   const [isAddTransaction, setAddTransactionIsOpen] = useState(false);
 
   function openAddTransaction() {
@@ -22,6 +26,7 @@ function QuickAccess() {
       <AddTransaction
         isOpen={isAddTransaction}
         handleState={setAddTransactionIsOpen}
+        handleAlert={props.showAlert}
       />
 
       <div onClick={openAddTransaction} className="border w-48 h-20 flex flex-row justify-between p-3 mr-3 items-center rounded-md shadow-md cursor-pointer">
