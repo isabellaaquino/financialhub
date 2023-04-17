@@ -1,4 +1,6 @@
+import { AxiosResponse } from "axios";
 import { User } from "../../models/User";
+import { UserInput } from "../../routes/SignUp";
 import { api } from "./Api";
 
 class AuthService {
@@ -15,12 +17,16 @@ class AuthService {
     }
   }
 
-  async signUp(user: User) {
+  async signUp(user: UserInput): Promise<string | null> {
     try {
-      console.log("sign up");
+      const response = await api.post("/register/", user);
+      if (response.status !== 200) return null;
+      return (await response.data) as string;
     } catch (error) {
       console.log(error);
     }
+
+    return null;
   }
 
   async refreshToken(token: string | undefined) {

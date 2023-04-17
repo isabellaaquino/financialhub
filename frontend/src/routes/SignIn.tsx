@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 interface UserInput {
@@ -70,7 +70,7 @@ function Login() {
           </button>
           <span className="text-gray-500 text-center text-sm">
             Don't have an account?{" "}
-            <a className="text-blue-800 cursor-pointer font-medium">Sign up</a>
+            <Link to="/sign-up" className="text-blue-800 cursor-pointer font-medium">Sign up</Link>
           </span>
         </div>
       </form>

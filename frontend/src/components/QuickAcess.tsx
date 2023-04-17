@@ -1,6 +1,19 @@
-function QuickAccess() {
+import { useState } from "react";
+import AddTransaction from "./AddTransaction";
+
+interface Props {
+  showAlert(message: string, type: string): void;
+}
+
+function QuickAccess(props: Props) {
+  const [isAddTransaction, setAddTransactionIsOpen] = useState(false);
+
+  function openAddTransaction() {
+    setAddTransactionIsOpen(true);
+  }
+  
   return (
-    <div className="QuickCards flex flex-row mt-10 overflow-x-scroll w-full text-md">
+    <div className="QuickCards flex flex-row mt-10 overflow-hidden w-full text-md">
       <div className="border h-20 flex flex-row justify-between p-3 mr-3 items-center rounded-md shadow-md">
         <h3 className="text-left mr-10">My Wallet</h3>
         <span className="material-symbols-rounded">wallet</span>
@@ -9,8 +22,15 @@ function QuickAccess() {
         <h3 className="text-left mr-10">My Dashboard</h3>
         <span className="material-symbols-rounded">wallet</span>
       </div>
-      <div className="border w-48 h-20 flex flex-row justify-between p-3 mr-3 items-center rounded-md shadow-md">
-        <h3 className="text-left mr-10">Import Expense</h3>
+
+      <AddTransaction
+        isOpen={isAddTransaction}
+        handleState={setAddTransactionIsOpen}
+        handleAlert={props.showAlert}
+      />
+
+      <div onClick={openAddTransaction} className="border w-48 h-20 flex flex-row justify-between p-3 mr-3 items-center rounded-md shadow-md cursor-pointer">
+        <h3 className="text-left mr-10">Add Transaction</h3>
         <span className="material-symbols-rounded">wallet</span>
       </div>
     </div>

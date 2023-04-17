@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from django.db.models import QuerySet
 from django.core.mail import send_mail
@@ -28,6 +29,31 @@ class HubUser(AbstractBaseUser, PermissionsMixin):
         verbose_name = 'user'
         verbose_name_plural = 'users'
 
+    @staticmethod
+    def create_from_json(data: dict):
+        # TODO: Field validations
+        user = HubUser()
+        if data.get("firstName"):
+            user.first_name = data.get("firstName")
+        if data.get("lastName"):
+            user.last_name = data.get("lastName")
+        if data.get("password"):
+            user.set_password(data.get("password"))
+        if data.get("email"):
+            user.email = data.get("email")
+
+        user.save()
+
+        # Creation of a related wallet for the created user
+        user_wallet = Wallet.objects.create(
+            user_id=user.pk,
+            current_amount=0
+        )
+
+        user_wallet.save()
+
+        return user
+
     def get_wallet(self) -> 'Wallet':
         '''
         Returns the wallet related to that user.
@@ -55,8 +81,16 @@ class HubUser(AbstractBaseUser, PermissionsMixin):
 
 
 class Wallet(models.Model):
-    user_id = models.ForeignKey(HubUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(HubUser, on_delete=models.CASCADE)
     current_amount = models.DecimalField(decimal_places=2, max_digits=15)
+    
+    constraints = [
+        models.UniqueConstraint(fields=['user'], name='unique wallet per user')
+    ]
+
+    def update_balance(self, value: Decimal):
+        self.current_amount = self.current_amount + value
+        self.save(update_fields=['current_amount'])
 
     def get_current_amount(self):
         return self.current_amount
@@ -97,21 +131,93 @@ class Transaction(models.Model):
         ('INCOME', 'Income'),
     ]
 
-    wallet_id = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False)
+    title = models.CharField(max_length=200, default='Amazong Prime')
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False)
     value = models.DecimalField(decimal_places=2, max_digits=15)
-    date = models.DateTimeField(auto_now=True)
+    date = models.DateTimeField(auto_now=False)
     type = models.CharField(max_length=100, choices=TRANSACTION_TYPES)
     # TODO: Implement user be able to create and store their own labels
     user_label = models.CharField(max_length=30, blank=True, null=True)
     # Django convention is to avoid setting null=True to CharFields
     from_user = models.CharField(max_length=50, blank=True, null=True)
     to_user = models.CharField(max_length=100, blank=True, null=True)
-    description = models.CharField(max_length=200)
+    description = models.CharField(max_length=200, blank=True, null=True)
     update_wallet = models.BooleanField(default=True)
+
+    def save(self, is_first_save=False):
+        if self.update_wallet and is_first_save:
+            amount = self.value if self.type == 'INCOME' else (-self.value)
+            self.wallet.update_balance(amount)
+
+        return super().save()
+        
+    def delete(self, using=None, keep_parents=False):
+        # Rollback for the wallet's previous update
+        if self.update_wallet:
+            amount = (-self.value) if self.type == 'INCOME' else self.value
+            self.wallet.update_balance(amount)
+            
+        return super().delete(using, keep_parents)
+
+    @staticmethod
+    def create_from_json(data: dict, user_pk: int):
+        """
+        Creates a transaction from a frontend request
+        @params: 
+            data : dict
+        """
+        # TODO: Field validations
+        user = HubUser.objects.get(pk=user_pk)
+        if not user:
+            raise PermissionError()
+
+        user_wallet = user.get_wallet()
+
+        if not user_wallet:
+            raise PermissionError()
+
+        transaction = Transaction()
+        transaction.wallet = user_wallet
+
+        # TODO: Update required attributes
+        if data.get("title"):
+            transaction.title = data.get("title")
+            
+        if data.get("description"):
+            transaction.description = data.get("description")
+            
+        # Value section
+        if data.get("value") is not None:
+            transaction.value = data.get("value")
+        else:
+            raise PermissionError()
+        
+
+        if data.get("type"):
+            transaction.type = data.get("type")
+        if data.get("date"):
+            transaction.date = data.get("date")
+        if data.get("updateWallet") is not None:
+            transaction.update_wallet = data.get("updateWallet")
+
+        transaction.save(is_first_save=True)
+
+        return transaction
+    
+    def get_wallet(self):
+        return self.wallet
+    
+    def is_from_wallet(self, wallet):
+        if not isinstance(wallet, Wallet):
+            raise Exception # TODO: customize exception
+        
+        if not self.get_wallet() == wallet:
+            return False
+        return True
 
 
 class SavingPlan(models.Model):
-    wallet_id = models.ForeignKey(Wallet, on_delete=models.CASCADE)
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE)
     title = models.CharField(max_length=50)
     amount = models.DecimalField(decimal_places=2, max_digits=15)
     active = models.BooleanField(default=True)

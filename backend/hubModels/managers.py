@@ -1,4 +1,5 @@
 from django.contrib.auth.base_user import BaseUserManager
+from django.apps import apps
 
 
 class HubUserManager(BaseUserManager):
@@ -15,6 +16,16 @@ class HubUserManager(BaseUserManager):
                           last_name=last_name, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
+
+        # Creation of a related wallet for the created user
+        wallet_model = apps.get_model('hubModels', 'Wallet')
+
+        wallet = wallet_model.objects.create(
+            user_id=user.pk,
+            current_amount=0
+        )
+        wallet.save()
+
         return user
 
     def create_user(self, first_name, last_name, email, password=None, **extra_fields):
