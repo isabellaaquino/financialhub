@@ -1,10 +1,14 @@
 import { useState } from "react";
+import { useLocation } from "react-router";
+import { Link } from "react-router-dom";
 
 interface Props {
   state: boolean;
   handleState: (state: boolean) => void;
 }
 function SideNav(props: Props) {
+  const location = useLocation();
+
   function handleSideNav() {
     props.handleState(!props.state);
   }
@@ -22,37 +26,92 @@ function SideNav(props: Props) {
         <div
           className={
             "flex flex-col text-white" + !props.state
-              ? "items-center"
+              ? "items-center w-full"
               : "items-start"
           }
         >
-          <a href="/" className="flex items-center text-white">
-            <span className="material-symbols-rounded">home</span>
-            <p
-              style={{ marginLeft: !props.state ? 0 : 10 }}
-              className={!props.state ? "hidden" : "inline"}
+          <p
+            className={`${
+              !props.state && "hidden"
+            } text-blue-300 mt-8 text-xs uppercase`}
+          >
+            Navigation
+          </p>
+          <Link
+            to="/"
+            className={`mt-5 p-3 flex items-center ${
+              location.pathname === "/"
+                ? "bg-blue-700 text-white w-full"
+                : "text-blue-300"
+            } ${props.state && "rounded-l-md"}`}
+          >
+            <span
+              className={`material-symbols-rounded text-xl ${
+                !props.state && "ml-1"
+              }`}
             >
-              Home
-            </p>
-          </a>
-          <a href="#" className="mt-10 flex items-center text-white">
-            <span className="material-symbols-rounded">monitoring</span>
+              leaderboard
+            </span>
             <p
-              style={{ marginLeft: !props.state ? 0 : 10 }}
+              style={{ marginLeft: !props.state ? 0 : 15 }}
               className={!props.state ? "hidden" : "inline"}
             >
               Dashboard
             </p>
-          </a>
-          <a href="#" className="mt-10 flex items-center text-white">
-            <span className="material-symbols-rounded">leaderboard</span>
+          </Link>
+          <p
+            className={`${
+              !props.state && "hidden"
+            } text-blue-300 mt-8 text-xs uppercase ${
+              props.state && "rounded-l-md"
+            }`}
+          >
+            Manage
+          </p>
+          <Link
+            to="/transactions"
+            className={`mt-5 p-3 flex items-center ${
+              location.pathname === "/transactions"
+                ? "bg-blue-700 text-white w-full"
+                : "text-blue-300"
+            } ${props.state && "rounded-l-md"}`}
+          >
+            <span
+              className={`material-symbols-rounded text-xl ${
+                !props.state && "ml-1"
+              }`}
+            >
+              receipt
+            </span>
             <p
-              style={{ marginLeft: !props.state ? 0 : 10 }}
+              style={{ marginLeft: !props.state ? 0 : 15 }}
               className={!props.state ? "hidden" : "inline"}
             >
-              Wallet
+              Transactions
             </p>
-          </a>
+          </Link>
+          <Link
+            to="/saving-plans"
+            className={`mt-4 p-3 flex items-center ${
+              location.pathname === "/saving-plans"
+                ? "bg-blue-700 text-white w-full"
+                : "text-blue-300"
+            } ${props.state && "rounded-l-md"}`}
+          >
+            <span
+              className={`material-symbols-rounded text-xl ${
+                !props.state && "ml-1"
+              }`}
+            >
+              savings
+            </span>
+            <p
+              style={{ marginLeft: !props.state ? 0 : 15 }}
+              className={!props.state ? "hidden" : "inline"}
+            >
+              Saving Plans
+            </p>
+          </Link>
         </div>
         <div>
           <a onClick={handleSideNav} className="text-white">
