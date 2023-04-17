@@ -26,7 +26,7 @@ function SideNav(props: Props) {
               : "items-start"
           }
         >
-          <a href="#" className="flex items-center text-white">
+          <a href="/" className="flex items-center text-white">
             <span className="material-symbols-rounded">home</span>
             <p
               style={{ marginLeft: !props.state ? 0 : 10 }}

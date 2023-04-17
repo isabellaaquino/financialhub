@@ -7,9 +7,15 @@ import YearDropdown from "../components/YearDropdown";
 import { useAuth } from "../hooks/useAuth";
 import { Transaction, TypeOption } from "../models/Transaction";
 import ConfirmModal from "../components/ConfirmModal";
+import { Alert, AlertType } from "../components/Alert";
 
 function Transactions() {
   const { authTokens } = useAuth();
+  
+  const [isAlertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState<AlertType>(AlertType.WARNING);
+
   const [transactions, setTransactions] = useState<Transaction[] | null>();
   const [filteredTransactions, setFilteredTransactions] = useState<
     Transaction[] | null
@@ -43,6 +49,13 @@ function Transactions() {
     setConfirmModalOpen(true);
   }
 
+  function showAlert(message: string, type: string) {
+    setAlertMessage(message);
+    setAlertType(getAlertType(type));
+    setAlertOpen(true);
+    setTimeout(() => setAlertOpen(false), 4000);
+  }
+
   const handleDeleteTransaction = async (
     event: React.MouseEvent<HTMLSpanElement, MouseEvent>,
     index: number
@@ -51,15 +64,15 @@ function Transactions() {
     const transactionId = transactions?.at(index)?.id;
     if (transactionId) {
       event.preventDefault();
-      const response: string | null = await transactionService
+      setConfirmModalOpen(false);
+      const response: {[key: string]: string} | null = await transactionService
         .deleteTransactionAPI(authTokens!.access, transactionId)
         .then((response) => {
           searchTransactions();
           return response;
         });
       if (response) {
-        console.log(response);
-        setConfirmModalOpen(false);
+        showAlert(response.message, response.success);
       }
     }
   };
@@ -91,6 +104,7 @@ function Transactions() {
 
   return (
     <div className="Transactions">
+      <Alert isOpen={isAlertOpen} message={alertMessage} type={alertType} setAlertOpen={setAlertOpen}/>
       <SideNav state={isSideNavOpen} handleState={handleSideNav} />
       <TopNav />
       <div className="flex flex-row divide-x">
@@ -239,6 +253,11 @@ function Transactions() {
       </div>
     </div>
   );
+}
+
+export const getAlertType = (success: string) => {
+  if (!!success) return AlertType.SUCCESS
+  else return AlertType.ERROR
 }
 
 export default Transactions;

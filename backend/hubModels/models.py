@@ -83,6 +83,10 @@ class HubUser(AbstractBaseUser, PermissionsMixin):
 class Wallet(models.Model):
     user = models.ForeignKey(HubUser, on_delete=models.CASCADE)
     current_amount = models.DecimalField(decimal_places=2, max_digits=15)
+    
+    constraints = [
+        models.UniqueConstraint(fields=['user'], name='unique wallet per user')
+    ]
 
     def update_balance(self, value: Decimal):
         self.current_amount = self.current_amount + value
@@ -140,11 +144,20 @@ class Transaction(models.Model):
     description = models.CharField(max_length=200, blank=True, null=True)
     update_wallet = models.BooleanField(default=True)
 
-    # def save(self):
-    #     if self.update_wallet:
-    #         self.wallet.update_balance(self.value)
+    def save(self, is_first_save=False):
+        if self.update_wallet and is_first_save:
+            amount = self.value if self.type == 'INCOME' else (-self.value)
+            self.wallet.update_balance(amount)
 
-    #     self.save()
+        return super().save()
+        
+    def delete(self, using=None, keep_parents=False):
+        # Rollback for the wallet's previous update
+        if self.update_wallet:
+            amount = (-self.value) if self.type == 'INCOME' else self.value
+            self.wallet.update_balance(amount)
+            
+        return super().delete(using, keep_parents)
 
     @staticmethod
     def create_from_json(data: dict, user_pk: int):
@@ -166,12 +179,20 @@ class Transaction(models.Model):
         transaction = Transaction()
         transaction.wallet = user_wallet
 
+        # TODO: Update required attributes
         if data.get("title"):
             transaction.title = data.get("title")
+            
         if data.get("description"):
             transaction.description = data.get("description")
-        if data.get("value"):
+            
+        # Value section
+        if data.get("value") is not None:
             transaction.value = data.get("value")
+        else:
+            raise PermissionError()
+        
+
         if data.get("type"):
             transaction.type = data.get("type")
         if data.get("date"):
@@ -179,9 +200,20 @@ class Transaction(models.Model):
         if data.get("updateWallet") is not None:
             transaction.update_wallet = data.get("updateWallet")
 
-        transaction.save()
+        transaction.save(is_first_save=True)
 
         return transaction
+    
+    def get_wallet(self):
+        return self.wallet
+    
+    def is_from_wallet(self, wallet):
+        if not isinstance(wallet, Wallet):
+            raise Exception # TODO: customize exception
+        
+        if not self.get_wallet() == wallet:
+            return False
+        return True
 
 
 class SavingPlan(models.Model):

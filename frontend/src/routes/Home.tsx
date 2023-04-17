@@ -13,6 +13,8 @@ import Title from "../components/Title";
 import { useAuth } from "../hooks/useAuth";
 import { SummaryOption } from "../models/Summary";
 import { Transaction } from "../models/Transaction";
+import { Alert, AlertType } from "../components/Alert";
+import { getAlertType } from "./Transactions";
 
 interface Props {
   isSideNavOpen: boolean;
@@ -28,6 +30,17 @@ function Home(props: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [summaryOptionSelected, setSummaryOptionSelected] =
     useState<SummaryOption>(SummaryOption.Month);
+
+  const [isAlertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState<AlertType>(AlertType.WARNING);
+
+  function showAlert(message: string, type: AlertType) {
+    setAlertMessage(message);
+    setAlertType(getAlertType(type));
+    setAlertOpen(true);
+    setTimeout(() => setAlertOpen(false), 4000);
+  }
 
   useEffect(() => {
     // user is not logged out when token expires
@@ -56,7 +69,7 @@ function Home(props: Props) {
           } else if (res?.config.url.includes("/transactions")) {
             setTransactions(res);
           }
-        } 
+        }
         // else {
         //   console.log(
         //     "Oops! Unable to fetch data. Please check your internet connection and try again."
@@ -78,6 +91,7 @@ function Home(props: Props) {
         currentBalance={currentBalance}
         handleCurrentBalance={setCurrentBalance}
       />
+      <Alert isOpen={isAlertOpen} message={alertMessage} type={alertType} setAlertOpen={setAlertOpen}/>
       {
         <div className="grid grid-cols-[1fr_500px] gap-6">
           <main
@@ -103,7 +117,7 @@ function Home(props: Props) {
               </div>
             )}
 
-            <QuickAccess />
+            <QuickAccess showAlert={showAlert}/>
 
             {/* <Banner text="Planning a trip? Start a personalized SavingPlan now" /> */}
 
