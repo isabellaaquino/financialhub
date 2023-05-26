@@ -1,11 +1,11 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useCallback, useState } from "react";
-import { DurationOption, TypeOption } from "../models/Transaction";
+import { TypeOption } from "../models/Transaction";
 import transactionService from "../api/services/TransactionService";
-import OptionsDropdown from "./OptionsDropdown";
-import { capitalizeStr } from "./utils";
+import TypeDropdown from "./TypeDropdown";
+import ToolTip from "./Tooltip";
+import { capitalizeType } from "./utils";
 import { useAuth } from "../hooks/useAuth";
-import ModalLabel from "./ModalLabel";
 
 export interface TransactionInput {
   title?: string;
@@ -14,9 +14,6 @@ export interface TransactionInput {
   date?: string;
   updateWallet: boolean;
   type: TypeOption;
-  recurrent: boolean;
-  amount?: number;
-  duration?: DurationOption;
 }
 
 interface Props {
@@ -33,19 +30,11 @@ export default function AddTransaction(props: Props) {
   }
 
   const [selectedType, setSelectedType] = useState(TypeOption.EXPENSE);
-  const [selectedDuration, setSelectedDuration] = useState(DurationOption.DAYS);
 
   const handleTypeChange = (type: TypeOption) => {
     setSelectedType(type);
     setTransactionInput((prevState) => {
       return { ...prevState, ["type"]: type };
-    });
-  };
-
-  const handleDurationChange = (duration: DurationOption) => {
-    setSelectedDuration(duration);
-    setTransactionInput((prevState) => {
-      return { ...prevState, ["duration"]: duration };
     });
   };
 
@@ -58,9 +47,6 @@ export default function AddTransaction(props: Props) {
     date: new Date().toISOString(),
     type: selectedType,
     updateWallet: false,
-    recurrent: false,
-    amount: undefined,
-    duration: selectedDuration,
   });
 
   const handleInputChange = useCallback(
@@ -70,8 +56,6 @@ export default function AddTransaction(props: Props) {
         if (e.target.name === "value") {
           value = parseFloat(e.target.value);
         } else if (e.target.name === "updateWallet") {
-          value = e.target.checked;
-        } else if (e.target.name === "recurrent") {
           value = e.target.checked;
         }
         return { ...prevState, [e.target.name]: value };
@@ -88,8 +72,9 @@ export default function AddTransaction(props: Props) {
       transactionInput
     );
     if (response) {
-      props.handleAlert(response.message, response.success);
-    } else setError("Register error");
+      props.handleAlert(response.message, response.success)
+    }
+    else setError("Register error");
   };
 
   return (
@@ -130,121 +115,84 @@ export default function AddTransaction(props: Props) {
                     onSubmit={(e) => createTransaction(e)}
                     className="mt-2 mb-4"
                   >
-                    <div className="flex flex-row mt-6">
+                    <div className="flex flex-row mt-6 mb-6 justify-between">
                       <div>
-                        <div className="flex flex-col gap-1 mb-6">
-                          <ModalLabel title="Title" styling="mb-2" />
+                        <div className="flex flex-col gap-1 items-center mb-6">
+                          <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
+                            Title:
+                          </label>
                           <input
                             name="title"
-                            className="appearance-none border rounded py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
+                            className="shadow appearance-none border rounded py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
                             onChange={handleInputChange}
                           />
                         </div>
-                        <ModalLabel
-                          title={
-                            transactionInput.recurrent ? "Start date" : "Date"
-                          }
-                          styling="mb-2"
-                        />
-                        <input
-                          name={
-                            transactionInput.recurrent ? "startDate" : "date"
-                          }
-                          type="date"
-                          className="appearance-none border rounded py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
-                          onChange={handleInputChange}
-                        />
+                        <div className="flex flex-col gap-1 items-center mb-6">
+                          <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
+                            Description:
+                          </label>
+                          <input
+                            name="description"
+                            className="shadow appearance-none border rounded py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
+                            onChange={handleInputChange}
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1 items-center mb-6">
+                          <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
+                            Date:
+                          </label>
+                          <input
+                            name="date"
+                            type="date"
+                            className="shadow appearance-none border rounded py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
+                            onChange={handleInputChange}
+                          />
+                        </div>
                       </div>
                       <div className="mx-auto">
                         <div className="flex flex-col gap-1 items-center mb-6">
-                          <ModalLabel title="Value" styling="mb-2" />
-                          <div className="flex flex-row border items-center rounded text-lg w-min-full py-1 gap-1">
-                            <span className="material-symbols-rounded">
-                              attach_money
-                            </span>
+                          <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
+                            Value:
+                          </label>
+                          <div className="flex flex-row items-center gap-1">
+                            <span>$</span>
                             <input
                               name="value"
-                              className="w-16 text-gray-900 focus:outline-none"
+                              className="w-16 text-center shadow appearance-none border rounded py-2 px-1 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
                               placeholder="0.00"
                               onChange={handleInputChange}
                             />
                           </div>
                         </div>
                         <div className="flex flex-col gap-1 items-center mb-6">
-                          <ModalLabel
-                            title="Type of transaction"
-                            styling="mb-2"
-                          />
-                          <OptionsDropdown
+                          <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
+                            Type of transaction:
+                          </label>
+                          <TypeDropdown
                             selectedType={selectedType}
                             handleType={(e: TypeOption) => handleTypeChange(e)}
-                            options={TypeOption}
                           />
                         </div>
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-1 justify-around mb-6">
-                      <div className="flex flex-col gap-1 items-center mb-6">
-                        <ModalLabel title="Description" styling="mb-2" />
-                        <textarea
-                          name="description"
-                          className="appearance-none border rounded py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex flex-row gap-1 items-center justify-around">
-                      <div className="flex flex-col gap-1 items-center mb-6">
-                        <ModalLabel
-                          title="Update wallet?"
-                          tooltipText="Check if you want this transaction to update your current balance."
-                        />
-                        <input
-                          name="updateWallet"
-                          type="checkbox"
-                          className="mt-4 leading-tight"
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1 items-center mb-6">
-                        <ModalLabel
-                          title="Is recurrent?"
-                          tooltipText="Check this if you want this transaction to be replicated in a certain amount of time."
-                        />
-                        <input
-                          name="recurrent"
-                          type="checkbox"
-                          className="mt-4 leading-tight"
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                    </div>
-                    {transactionInput.recurrent && (
-                      <div className="flex flex-row items-center mb-6 justify-center">
-                        <div className="flex flex-row items-center gap-2">
-                          <ModalLabel title="Copied Every" />
+                        <div className="flex flex-col gap-1 items-center mb-6">
+                          <label className="flex items-top block uppercase tracking-wide text-gray-700 text-xs font-bold">
+                            Update wallet?
+                            <ToolTip content="Check if you want this transaction to update your current balance." />
+                          </label>
                           <input
-                            name="amount"
-                            className="w-10 text-center appearance-none rounded py-2 px-1 text-gray-900 focus:outline-none py-1"
-                            placeholder="0"
+                            name="updateWallet"
+                            type="checkbox"
+                            className="mt-4 leading-tight"
                             onChange={handleInputChange}
                           />
-                          <OptionsDropdown
-                            selectedType={selectedDuration}
-                            handleType={(e: DurationOption) =>
-                              handleDurationChange(e)
-                            }
-                            options={DurationOption}
-                          />
                         </div>
                       </div>
-                    )}
+                    </div>
                     <button
                       type="submit"
                       className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-3 py-2 text-sm font-medium text-blue-900 hover:bg-gray-200 focus:outline-none 
 											focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                     >
-                      Create {capitalizeStr(selectedType)}
+                      Create {capitalizeType(selectedType)}
                     </button>
                   </form>
                 </Dialog.Panel>
