@@ -27,10 +27,24 @@ class WalletSerializer(serializers.ModelSerializer):
 
 class TransactionSerializer(serializers.ModelSerializer):
     date = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S")
+    amount = serializers.SerializerMethodField()
+    duration = serializers.SerializerMethodField()
 
     class Meta:
         model = Transaction
-        fields = ('id', 'value', 'date', 'type', 'title', 'description')
+        fields = ('id', 'value', 'date', 'type', 'title', 'description', 'recurrent',
+                  'amount', 'duration')
+        
+    
+    def get_amount(self, obj):
+        if obj.recurrent:
+            return obj.get_recurrency().get_amount()
+        return None
+    
+    def get_duration(self, obj):
+        if obj.recurrent:
+            return obj.get_recurrency().get_duration()
+        return None
 
 
 class SavingPlanSerializer(serializers.ModelSerializer):
