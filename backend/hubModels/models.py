@@ -89,7 +89,7 @@ class Wallet(models.Model):
     ]
 
     def update_balance(self, value: Decimal):
-        self.current_amount = self.current_amount + value
+        self.current_amount = self.current_amount + Decimal(value)
         self.save(update_fields=['current_amount'])
 
     def get_current_amount(self):
@@ -97,9 +97,9 @@ class Wallet(models.Model):
 
     def get_transactions(self) -> QuerySet['Transaction']:
         """
-        Return a QuerySet of all Transactions related to a Wallet
+        Return a QuerySet of all non recurrent Transactions related to a Wallet
         """
-        return Transaction.objects.filter(wallet_id=self.pk)
+        return Transaction.objects.filter(wallet_id=self.pk, recurrent=False)
 
     def get_transactions_by_year(self, year) -> QuerySet['Transaction']:
         """
@@ -120,6 +120,18 @@ class Wallet(models.Model):
         Return a QuerySet of all SavingPlans related to a Wallet
         """
         return SavingPlan.objects.filter(wallet_id=self.pk)
+    
+    def get_monthly_income(self):
+        """
+        Returns the monthly income value of an user's Wallet
+        """
+        pass
+    
+    def get_monthly_debt(self):
+        """
+        Returns the monthly debt value of an user's Wallet
+        """
+        pass
 
     # TODO: create unittest for all methods
 
@@ -136,14 +148,18 @@ class TransactionRecurrency(models.Model):
         ('YEARS', 'years'),
     ]
     transaction = models.ForeignKey('Transaction', on_delete=models.CASCADE)
-    start_date = models.DateTimeField()
-    amount = models.IntegerField(max_length=2)
-    duration = models.CharField(choices=DURATION_TYPES)
+    amount = models.IntegerField()
+    duration = models.CharField(max_length=6, choices=DURATION_TYPES)
     end_date = models.DateTimeField(blank=True, null=True)
     
     def trigger_async_instatiation(self):
         pass
-        
+    
+    def get_amount(self):
+        return self.amount
+
+    def get_duration(self):
+        return self.duration        
 
 class Transaction(models.Model):
     TRANSACTION_TYPES = [
@@ -152,7 +168,7 @@ class Transaction(models.Model):
         ('INCOME', 'Income'),
     ]
 
-    title = models.CharField(max_length=200, default='Amazong Prime')
+    title = models.CharField(max_length=200, default='Amazong Prime') # TODO: remove default value
     wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False)
     value = models.DecimalField(decimal_places=2, max_digits=15)
     date = models.DateTimeField(auto_now=False)
@@ -230,6 +246,7 @@ class Transaction(models.Model):
         
         # Recurrency section
         if data.get("recurrent") is True:
+            transaction.recurrent = data.get("recurrent")
             # When a transaction is set to recurrent, we'll instantiate a copy of this transaction to be the base
             # for recurrency editions
             if not data.get("amount"):
@@ -238,24 +255,26 @@ class Transaction(models.Model):
             if not data.get("duration"):
                 raise PermissionError() # TODO: Update exception
             
-            if not data.get("startDate"):
-                raise PermissionError() # TODO: Update exception
-            
             # TODO: Move this instatiation + fk's handling to another method
+            
+            transaction.save(is_first_save=True)
             
             TransactionRecurrency.objects.create(
                 transaction=transaction,
                 amount=data.get("amount"),
                 duration=data.get("duration"),
-                start_date=data.get("startDate")
             )
-
-        transaction.save(is_first_save=True)
+            
+        else:
+            transaction.save(is_first_save=True)
 
         return transaction
     
     def get_wallet(self):
         return self.wallet
+    
+    def get_recurrency(self):
+        return TransactionRecurrency.objects.get(transaction_id=self.pk) if self.recurrent else None
     
     def is_from_wallet(self, wallet):
         if not isinstance(wallet, Wallet):
