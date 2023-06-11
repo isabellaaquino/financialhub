@@ -19,7 +19,7 @@ function ProfileChart() {
       },
       legend: legend,
     },
-    series: [],
+    series: [30, 40, 50],
     labels: [],
     noData: {
       text: "No data found",
@@ -27,12 +27,12 @@ function ProfileChart() {
   });
 
   return (
-    <div className="ProfileChart">
+    <div className="ProfileChart mt-10">
       <Chart
         options={state.options}
         series={state.series}
         type="donut"
-        width="370"
+        width="100%"
       />
     </div>
   );

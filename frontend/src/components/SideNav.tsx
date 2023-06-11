@@ -1,27 +1,25 @@
-import { useState } from "react";
-import { useLocation } from "react-router";
-import { Link } from "react-router-dom";
+import ItemNav from "./ItemNav";
+import LabelNav from "./LabelNav";
 
 interface Props {
   state: boolean;
   handleState: (state: boolean) => void;
 }
-function SideNav(props: Props) {
-  const location = useLocation();
 
+function SideNav(props: Props) {
   function handleSideNav() {
     props.handleState(!props.state);
   }
 
   return (
-    <div className="SideNav fixed">
+    <div className="SideNav fixed z-20">
       <nav
         style={{
-          width: !props.state ? "56px" : "300px",
+          width: !props.state ? "56px" : "250px",
           paddingLeft: !props.state ? 0 : 30,
           alignItems: !props.state ? "center" : "start",
         }}
-        className={`h-screen bg-blue-800 flex flex-col justify-between items-start py-10`}
+        className={`h-screen bg-black-400 flex flex-col justify-between items-start py-10`}
       >
         <div
           className={
@@ -30,91 +28,33 @@ function SideNav(props: Props) {
               : "items-start"
           }
         >
-          <p
-            className={`${
-              !props.state && "hidden"
-            } text-blue-300 mt-8 text-xs uppercase`}
-          >
-            Navigation
-          </p>
-          <Link
+          <LabelNav sideNavState={props.state} text="Navigation" />
+          <ItemNav
             to="/"
-            className={`mt-5 p-3 flex items-center ${
-              location.pathname === "/"
-                ? "bg-blue-700 text-white w-full"
-                : "text-blue-300"
-            } ${props.state && "rounded-l-md"}`}
-          >
-            <span
-              className={`material-symbols-rounded text-xl ${
-                !props.state && "ml-1"
-              }`}
-            >
-              leaderboard
-            </span>
-            <p
-              style={{ marginLeft: !props.state ? 0 : 15 }}
-              className={!props.state ? "hidden" : "inline"}
-            >
-              Dashboard
-            </p>
-          </Link>
-          <p
-            className={`${
-              !props.state && "hidden"
-            } text-blue-300 mt-8 text-xs uppercase ${
-              props.state && "rounded-l-md"
-            }`}
-          >
-            Manage
-          </p>
-          <Link
+            text="Dashboard"
+            sideNavState={props.state}
+            handleState={props.handleState}
+            iconName="leaderboard"
+          />
+
+          <LabelNav sideNavState={props.state} text="Manage" />
+          <ItemNav
             to="/transactions"
-            className={`mt-5 p-3 flex items-center ${
-              location.pathname === "/transactions"
-                ? "bg-blue-700 text-white w-full"
-                : "text-blue-300"
-            } ${props.state && "rounded-l-md"}`}
-          >
-            <span
-              className={`material-symbols-rounded text-xl ${
-                !props.state && "ml-1"
-              }`}
-            >
-              receipt
-            </span>
-            <p
-              style={{ marginLeft: !props.state ? 0 : 15 }}
-              className={!props.state ? "hidden" : "inline"}
-            >
-              Transactions
-            </p>
-          </Link>
-          <Link
+            text="Transactions"
+            sideNavState={props.state}
+            handleState={props.handleState}
+            iconName="receipt"
+          />
+          <ItemNav
             to="/saving-plans"
-            className={`mt-4 p-3 flex items-center ${
-              location.pathname === "/saving-plans"
-                ? "bg-blue-700 text-white w-full"
-                : "text-blue-300"
-            } ${props.state && "rounded-l-md"}`}
-          >
-            <span
-              className={`material-symbols-rounded text-xl ${
-                !props.state && "ml-1"
-              }`}
-            >
-              savings
-            </span>
-            <p
-              style={{ marginLeft: !props.state ? 0 : 15 }}
-              className={!props.state ? "hidden" : "inline"}
-            >
-              Saving Plans
-            </p>
-          </Link>
+            text="Saving Plans"
+            sideNavState={props.state}
+            handleState={props.handleState}
+            iconName="savings"
+          />
         </div>
         <div>
-          <a onClick={handleSideNav} className="text-white">
+          <a onClick={handleSideNav} className="text-white cursor-pointer">
             <span className="material-symbols-rounded text-3xl">
               exit_to_app
             </span>

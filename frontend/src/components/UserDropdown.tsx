@@ -7,12 +7,12 @@ export default function UserDropdown() {
   const { user, SignOut } = useAuth();
 
   return (
-    <div className="fixed w-56 text-right z-10">
+    <div className="w-56 text-right z-10">
       <Menu as="div" className="relative inline-block text-left">
         <div className="flex flex-row items-center">
           <img src={avatar} className="w-10 rounded-full" alt="Avatar" />
-          <Menu.Button className="inline-flex items-center w-full justify-center rounded-md px-4 py-2 text-sm text-black hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
-            {user && user.first_name + " " + user.last_name}
+          <Menu.Button className="inline-flex items-center w-full justify-center rounded-md px-4 py-2 text-sm text-white hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
+            {/* {user && user.first_name + " " + user.last_name} */}
             <span className="material-symbols-rounded text-xl pl-1">
               expand_more
             </span>
@@ -27,7 +27,7 @@ export default function UserDropdown() {
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-black-400 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="px-1 py-1">
               <Menu.Item>
                 {({ active }) => (

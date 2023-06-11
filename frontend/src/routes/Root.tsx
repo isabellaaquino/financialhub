@@ -15,7 +15,7 @@ function Root() {
   }
 
   return (
-    <div className="Root">
+    <div className="Root bg-black-500">
       {/* <SignIn /> */}
       {user ? (
         <>
