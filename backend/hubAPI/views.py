@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.db.models import QuerySet
+from .utils import custom_server_error_response, custom_success_response
 from hubModels.serializers import MyTokenObtainPairSerializer
 from hubModels.models import HubUser, Wallet, Transaction
 from rest_framework.response import Response
@@ -27,23 +28,23 @@ class TransactionDetail(APIView):
         transaction = Transaction.create_from_json(data, user_pk=user.pk)
 
         # TODO: Change response to message string
-        return Response(TransactionSerializer(instance=transaction).data)
+        return custom_success_response("Transaction created with success!")
 
     def delete(self, request, transaction_pk):
         user: HubUser = request.user
 
         if not transaction_pk:
-            raise PermissionError()
+            return custom_server_error_response("No transaction id was given. Please try again.")
 
         transaction = Transaction.objects.get(pk=transaction_pk)
 
         # Transaction does not belong to the requesting user
-        if not transaction.wallet.pk == user.get_wallet().pk:
+        if not transaction.is_from_wallet(user.get_wallet()):
             raise PermissionError()
 
         transaction.delete()
-
-        return Response("ok")
+        
+        return custom_success_response("Transaction deleted with success!")
 
 
 @api_view(['GET'])

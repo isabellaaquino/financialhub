@@ -24,7 +24,7 @@ class TransactionService {
   async createTransactionAPI(
     accessToken: string,
     transaction: TransactionInput
-  ): Promise<string | null> {
+  ): Promise<{[key: string]: string} | null> {
     try {
       const response = await api.post("/transaction/", transaction, {
         headers: {
@@ -33,7 +33,7 @@ class TransactionService {
         },
       });
       if (response.status !== 200) return null;
-      return (await response.data) as string;
+      return (await response.data);
     } catch (error) {
       console.log(error);
     }
@@ -44,7 +44,7 @@ class TransactionService {
   async deleteTransactionAPI(
     accessToken: string,
     transaction_pk: number
-  ): Promise<string | null> {
+  ): Promise<{[key: string]: string} | null> {
     try {
       const response = await api.delete(`/transaction/${transaction_pk}`, {
         headers: {
@@ -52,12 +52,10 @@ class TransactionService {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      if (response.status !== 200) return null;
-      return (await response.data) as string;
+      return (await response.data);
     } catch (error) {
       console.log(error);
     }
-
     return null;
   }
 }

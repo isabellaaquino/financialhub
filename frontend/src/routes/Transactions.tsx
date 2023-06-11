@@ -7,9 +7,18 @@ import YearDropdown from "../components/YearDropdown";
 import { useAuth } from "../hooks/useAuth";
 import { Transaction, TypeOption } from "../models/Transaction";
 import ConfirmModal from "../components/ConfirmModal";
+import { Alert, AlertType } from "../components/Alert";
+import ModalLabel from "../components/ModalLabel";
+import ToolTip from "../components/Tooltip";
+import { capitalizeStr } from "../components/utils";
 
 function Transactions() {
   const { authTokens } = useAuth();
+
+  const [isAlertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState<AlertType>(AlertType.WARNING);
+
   const [transactions, setTransactions] = useState<Transaction[] | null>();
   const [filteredTransactions, setFilteredTransactions] = useState<
     Transaction[] | null
@@ -43,6 +52,13 @@ function Transactions() {
     setConfirmModalOpen(true);
   }
 
+  function showAlert(message: string, type: string) {
+    setAlertMessage(message);
+    setAlertType(getAlertType(type));
+    setAlertOpen(true);
+    setTimeout(() => setAlertOpen(false), 4000);
+  }
+
   const handleDeleteTransaction = async (
     event: React.MouseEvent<HTMLSpanElement, MouseEvent>,
     index: number
@@ -51,15 +67,16 @@ function Transactions() {
     const transactionId = transactions?.at(index)?.id;
     if (transactionId) {
       event.preventDefault();
-      const response: string | null = await transactionService
-        .deleteTransactionAPI(authTokens!.access, transactionId)
-        .then((response) => {
-          searchTransactions();
-          return response;
-        });
+      setConfirmModalOpen(false);
+      const response: { [key: string]: string } | null =
+        await transactionService
+          .deleteTransactionAPI(authTokens!.access, transactionId)
+          .then((response) => {
+            searchTransactions();
+            return response;
+          });
       if (response) {
-        console.log(response);
-        setConfirmModalOpen(false);
+        showAlert(response.message, response.success);
       }
     }
   };
@@ -91,6 +108,12 @@ function Transactions() {
 
   return (
     <div className="Transactions">
+      <Alert
+        isOpen={isAlertOpen}
+        message={alertMessage}
+        type={alertType}
+        setAlertOpen={setAlertOpen}
+      />
       <SideNav state={isSideNavOpen} handleState={handleSideNav} />
       <TopNav />
       <div className="flex flex-row divide-x">
@@ -200,7 +223,9 @@ function Transactions() {
                     </dd>
                   </div>
                   <div className="bg-blue-100 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                    <dt className="text-sm font-medium text-gray-500">Amout</dt>
+                    <dt className="text-sm font-medium text-gray-500">
+                      Amount
+                    </dt>
                     <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
                       ${selectedTransaction.value}
                     </dd>
@@ -231,6 +256,29 @@ function Transactions() {
                       {selectedTransaction?.description}
                     </dd>
                   </div>
+                  <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt className="text-sm font-medium text-gray-500">
+                      Recurrent
+                    </dt>
+                    <dd className="flex flex-row align-middle gap-1 mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                      <input
+                        type="checkbox"
+                        disabled
+                        checked={selectedTransaction.recurrent}
+                      />
+                      {selectedTransaction.recurrent && (
+                        <ToolTip
+                          content={`Transaction is cloned every ${
+                            selectedTransaction.amount
+                          } ${
+                            selectedTransaction.duration
+                              ? selectedTransaction.duration.toLowerCase()
+                              : null
+                          }.`}
+                        />
+                      )}
+                    </dd>
+                  </div>
                 </dl>
               </div>
             </div>
@@ -240,5 +288,10 @@ function Transactions() {
     </div>
   );
 }
+
+export const getAlertType = (success: string) => {
+  if (!!success) return AlertType.SUCCESS;
+  else return AlertType.ERROR;
+};
 
 export default Transactions;
