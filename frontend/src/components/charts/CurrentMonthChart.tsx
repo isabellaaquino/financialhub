@@ -20,12 +20,25 @@ function CurrentMonthChart(props: Props) {
         toolbar: { show: false },
         id: "bar",
       },
+      colors: ["#28bd62"],
+      title: {
+        text: `${
+          props.option === SummaryOption.Month ? "Monthly" : "Annual"
+        } expenses`,
+        align: "left",
+        style: {
+          fontFamily: "Inter",
+          fontSize: "16px",
+          fontWeight: "medium",
+          color: "white"
+        },
+      } as ApexTitleSubtitle,
       xaxis: {
         type: "numeric",
         labels: {
           show: true,
           formatter: function (value: string) {
-            return String(value);
+            return String(value).substring(0, 2);
           },
         },
       } as ApexXAxis,
@@ -189,13 +202,13 @@ function CurrentMonthChart(props: Props) {
   }
 
   return (
-    <div className="CurrentMonthChart">
+    <div className="CurrentMonthChart px-10 h-full">
       <Chart
         options={state.options}
         series={state.series}
         type="bar"
-        width="1000"
-        height="200"
+        width="100%"
+        height="100%"
       />
     </div>
   );
