@@ -26,6 +26,7 @@ function QuickAccessCard(props: Props) {
       </div>
 
       <AddTransaction
+        handleAlert={openAddTransaction}
         isOpen={isAddTransaction}
         handleState={setAddTransactionIsOpen}
       />
