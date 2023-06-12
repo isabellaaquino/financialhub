@@ -10,7 +10,14 @@ export default function UserDropdown() {
     <div className="w-56 text-right z-10">
       <Menu as="div" className="relative inline-block text-left">
         <div className="flex flex-row items-center">
-          <img src={avatar} className="w-10 rounded-full" alt="Avatar" />
+          <div className="rounded-full bg-gray-300 p-3 inline-flex items-center">
+            <span className="text-green-500 text-md">
+              {user &&
+                user.first_name.charAt(0).toUpperCase() +
+                  user.last_name.charAt(0).toUpperCase()}
+            </span>
+          </div>
+          {/* <img src={avatar} className="w-10 rounded-full" alt="Avatar" /> */}
           <Menu.Button className="inline-flex items-center w-full justify-center rounded-md px-4 py-2 text-sm text-white hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
             {/* {user && user.first_name + " " + user.last_name} */}
             <span className="material-symbols-rounded text-xl pl-1">

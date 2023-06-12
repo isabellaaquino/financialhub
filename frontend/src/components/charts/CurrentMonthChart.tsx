@@ -3,6 +3,7 @@ import Chart from "react-apexcharts";
 import dateService, { MONTHS_IN_YEAR } from "../../api/services/DateService";
 import { SummaryOption } from "../../models/Summary";
 import { Transaction } from "../../models/Transaction";
+import { ApexOptions } from "apexcharts";
 
 interface Props {
   data: Transaction[];
@@ -14,13 +15,24 @@ function CurrentMonthChart(props: Props) {
     { x: string; y: string | number }[]
   >([]);
 
-  const [state, setState] = useState({
+  const [state, setState] = useState<{
+    options: ApexOptions;
+    series: ApexOptions["series"];
+  }>({
     options: {
       chart: {
         toolbar: { show: false },
         id: "bar",
       },
-      colors: ["#28bd62"],
+      plotOptions: {
+        bar: {
+          columnWidth: "80%",
+          distributed: true,
+        },
+      },
+      legend: {
+        show: false,
+      },
       title: {
         text: `${
           props.option === SummaryOption.Month ? "Monthly" : "Annual"
@@ -30,46 +42,60 @@ function CurrentMonthChart(props: Props) {
           fontFamily: "Inter",
           fontSize: "16px",
           fontWeight: "medium",
-          color: "white"
+          color: "white",
         },
-      } as ApexTitleSubtitle,
+      },
       xaxis: {
         type: "numeric",
         labels: {
+          style: {
+            colors: "#5c636f",
+          },
           show: true,
           formatter: function (value: string) {
             return String(value).substring(0, 2);
           },
         },
-      } as ApexXAxis,
+      },
       yaxis: {
         labels: {
           show: false,
-          labels: {
-            show: true,
-            formatter: function (value: string) {
-              return `$${value}`;
-            },
+          formatter: function (val) {
+            return "$" + val.toFixed(2);
           },
+          // labels: {
+          //   show: true,
+          //   formatter: function (value: string) {
+          //     return `$${value}`;
+          //   },
+          // },
         },
       },
       grid: {
         show: false,
       },
       dataLabels: { enabled: false },
+      tooltip: {
+        theme: "dark",
+        x: {
+          formatter(val, opts) {
+            // const seriesName = opts.series[opts.seriesIndex].name;
+            return String(val);
+          },
+        },
+      },
     },
     series: [
       {
         name: "",
         data: [],
       },
-    ] as ApexAxisChartSeries,
+    ],
   });
 
   useEffect(() => {
     let categories: string[] = [];
     const result = createLineChartData(props.option);
-
     result.map((transaction) => {
       categories.push(transaction.date);
     });
@@ -188,7 +214,7 @@ function CurrentMonthChart(props: Props) {
     //
     // Change transactions array into dictionary (format: {date: value}) for ApexCharts
     //
-
+    console.log(option);
     if (option === SummaryOption.Year) return getPairValues(props.data, option);
 
     //if option != Summaryoption.Year, return all transactions from current month

@@ -3,6 +3,9 @@ module.exports = {
   content: ["./src/**/*.tsx"],
   theme: {
     extend: {
+      fontFamily: {
+        logo: ["Poppins", "ui-sans-serif", "system-ui"],
+      },
       fontSize: {
         sm: ".889rem",
         md: "1rem",

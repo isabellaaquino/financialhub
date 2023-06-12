@@ -82,6 +82,7 @@ function Home(props: Props) {
   function openBalanceEditor() {
     setIsOpen(true);
   }
+  console.log(transactions);
 
   return (
     <div className="App">
@@ -91,12 +92,19 @@ function Home(props: Props) {
         currentBalance={currentBalance}
         handleCurrentBalance={setCurrentBalance}
       />
-      <Alert isOpen={isAlertOpen} message={alertMessage} type={alertType} setAlertOpen={setAlertOpen}/>
+      <Alert
+        isOpen={isAlertOpen}
+        message={alertMessage}
+        type={alertType}
+        setAlertOpen={setAlertOpen}
+      />
       {
         <div className="w-full">
           <main
             style={{
-              margin: "0 30px 0 90px",
+              margin: `${
+                props.isSideNavOpen ? "0 30px 0 280px" : "0 30px 0 90px"
+              }`,
             }}
             className="ml-20 mr-6"
           >

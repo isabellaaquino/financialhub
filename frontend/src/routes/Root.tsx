@@ -8,7 +8,7 @@ import SignIn from "./SignIn";
 
 function Root() {
   let { user } = useAuth();
-  const [isSideNavOpen, setIsSideNavOpen] = useState(false);
+  const [isSideNavOpen, setIsSideNavOpen] = useState(true);
 
   function handleSideNav(state: boolean) {
     setIsSideNavOpen(state);

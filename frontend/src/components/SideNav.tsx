@@ -1,5 +1,7 @@
+import { Link } from "react-router-dom";
 import ItemNav from "./ItemNav";
 import LabelNav from "./LabelNav";
+import Title from "./Title";
 
 interface Props {
   state: boolean;
@@ -19,7 +21,7 @@ function SideNav(props: Props) {
           paddingLeft: !props.state ? 0 : 30,
           alignItems: !props.state ? "center" : "start",
         }}
-        className={`h-screen bg-black-400 flex flex-col justify-between items-start py-10`}
+        className={`h-screen bg-black-400 justify-between flex flex-col items-start py-10`}
       >
         <div
           className={
@@ -28,30 +30,43 @@ function SideNav(props: Props) {
               : "items-start"
           }
         >
-          <LabelNav sideNavState={props.state} text="Navigation" />
-          <ItemNav
-            to="/"
-            text="Dashboard"
-            sideNavState={props.state}
-            handleState={props.handleState}
-            iconName="leaderboard"
-          />
+          <Link to="/" className={`text-white font-medium font-logo text-2xl ${!props.state && "text-center"}`}>
+            {props.state ? (
+              <h1>
+                Financial<strong className="text-green-500">hub</strong>
+              </h1>
+            ) : (
+              <h1>
+                F<strong className="text-green-500">.</strong>
+              </h1>
+            )}
+          </Link>
+          <div className="mt-14">
+            <LabelNav sideNavState={props.state} text="Navigation" />
+            <ItemNav
+              to="/"
+              text="Dashboard"
+              sideNavState={props.state}
+              handleState={props.handleState}
+              iconName="leaderboard"
+            />
 
-          <LabelNav sideNavState={props.state} text="Manage" />
-          <ItemNav
-            to="/transactions"
-            text="Transactions"
-            sideNavState={props.state}
-            handleState={props.handleState}
-            iconName="receipt"
-          />
-          <ItemNav
-            to="/saving-plans"
-            text="Saving Plans"
-            sideNavState={props.state}
-            handleState={props.handleState}
-            iconName="savings"
-          />
+            <LabelNav sideNavState={props.state} text="Manage" />
+            <ItemNav
+              to="/transactions"
+              text="Transactions"
+              sideNavState={props.state}
+              handleState={props.handleState}
+              iconName="receipt"
+            />
+            <ItemNav
+              to="/saving-plans"
+              text="Saving Plans"
+              sideNavState={props.state}
+              handleState={props.handleState}
+              iconName="savings"
+            />
+          </div>
         </div>
         <div>
           <a onClick={handleSideNav} className="text-white cursor-pointer">
