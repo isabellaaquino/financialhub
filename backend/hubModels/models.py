@@ -88,7 +88,7 @@ class Wallet(models.Model):
         models.UniqueConstraint(fields=['user'], name='unique wallet per user')
     ]
 
-    def update_balance(self, value: Decimal):
+    def update_balance(self, value):
         self.current_amount = self.current_amount + Decimal(value)
         self.save(update_fields=['current_amount'])
 
@@ -97,7 +97,7 @@ class Wallet(models.Model):
 
     def get_transactions(self) -> QuerySet['Transaction']:
         """
-        Return a QuerySet of all non recurrent Transactions related to a Wallet
+        Return a QuerySet of all non-recurrent Transactions related to a Wallet
         """
         return Transaction.objects.filter(wallet_id=self.pk, recurrent=False)
 
@@ -168,7 +168,7 @@ class Transaction(models.Model):
         ('INCOME', 'Income'),
     ]
 
-    title = models.CharField(max_length=200, default='Amazong Prime') # TODO: remove default value
+    title = models.CharField(max_length=200, default='Amazon Prime') # TODO: remove default value
     wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False)
     value = models.DecimalField(decimal_places=2, max_digits=15)
     date = models.DateTimeField(auto_now=False)
@@ -283,6 +283,9 @@ class Transaction(models.Model):
         if not self.get_wallet() == wallet:
             return False
         return True
+
+    def is_recurrent(self):
+        return self.recurrent
 
 
 class SavingPlan(models.Model):

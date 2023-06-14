@@ -187,10 +187,15 @@ bower_components
 
 *.sublime*
 
+## VSCODE
+
 psd
 thumb
 sketch
 .vscode
+
+## PYCHARM
+.idea
 
 # End of https://www.toptal.com/developers/gitignore/api/react
 frontend/node_modules
