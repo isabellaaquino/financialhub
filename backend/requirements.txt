@@ -6,6 +6,7 @@ django-filter==22.1
 django-restframework==0.0.1
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.2.2
+Faker==18.10.1
 Markdown==3.4.1
 Pillow==9.4.0
 psycopg2==2.9.5
