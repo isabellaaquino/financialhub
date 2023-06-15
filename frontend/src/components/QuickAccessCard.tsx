@@ -5,18 +5,19 @@ interface Props {
   text: string;
   iconName: string;
   isAddTransaction: boolean;
+  showAlert(message: string, type: string): void;
 }
 function QuickAccessCard(props: Props) {
-  const [isAddTransaction, setAddTransactionIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
-  function openAddTransaction() {
-    setAddTransactionIsOpen(true);
+  function handleTransactionModal(state: boolean) {
+    setIsOpen(state);
   }
 
   return (
     <div>
       <div
-        onClick={props.isAddTransaction ? openAddTransaction : undefined}
+        onClick={() => props.isAddTransaction ? handleTransactionModal(true) : undefined}
         className="cursor-pointer text-center p-4 bg-black-400 rounded-md w-40 h-44 flex justify-center flex-col items-center hover:border-2 border-white-500"
       >
         <span className="material-symbols-rounded text-white bg-green-500 rounded-full p-2">
@@ -26,9 +27,9 @@ function QuickAccessCard(props: Props) {
       </div>
 
       <AddTransaction
-        handleAlert={openAddTransaction}
-        isOpen={isAddTransaction}
-        handleState={setAddTransactionIsOpen}
+        handleAlert={props.showAlert}
+        isOpen={isOpen}
+        handleState={handleTransactionModal}
       />
     </div>
   );

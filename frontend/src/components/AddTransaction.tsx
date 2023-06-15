@@ -6,6 +6,8 @@ import OptionsDropdown from "./OptionsDropdown";
 import { capitalizeStr } from "./utils";
 import { useAuth } from "../hooks/useAuth";
 import ModalLabel from "./ModalLabel";
+import RadioGroup from "./RadioGroup";
+import SwitchButton from "./SwitchButton";
 
 export interface TransactionInput {
   title?: string;
@@ -27,18 +29,45 @@ interface Props {
 
 export default function AddTransaction(props: Props) {
   const { authTokens } = useAuth();
+  const [selectedType, setSelectedType] = useState(TypeOption.EXPENSE);
+  const [isRecurrent, setIsRecurrent] = useState(false);
+  const [isUpdatingWallet, setIsUpdatingWallet] = useState(false);
+  const [selectedDuration, setSelectedDuration] = useState(DurationOption.DAYS);
+  const [error, setError] = useState("");
+  const [transactionInput, setTransactionInput] = useState<TransactionInput>({
+    title: "",
+    description: "",
+    value: 0,
+    date: new Date().toISOString().split("T")[0],
+    type: selectedType,
+    updateWallet: isUpdatingWallet,
+    recurrent: isRecurrent,
+    amount: undefined,
+    duration: selectedDuration,
+  });
 
   function closeModal() {
     props.handleState(false);
   }
 
-  const [selectedType, setSelectedType] = useState(TypeOption.EXPENSE);
-  const [selectedDuration, setSelectedDuration] = useState(DurationOption.DAYS);
-
   const handleTypeChange = (type: TypeOption) => {
     setSelectedType(type);
     setTransactionInput((prevState) => {
       return { ...prevState, ["type"]: type };
+    });
+  };
+
+  const handleRecurrentChange = (state: boolean) => {
+    setIsRecurrent(state);
+    setTransactionInput((prevState) => {
+      return { ...prevState, ["recurrent"]: state };
+    });
+  };
+
+  const handleUpdatingWalletChange = (state: boolean) => {
+    setIsUpdatingWallet(state);
+    setTransactionInput((prevState) => {
+      return { ...prevState, ["updateWallet"]: state };
     });
   };
 
@@ -49,30 +78,12 @@ export default function AddTransaction(props: Props) {
     });
   };
 
-  const [error, setError] = useState("");
-
-  const [transactionInput, setTransactionInput] = useState<TransactionInput>({
-    title: "",
-    description: "",
-    value: 0,
-    date: new Date().toISOString(),
-    type: selectedType,
-    updateWallet: false,
-    recurrent: false,
-    amount: undefined,
-    duration: selectedDuration,
-  });
-
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<any>) => {
       setTransactionInput((prevState) => {
         let value = e.target.value;
         if (e.target.name === "value") {
           value = parseFloat(e.target.value);
-        } else if (e.target.name === "updateWallet") {
-          value = e.target.checked;
-        } else if (e.target.name === "recurrent") {
-          value = e.target.checked;
         }
         return { ...prevState, [e.target.name]: value };
       });
@@ -105,7 +116,7 @@ export default function AddTransaction(props: Props) {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black bg-opacity-25" />
+            <div className="fixed inset-0 bg-black-500 bg-opacity-40" />
           </Transition.Child>
 
           <div className="fixed inset-0 overflow-y-auto">
@@ -119,27 +130,46 @@ export default function AddTransaction(props: Props) {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-xl transform rounded-2xl bg-black-400 p-6 align-middle shadow-xl transition-all">
+                <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-lg bg-black-400 p-6 text-left align-middle shadow-xl transition-all">
                   <Dialog.Title
                     as="h3"
-                    className="text-lg font-medium leading-6 mb-4 text-gray-900"
+                    className="text-lg font-medium leading-6 text-white"
                   >
-                    Add transaction
+                    Add new transaction
                   </Dialog.Title>
                   <form
                     onSubmit={(e) => createTransaction(e)}
-                    className="mt-2 mb-4"
+                    className="flex flex-col gap-10"
                   >
-                    <div className="flex flex-row mt-6">
+                    <div className="mt-10">
                       <div>
-                        <div className="flex flex-col gap-1 mb-6">
-                          <ModalLabel title="Title" styling="mb-2" />
+                        <ModalLabel title="Title" styling="mb-3" />
+                        <input
+                          name="title"
+                          className="w-full text-white pl-3 pr-5 py-2 rounded-md bg-black-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-row gap-5">
+                      <div className="w-1/2">
+                        <ModalLabel title="Amount" styling="mb-2" />
+                        <div className="relative">
                           <input
-                            name="title"
-                            className="appearance-none border rounded py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
+                            className="pl-10 pr-5 py-2 text-white rounded-md bg-black-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            type="text"
+                            name="value"
+                            placeholder="0.00"
                             onChange={handleInputChange}
                           />
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span className="material-symbols-rounded text-2xl font-semibold text-gray-200">
+                              attach_money
+                            </span>
+                          </div>
                         </div>
+                      </div>
+                      <div className="w-1/2">
                         <ModalLabel
                           title={
                             transactionInput.recurrent ? "Start date" : "Date"
@@ -151,98 +181,66 @@ export default function AddTransaction(props: Props) {
                             transactionInput.recurrent ? "startDate" : "date"
                           }
                           type="date"
-                          className="appearance-none border rounded py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
+                          className="w-full text-white pl-3 pr-5 py-2 rounded-md bg-black-300 focus:outline-none focus:ring-2 focus:ring-green-500"
                           onChange={handleInputChange}
                         />
                       </div>
-                      <div className="mx-auto">
-                        <div className="flex flex-col gap-1 items-center mb-6">
-                          <ModalLabel title="Value" styling="mb-2" />
-                          <div className="flex flex-row border items-center rounded text-lg w-min-full py-1 gap-1">
-                            <span className="material-symbols-rounded">
-                              attach_money
-                            </span>
-                            <input
-                              name="value"
-                              className="w-16 text-gray-900 focus:outline-none"
-                              placeholder="0.00"
-                              onChange={handleInputChange}
-                            />
-                          </div>
-                        </div>
-                        <div className="flex flex-col gap-1 items-center mb-6">
+                    </div>
+                    <div>
+                      <ModalLabel title="Type of transaction" styling="mb-5" />
+                      <RadioGroup
+                        selectedValue={selectedType}
+                        handleStateChange={handleTypeChange}
+                        types={Object.values(TypeOption)}
+                      />
+                    </div>
+                    <div className="flex flex-row gap-6 items-start justify-center">
+                      <div className="bg-black-500 rounded-md p-3 px-4 flex w-full flex-row justify-between gap-3 items-center">
+                        <ModalLabel
+                          title="Update wallet"
+                          tooltipText="Update your current balance with this transaction."
+                        />
+                        <SwitchButton
+                          handleStateChange={handleUpdatingWalletChange}
+                        />
+                      </div>
+                      <div className="bg-black-500 rounded-md p-3 px-4 flex w-full flex-col gap-3 items-center">
+                        <div className="flex flex-row justify-between w-full">
                           <ModalLabel
-                            title="Type of transaction"
-                            styling="mb-2"
+                            title="Recurring"
+                            tooltipText="Make this transaction recurring at a specified interval."
                           />
-                          <OptionsDropdown
-                            selectedType={selectedType}
-                            handleType={(e: TypeOption) => handleTypeChange(e)}
-                            options={TypeOption}
+                          <SwitchButton
+                            handleStateChange={handleRecurrentChange}
                           />
                         </div>
+                        {transactionInput.recurrent && (
+                          <div className="flex flex-row items-center mt-5 justify-start w-full">
+                            <div className="flex flex-row items-center gap-2">
+                              <ModalLabel title="Repeats every" />
+                              <input
+                                name="amount"
+                                className="w-10 text-center appearance-none rounded-md px-1 text-white bg-black-300 focus:outline-none py-2"
+                                placeholder="0"
+                                onChange={handleInputChange}
+                              />
+                              <OptionsDropdown
+                                selectedType={selectedDuration}
+                                handleType={(e: DurationOption) =>
+                                  handleDurationChange(e)
+                                }
+                                options={DurationOption}
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
-                    <div className="flex flex-col gap-1 justify-around mb-6">
-                      <div className="flex flex-col gap-1 items-center mb-6">
-                        <ModalLabel title="Description" styling="mb-2" />
-                        <textarea
-                          name="description"
-                          className="appearance-none border rounded py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex flex-row gap-1 items-center justify-around">
-                      <div className="flex flex-col gap-1 items-center mb-6">
-                        <ModalLabel
-                          title="Update wallet?"
-                          tooltipText="Check if you want this transaction to update your current balance."
-                        />
-                        <input
-                          name="updateWallet"
-                          type="checkbox"
-                          className="mt-4 leading-tight"
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1 items-center mb-6">
-                        <ModalLabel
-                          title="Is recurrent?"
-                          tooltipText="Check this if you want this transaction to be replicated in a certain amount of time."
-                        />
-                        <input
-                          name="recurrent"
-                          type="checkbox"
-                          className="mt-4 leading-tight"
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                    </div>
-                    {transactionInput.recurrent && (
-                      <div className="flex flex-row items-center mb-6 justify-center">
-                        <div className="flex flex-row items-center gap-2">
-                          <ModalLabel title="Copied Every" />
-                          <input
-                            name="amount"
-                            className="w-10 text-center appearance-none rounded py-2 px-1 text-gray-900 focus:outline-none py-1"
-                            placeholder="0"
-                            onChange={handleInputChange}
-                          />
-                          <OptionsDropdown
-                            selectedType={selectedDuration}
-                            handleType={(e: DurationOption) =>
-                              handleDurationChange(e)
-                            }
-                            options={DurationOption}
-                          />
-                        </div>
-                      </div>
-                    )}
+
                     <button
                       type="submit"
-                      className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-3 py-2 text-sm font-medium text-blue-900 hover:bg-gray-200 focus:outline-none 
-											focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-green-500 px-3 py-2 text-sm font-medium text-white hover:bg-green-600 focus:outline-none 
+											focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
                     >
                       Create {capitalizeStr(selectedType)}
                     </button>

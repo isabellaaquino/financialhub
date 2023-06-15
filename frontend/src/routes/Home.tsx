@@ -91,7 +91,12 @@ function Home(props: Props) {
         currentBalance={currentBalance}
         handleCurrentBalance={setCurrentBalance}
       />
-      <Alert isOpen={isAlertOpen} message={alertMessage} type={alertType} setAlertOpen={setAlertOpen}/>
+      <Alert
+        isOpen={isAlertOpen}
+        message={alertMessage}
+        type={alertType}
+        setAlertOpen={setAlertOpen}
+      />
       {
         <div className="w-full">
           <main
@@ -167,7 +172,7 @@ function Home(props: Props) {
                 )}
               </div>
               <div className="rounded-md pt-5 py-10">
-                <QuickAccess />
+                <QuickAccess showAlert={showAlert}/>
               </div>
             </div>
 

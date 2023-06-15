@@ -3,13 +3,11 @@ import AddTransaction from "./AddTransaction";
 import QuickAccessCard from "./QuickAccessCard";
 import Title from "./Title";
 
-function QuickAccess() {
-  const [isAddTransaction, setAddTransactionIsOpen] = useState(false);
+interface Props {
+  showAlert(message: string, type: string): void;
+}
 
-  function openAddTransaction() {
-    setAddTransactionIsOpen(true);
-  }
-
+function QuickAccess(props: Props) {
   return (
     <div>
       <Title text="Quick Access" />
@@ -18,11 +16,13 @@ function QuickAccess() {
           text="New transaction"
           iconName="wallet"
           isAddTransaction={true}
+          showAlert={props.showAlert}
         />
         <QuickAccessCard
           text="Import file"
           iconName="upload_file"
-          isAddTransaction={true}
+          isAddTransaction={false}
+          showAlert={props.showAlert}
         />
       </div>
     </div>
