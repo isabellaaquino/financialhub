@@ -175,7 +175,7 @@ function Home(props: Props) {
                 )}
               </div>
               <div className="rounded-md pt-5 py-10">
-                <QuickAccess />
+                <QuickAccess showAlert={showAlert}/>
               </div>
             </div>
 

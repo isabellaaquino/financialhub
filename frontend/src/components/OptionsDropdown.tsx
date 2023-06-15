@@ -9,11 +9,11 @@ interface Props {
 
 export default function OptionsDropdown(props: Props) {
   return (
-    <div className="w-18">
+    <div>
       <Listbox value={props.selectedType} onChange={props.handleType}>
         <div className="relative">  
           {/* border border-gray-300 w-full rounded-md h-8 px-4 mb-2 text-sm */}
-          <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left border border-gray-300 focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
+          <Listbox.Button className="relative w-full cursor-default rounded-lg text-white bg-black-300 py-2 pl-3 pr-10 text-left border border-gray-300 focus:outline-none focus-visible:border-green-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-green-300 sm:text-sm">
             <span className="block text-center">
               {props.selectedType.toUpperCase()}
             </span>
@@ -29,13 +29,13 @@ export default function OptionsDropdown(props: Props) {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Listbox.Options className="z-10 absolute mt-1 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+            <Listbox.Options className="z-10 absolute mt-1 overflow-auto rounded-md bg-black-300 py-1 text-base shadow-lg ring-1 ring-black-400 ring-opacity-5 focus:outline-none sm:text-sm">
               {Object.keys(props.options).map((type, i) => (
                 <Listbox.Option
                   key={i}
                   className={({ active }) =>
                     ` relative cursor-pointer select-none py-2 pl-6 pr-6 ${
-                      active ? "bg-amber-100 text-amber-900" : "text-gray-900"
+                      active ? "bg-green-500 text-white" : "text-white"
                     }`
                   }
                   value={type}

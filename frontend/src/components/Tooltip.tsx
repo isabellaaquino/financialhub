@@ -20,14 +20,14 @@ export default function ToolTip(props: Props) {
 
   return (
     <span
-      className="material-symbols-rounded text-xs opacity-40 inline-block relative ml-0.5"
+      className="material-symbols-rounded text-md opacity-60 inline-block relative ml-1"
       onMouseOver={showTip}
       onMouseOut={hideTip}
     >
       help
       {active && (
         <div
-          className={`Tooltip-Tip ${props.direction || "top"}`}
+          className={`ml-8 Tooltip-Tip ${props.direction || "top"}`}
         >
           {props.content}
         </div>
