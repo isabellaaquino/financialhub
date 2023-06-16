@@ -3,7 +3,7 @@
 
 This repository contains a finance management web application built with **Django** and **React.js**. The main goal of this project is to ~~make myself a finance tracker because i'm terrible at saving money~~ provide a user-friendly solution for managing your personal finances, tracking transactions, and gaining insights into your income and expenses.
 
-While we don't host this on a cloud solution, you can try this app following the steps described [here](#installation-).
+While we don't host this on a cloud solution, you can try this app following the steps described [here](#installation-%EF%B8%8F).
 
 ## Features 🚀
 
@@ -70,6 +70,8 @@ Although this project is a work in progress (and will be for a long time), our k
 
 Another thing worth being said is that we are both undergrad compsci students, and we try to allocate time to work on this whenever we can. Along with that, we also want to add that we have an initial UML modelling made on Visual Paradigm that is being made for studying purposes and can be accessed through `backend/modelling`.
 
+Last but not least, stars are appreciated! 🤩
+
 ## Usage 💡
 
 Once the application is up and running, you can perform the following tasks:
@@ -92,5 +94,5 @@ This project will be soon licensed under the MIT License. You are free to use, m
 
 ## Authors ✍️
 
-This project is thought, planned and implemented by @isabellaaquino & @pedrodellolio
+This project is thought, planned and implemented by [Isabella Aquino](https://github.com/isabellaaquino) (backend heavy) & [Pedro Dell'Olio](https://github.com/pedrodellolio) (frontend heavy)
 
