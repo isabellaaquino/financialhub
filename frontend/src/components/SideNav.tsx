@@ -1,37 +1,37 @@
 import { Link } from "react-router-dom";
 import ItemNav from "./ItemNav";
 import LabelNav from "./LabelNav";
-import Title from "./Title";
+import { useAuth } from "../hooks/useAuth";
 
-interface Props {
-  state: boolean;
-  handleState: (state: boolean) => void;
-}
+function SideNav() {
+  const { isSideNavOpen, setIsSideNavOpen } = useAuth();
 
-function SideNav(props: Props) {
   function handleSideNav() {
-    props.handleState(!props.state);
+    setIsSideNavOpen(!isSideNavOpen);
   }
 
   return (
-    <div className="SideNav fixed z-20">
+    <div className="SideNav fixed bottom-0 lg:bottom-auto z-30">
       <nav
-        style={{
-          width: !props.state ? "56px" : "250px",
-          paddingLeft: !props.state ? 0 : 30,
-          alignItems: !props.state ? "center" : "start",
-        }}
-        className={`h-screen bg-black-400 justify-between flex flex-col items-start py-10`}
+        className={`${
+          !isSideNavOpen
+            ? "lg:w-16 pl-0 items-center"
+            : "lg:w-64 pl-8 items-start"
+        } w-screen lg:h-screen h-14 bottom-0 bg-black-400 justify-between flex flex-row lg:flex-col items-start py-6`}
       >
         <div
-          className={
-            "flex flex-col text-white" + !props.state
-              ? "items-center w-full"
-              : "items-start"
+          className={`flex flex-row w-full lg:flex-col text-white" ${
+            !isSideNavOpen ? "items-center w-full" : "items-start"
           }
+              `}
         >
-          <Link to="/" className={`text-white font-medium font-logo text-2xl ${!props.state && "text-center"}`}>
-            {props.state ? (
+          <Link
+            to="/"
+            className={`text-white font-medium font-logo text-2xl mx-5 lg:mx-0 ${
+              !isSideNavOpen && "text-center"
+            }`}
+          >
+            {isSideNavOpen ? (
               <h1>
                 Financial<strong className="text-green-500">hub</strong>
               </h1>
@@ -41,34 +41,26 @@ function SideNav(props: Props) {
               </h1>
             )}
           </Link>
-          <div className="mt-14">
-            <LabelNav sideNavState={props.state} text="Navigation" />
-            <ItemNav
-              to="/"
-              text="Dashboard"
-              sideNavState={props.state}
-              handleState={props.handleState}
-              iconName="leaderboard"
-            />
+          <div className="flex flex-row w-full lg:flex-col gap-5">
+            <div className="lg:mt-10 flex flex-row lg:flex-col gap-3 lg:gap-0">
+              <LabelNav text="Navigation" />
+              <ItemNav to="/" text="Dashboard" iconName="leaderboard" />
 
-            <LabelNav sideNavState={props.state} text="Manage" />
-            <ItemNav
-              to="/transactions"
-              text="Transactions"
-              sideNavState={props.state}
-              handleState={props.handleState}
-              iconName="receipt"
-            />
-            <ItemNav
-              to="/saving-plans"
-              text="Saving Plans"
-              sideNavState={props.state}
-              handleState={props.handleState}
-              iconName="savings"
-            />
+              <LabelNav text="Manage" />
+              <ItemNav
+                to="/transactions"
+                text="Transactions"
+                iconName="receipt"
+              />
+              <ItemNav
+                to="/saving-plans"
+                text="Saving Plans"
+                iconName="savings"
+              />
+            </div>
           </div>
         </div>
-        <div>
+        <div className="hidden lg:block mt-2 px-8 lg:px-0 lg:mt-0">
           <a onClick={handleSideNav} className="text-white cursor-pointer">
             <span className="material-symbols-rounded text-3xl">
               exit_to_app

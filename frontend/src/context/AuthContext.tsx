@@ -7,6 +7,8 @@ import { UserInput } from "../routes/SignUp";
 
 interface AuthContextData {
   user: User | null;
+  isSideNavOpen: boolean;
+  setIsSideNavOpen: React.Dispatch<React.SetStateAction<boolean>>;
   SignIn(email: string, password: string): Promise<void>;
   SignUp(user: UserInput): Promise<string | null>;
   SignOut(): void;
@@ -24,6 +26,7 @@ interface AuthTokens {
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 export const AuthProvider = ({ children }: Props) => {
+  let [isSideNavOpen, setIsSideNavOpen] = useState(false);
   let [loading, setLoading] = useState(true);
   let [authTokens, setAuthTokens] = useState<AuthTokens | null>(() =>
     localStorage.getItem("authTokens")
@@ -83,6 +86,8 @@ export const AuthProvider = ({ children }: Props) => {
     <AuthContext.Provider
       value={{
         user: loggedUser,
+        isSideNavOpen,
+        setIsSideNavOpen,
         SignIn,
         SignUp,
         SignOut,
