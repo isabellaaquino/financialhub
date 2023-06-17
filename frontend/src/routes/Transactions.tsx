@@ -63,12 +63,12 @@ function Transactions() {
   ) => {
     event.preventDefault();
     const transactionId = transactions?.at(index)?.id;
-    if (transactionId) {
+    if (transactionId && authTokens) {
       event.preventDefault();
       setConfirmModalOpen(false);
       const response: { [key: string]: string } | null =
         await transactionService
-          .deleteTransactionAPI(authTokens!.access, transactionId)
+          .deleteTransactionAPI(authTokens.access, transactionId)
           .then((response) => {
             searchTransactions();
             return response;
@@ -92,12 +92,13 @@ function Transactions() {
   }
 
   function searchTransactions() {
-    transactionService
-      .getUserLoggedTransactions(authTokens!.access, selectedYear)
-      .then((transactions) => {
-        setTransactions(transactions);
-        setFilteredTransactions(transactions);
-      });
+    if (authTokens)
+      transactionService
+        .getUserLoggedTransactions(authTokens.access, selectedYear)
+        .then((transactions) => {
+          setTransactions(transactions);
+          setFilteredTransactions(transactions);
+        });
   }
 
   useEffect(() => {

@@ -54,15 +54,17 @@ function Home() {
     // user is not logged out when token expires
     // fetch data using Promise.all to get all in parallel
 
-    walletService.getUserLoggedWallet(authTokens!.access).then((wallet) => {
-      setCurrentBalance(Number(wallet!.current_amount));
-    });
-
-    transactionService
-      .getUserLoggedTransactions(authTokens!.access, dateService.currentYear())
-      .then((transactions) => {
-        setTransactions(transactions!);
+    if (authTokens) {
+      walletService.getUserLoggedWallet(authTokens.access).then((wallet) => {
+        setCurrentBalance(Number(wallet!.current_amount));
       });
+
+      transactionService
+        .getUserLoggedTransactions(authTokens.access, dateService.currentYear())
+        .then((transactions) => {
+          setTransactions(transactions!);
+        });
+    }
 
     // const walletPromise = walletService.getUserLoggedWallet(authTokens!.access);
     // const transactionPromise = transactionService.getUserLoggedTransactions(
@@ -98,7 +100,9 @@ function Home() {
       {
         <div className="w-full">
           <main
-            className={`${isSideNavOpen ? "ml-72 mr-8" : "ml-24 mr-8"} `}
+            className={`${
+              isSideNavOpen ? "ml-72 mr-8" : "ml-8 md:ml-22 lg:ml-24  md: mr-8"
+            }`}
             // style={{
             //   margin: `${isSideNavOpen ? "0 30px 0 280px" : "0 30px 0 90px"}`,
             // }}
