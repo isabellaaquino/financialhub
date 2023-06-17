@@ -3,22 +3,25 @@ import dateService from "../api/services/DateService";
 import transactionService from "../api/services/TransactionService";
 import SideNav from "../components/SideNav";
 import TopNav from "../components/TopNav";
-import YearDropdown from "../components/YearDropdown";
 import { useAuth } from "../hooks/useAuth";
-import { Transaction, TypeOption } from "../models/Transaction";
+import { Transaction } from "../models/Transaction";
 import ConfirmModal from "../components/ConfirmModal";
 import { Alert, AlertType } from "../components/Alert";
-import ModalLabel from "../components/ModalLabel";
 import ToolTip from "../components/Tooltip";
-import { capitalizeStr } from "../components/utils";
+import OptionsDropdown from "../components/OptionsDropdown";
+import { formatValue } from "../utils/utils";
+import Title from "../components/Title";
+import { useViewPort } from "../hooks/useViewPort";
+
+const WINDOW_BREAKPOINT = 1024;
 
 function Transactions() {
-  const { authTokens } = useAuth();
+  const { authTokens, isSideNavOpen, setIsSideNavOpen } = useAuth();
+  const { width } = useViewPort();
 
   const [isAlertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState<AlertType>(AlertType.WARNING);
-
   const [transactions, setTransactions] = useState<Transaction[] | null>();
   const [filteredTransactions, setFilteredTransactions] = useState<
     Transaction[] | null
@@ -26,14 +29,9 @@ function Transactions() {
   const [selectedYear, setSelectedYear] = useState<number>(
     dateService.currentYear()
   );
-  const [isSideNavOpen, setIsSideNavOpen] = useState(true);
   const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] =
     useState<Transaction | null>(null);
-
-  function handleSideNav(state: boolean) {
-    setIsSideNavOpen(state);
-  }
 
   function handleRowClick(index: number) {
     const transaction = transactions?.at(index);
@@ -106,6 +104,10 @@ function Transactions() {
     searchTransactions();
   }, []);
 
+  useEffect(() => {
+    if (width < WINDOW_BREAKPOINT) setIsSideNavOpen(false);
+  }, [width]);
+
   return (
     <div className="Transactions">
       <Alert
@@ -114,29 +116,33 @@ function Transactions() {
         type={alertType}
         setAlertOpen={setAlertOpen}
       />
-      <SideNav state={isSideNavOpen} handleState={handleSideNav} />
+      <SideNav />
       <TopNav />
-      <div className="flex flex-row divide-x">
+      <div className="flex flex-row divide-x divide-black-400">
         <div
-          className="py-24"
-          style={{ marginLeft: !isSideNavOpen ? "120px" : "370px" }}
+          className={`py-8 w-full 2xl:w-[60%] z-20 ${
+            isSideNavOpen ? "ml-72 mr-8" : "ml-8 md:ml-22 lg:ml-24  md: mr-8"
+          }`}
         >
-          {/* <Title text="Latest Transactions" /> */}
+          <Title text="Latest Transactions" />
           <form
             onSubmit={(e) => handleFormSubmit(e)}
-            className="flex items-center gap-4"
+            className="flex items-center gap-4 w-full"
           >
             <input
-              className="border border-gray-300 w-full rounded-md py-2 pl-3 pr-10 text-sm"
+              className="w-full text-sm text-white pl-3 pr-5 py-2 rounded-md bg-black-300 focus:outline-none focus:ring-2 focus:ring-green-500"
               onChange={(e) => handleSearchChange(e)}
               placeholder="Search for transaction"
               type="text"
             />
-            <YearDropdown
-              selectedYear={selectedYear}
-              handleYear={setSelectedYear}
+
+            <OptionsDropdown
+              selectedValue={selectedYear}
+              handleValueChange={setSelectedYear}
+              options={[2021, 2022, 2023]}
             />
-            <button className="bg-blue-700 p-2 text-white rounded-md text-sm">
+
+            <button className="bg-green-500 p-2 text-white rounded-md text-sm">
               Search
             </button>
             <ConfirmModal
@@ -147,120 +153,110 @@ function Transactions() {
             />
           </form>
           {filteredTransactions && filteredTransactions.length > 0 ? (
-            <table className="table-auto divide-y w-full text-left text-sm mt-5">
-              <thead className="">
-                <tr className="text-gray-600">
-                  <th className="text-md font-bold w-52 p-2">Name</th>
-                  <th className="text-md font-bold w-52">Date</th>
-                  <th className="text-md font-bold w-52">Type</th>
-                  <th className="text-md font-bold w-52">Amount</th>
-                  <th className="text-md font-bold w-52"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {filteredTransactions &&
-                  filteredTransactions.map((l, i) => {
-                    return (
-                      <tr
-                        onClick={() => handleRowClick(i)}
-                        key={i}
-                        className="hover:bg-blue-100 rounded-md cursor-pointer"
-                      >
-                        <td className="p-2 py-3">{l.title}</td>
-                        <td className="text-gray-500">
-                          {dateService.formatDateValue(l.date.toLocaleString())}
-                        </td>
-                        <td className="text-gray-500">
-                          <span
-                            className={
-                              l.type === TypeOption.EXPENSE
-                                ? `bg-red-100 p-1 rounded-md text-red-400 font-medium`
-                                : l.type === TypeOption.TRANSFER
-                                ? `bg-purple-100 p-1 rounded-md text-purple-400 font-medium`
-                                : `bg-green-100 p-1 rounded-md text-green-400 font-medium`
-                            }
-                          >
-                            {l.type}
+            <div className="flex flex-col mt-5">
+              {filteredTransactions &&
+                filteredTransactions.map((t, i) => {
+                  return (
+                    <div
+                      onClick={() => handleRowClick(i)}
+                      key={t.id}
+                      className="flex text-sm flex-row justify-between items-center w-full py-5 px-5 text-white border-b border-black-400 cursor-pointer hover:bg-black-450"
+                    >
+                      <div className="flex flex-row gap-5 w-[20%]">
+                        <div>
+                          <div className="rounded-full bg-gray-300 w-12 p-3 inline-flex justify-center items-center">
+                            <span className="text-green-500 text-md">
+                              {t.title.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex flex-col">
+                          <p>{t.title}</p>
+                          <span className="text-gray-500">
+                            {t.type.toLowerCase()}
                           </span>
-                        </td>
-                        <td>${Number(l.value).toFixed(2)}</td>
-                        <td data-transaction-pk={l.id}>
-                          <span
-                            onClick={(e) => openConfirmModal(e, i)}
-                            className="material-symbols-rounded opacity-50"
-                          >
-                            delete
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-              </tbody>
-            </table>
+                        </div>
+                      </div>
+                      <div className="w-auto text-gray-200 hidden md:block">
+                        {dateService.formatDateValue(t.date)}
+                      </div>
+                      <div className="w-[20%] text-right">
+                        {formatValue(t.value, 10_000)}
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
           ) : (
             <p className="text-center text-gray-500 text-sm my-5">
               No data found
             </p>
           )}
         </div>
-        <div className="max-w-2xl w-[768px] py-24 fixed right-0 h-full">
+        <div
+          className={`md:py-14 fixed right-0 ${
+            selectedTransaction && isSideNavOpen ? "lg:left-64" : "lg:left-16"
+          } ${selectedTransaction ? "left-0" : ""} 2xl:left-auto h-full ${
+            selectedTransaction && "z-20  bg-black-400"
+          }`}
+        >
           {selectedTransaction && (
             <div className="overflow-hidden">
               <div className="px-4 py-5 sm:px-6">
-                <h3 className="text-lg font-medium leading-6 text-gray-900">
+                <h3 className="text-lg font-medium leading-6 text-white">
                   Transaction Details
                 </h3>
                 {/* <p className="mt-1 max-w-2xl text-sm text-gray-500">
                   Personal details and application.
                 </p> */}
               </div>
-              <div className="border-t border-gray-200">
+              <div className="border-t border-black-400 text-white">
                 <dl>
-                  <div className="bg-blue-100 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                    <dt className="text-sm font-medium text-gray-500">Title</dt>
-                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                  <div className="bg-black-500 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt className="text-sm font-medium text-gray-200">Title</dt>
+                    <dd className="mt-1 text-sm text-white sm:col-span-2 sm:mt-0">
                       {selectedTransaction.title}
                     </dd>
                   </div>
-                  <div className="bg-blue-100 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                    <dt className="text-sm font-medium text-gray-500">
+                  <div className="bg-black-400 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt className="text-sm font-medium text-gray-200">
                       Amount
                     </dt>
-                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                      ${selectedTransaction.value}
+                    <dd className="mt-1 text-sm text-white sm:col-span-2 sm:mt-0">
+                      {formatValue(selectedTransaction.value, 10_000)}
                     </dd>
                   </div>
-                  <div className="bg-black-400 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                    <dt className="text-sm font-medium text-gray-500">To</dt>
-                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                  <div className="bg-black-500 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt className="text-sm font-medium text-gray-200">To</dt>
+                    <dd className="mt-1 text-sm text-white sm:col-span-2 sm:mt-0">
                       {selectedTransaction?.to_user}
                     </dd>
                   </div>
-                  <div className="bg-blue-100 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                    <dt className="text-sm font-medium text-gray-500">Date</dt>
-                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                  <div className="bg-black-400 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt className="text-sm font-medium text-gray-200">Date</dt>
+                    <dd className="mt-1 text-sm text-white sm:col-span-2 sm:mt-0">
                       {new Date(selectedTransaction.date).toLocaleString()}
                     </dd>
                   </div>
-                  <div className="bg-black-400 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                    <dt className="text-sm font-medium text-gray-500">Type</dt>
-                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                  <div className="bg-black-500 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt className="text-sm font-medium text-gray-200">Type</dt>
+                    <dd className="mt-1 text-sm text-white sm:col-span-2 sm:mt-0">
                       {selectedTransaction.type}
                     </dd>
                   </div>
-                  <div className="bg-blue-100 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                    <dt className="text-sm font-medium text-gray-500">
+                  <div className="bg-black-400 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt className="text-sm font-medium text-gray-200">
                       Description
                     </dt>
-                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                    <dd className="mt-1 text-sm text-white sm:col-span-2 sm:mt-0">
                       {selectedTransaction?.description}
                     </dd>
                   </div>
-                  <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                    <dt className="text-sm font-medium text-gray-500">
+                  <div className="bg-black-500 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt className="text-sm font-medium text-gray-200">
                       Recurrent
                     </dt>
-                    <dd className="flex flex-row align-middle gap-1 mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                    <dd className="flex flex-row align-middle gap-1 mt-1 text-sm text-gray-200 sm:col-span-2 sm:mt-0">
                       <input
                         type="checkbox"
                         disabled

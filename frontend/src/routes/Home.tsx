@@ -1,33 +1,29 @@
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import dateService from "../api/services/DateService";
 import transactionService from "../api/services/TransactionService";
 import walletService from "../api/services/WalletService";
 import CurrentMonthChart from "../components/charts/CurrentMonthChart";
-import Options from "../components/charts/Options";
 import ProfileChart from "../components/charts/ProfileChart";
 import EditBalance from "../components/EditBalance";
 import LatestTransactions from "../components/LatestTransactions";
 import QuickAccess from "../components/QuickAccess";
-import Title from "../components/Title";
 import { useAuth } from "../hooks/useAuth";
 import { SummaryOption } from "../models/Summary";
 import { Transaction } from "../models/Transaction";
 import { Alert, AlertType } from "../components/Alert";
 import { getAlertType } from "./Transactions";
+import { formatValue } from "../utils/utils";
+import { Wallet } from "../models/Wallet";
 
-interface Props {
-  isSideNavOpen: boolean;
-}
+function Home() {
+  const { authTokens, isSideNavOpen, setIsSideNavOpen } = useAuth();
 
-function Home(props: Props) {
-  const { authTokens } = useAuth();
-  const [currentBalance, setCurrentBalance] = useState<number>(-1.0);
+  const [currentBalance, setCurrentBalance] = useState<number>(5000000);
   const [transactions, setTransactions] = useState<Transaction[] | null>(null);
   const [incomeBalance, setIncomeBalance] = useState<number>(1000.2);
   const [debtBalance, setDebtBalance] = useState<number>(2000.5);
-  const [userHasSavings, setUserHasSavings] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isEditingBalance, setIsEditingBalance] = useState(false);
   const [summaryOptionSelected, setSummaryOptionSelected] =
     useState<SummaryOption>(SummaryOption.Month);
 
@@ -40,6 +36,18 @@ function Home(props: Props) {
     setAlertType(getAlertType(type));
     setAlertOpen(true);
     setTimeout(() => setAlertOpen(false), 4000);
+  }
+
+  function handleBalanceSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.target as HTMLFormElement;
+    const input = form.elements.namedItem("value") as HTMLInputElement;
+
+    const wallet: Wallet = {
+      current_amount: Number(input.value),
+    };
+
+    if (authTokens) walletService.updateWallet(authTokens.access, wallet);
   }
 
   useEffect(() => {
@@ -79,19 +87,8 @@ function Home(props: Props) {
     // });
   }, []);
 
-  function openBalanceEditor() {
-    setIsOpen(true);
-  }
-  console.log(transactions);
-
   return (
     <div className="App">
-      <EditBalance
-        isOpen={isOpen}
-        handleState={setIsOpen}
-        currentBalance={currentBalance}
-        handleCurrentBalance={setCurrentBalance}
-      />
       <Alert
         isOpen={isAlertOpen}
         message={alertMessage}
@@ -101,12 +98,10 @@ function Home(props: Props) {
       {
         <div className="w-full">
           <main
-            style={{
-              margin: `${
-                props.isSideNavOpen ? "0 30px 0 280px" : "0 30px 0 90px"
-              }`,
-            }}
-            className="ml-20 mr-6"
+            className={`${isSideNavOpen ? "ml-72 mr-8" : "ml-24 mr-8"} `}
+            // style={{
+            //   margin: `${isSideNavOpen ? "0 30px 0 280px" : "0 30px 0 90px"}`,
+            // }}
           >
             <div className="w-full">
               <h1 className="text-4xl font-semibold text-white">Overview</h1>
@@ -117,19 +112,36 @@ function Home(props: Props) {
                       <div className="CurrentBalance bg-black-400 rounded-md shadow-sm text-left p-10">
                         <h2 className="text-md text-green-500">Balance</h2>
                         <div className="flex items-center gap-4">
-                          <span className="font-medium text-4xl text-white">
-                            {" "}
-                            {currentBalance.toLocaleString("en-US", {
-                              style: "currency",
-                              currency: "USD",
-                            })}
-                          </span>
+                          {!isEditingBalance ? (
+                            <span className="font-medium text-4xl text-white w-48 h-14 mt-1">
+                              {formatValue(currentBalance, 10_000)}
+                            </span>
+                          ) : (
+                            <form
+                              onSubmit={handleBalanceSubmit}
+                              id="editBalance"
+                            >
+                              <input
+                                className="pl-4 w-48 h-14 pr-5 mt-1 text-3xl text-white rounded-md bg-black-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                type="text"
+                                name="value"
+                                placeholder="0.00"
+                              />
+                              <button type="submit" className="cursor-pointer">
+                                <span className="material-symbols-rounded text-3xl text-gray-200 p-1 rounded-md hover:bg-gray-300 hover:text-white">
+                                  done
+                                </span>
+                              </button>
+                            </form>
+                          )}
                           <button
-                            onClick={openBalanceEditor}
+                            onClick={() =>
+                              setIsEditingBalance(!isEditingBalance)
+                            }
                             className="cursor-pointer"
                           >
-                            <span className="material-symbols-rounded text-lg text-gray-700 p-1 rounded-md hover:bg-blue-200">
-                              edit
+                            <span className="material-symbols-rounded text-3xl text-gray-200 p-1 rounded-md hover:bg-gray-300 hover:text-white">
+                              {isEditingBalance ? "cancel" : "edit_note"}
                             </span>
                           </button>
                         </div>
@@ -175,7 +187,7 @@ function Home(props: Props) {
                 )}
               </div>
               <div className="rounded-md pt-5 py-10">
-                <QuickAccess showAlert={showAlert}/>
+                <QuickAccess showAlert={showAlert} />
               </div>
             </div>
 
@@ -183,10 +195,7 @@ function Home(props: Props) {
 
             <div className="flex flex-col lg:flex-row mt-5 gap-5">
               <div className="bg-black-400 p-10 rounded-md lg:w-2/3">
-                <LatestTransactions
-                  isSideNavOpen={props.isSideNavOpen}
-                  data={transactions}
-                />
+                <LatestTransactions data={transactions} />
                 <Link to={"/transactions"}>
                   <button className="mt-5 w-full bg-green-500 rounded-md p-2 text-center text-sm text-white hover:bg-green-600">
                     Show more

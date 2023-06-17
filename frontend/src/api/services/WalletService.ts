@@ -18,20 +18,21 @@ class WalletService {
     }
   }
 
-  // async updateWallet(accessToken: string, wallet: Wallet) {
-  //   try {
-  //     const response = await api.put("/wallet/", {
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${accessToken}`,
-  //       },
-  //     });
-  //     const data = await response.data;
-  //     return data;
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }
+  async updateWallet(accessToken: string, wallet: Wallet) {
+    console.log(accessToken);
+    try {
+      const response = await api.put("/wallet/", {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      const data = await response.data;
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
 }
 
 const walletService = new WalletService();

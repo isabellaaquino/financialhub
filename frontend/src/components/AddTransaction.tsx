@@ -225,11 +225,9 @@ export default function AddTransaction(props: Props) {
                                 onChange={handleInputChange}
                               />
                               <OptionsDropdown
-                                selectedType={selectedDuration}
-                                handleType={(e: DurationOption) =>
-                                  handleDurationChange(e)
-                                }
-                                options={DurationOption}
+                                selectedValue={selectedDuration}
+                                handleValueChange={handleDurationChange}
+                                options={Object.values(DurationOption)}
                               />
                             </div>
                           </div>
