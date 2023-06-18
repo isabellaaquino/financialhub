@@ -1,14 +1,16 @@
+import { useAuth } from "../hooks/useAuth";
+
 interface Props {
   text: string;
-  sideNavState: boolean;
 }
 
 function LabelNav(props: Props) {
+  const { isSideNavOpen } = useAuth();
   return (
     <p
       className={`${
-        !props.sideNavState && "hidden"
-      } text-gray-100 mt-8 text-xs uppercase`}
+        !isSideNavOpen && "hidden"
+      } text-gray-100 mt-5 text-xs uppercase`}
     >
       {props.text}
     </p>

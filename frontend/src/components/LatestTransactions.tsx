@@ -2,11 +2,11 @@ import { useState } from "react";
 import { Transaction, TypeOption } from "../models/Transaction";
 import Title from "./Title";
 import dateService from "../api/services/DateService";
+import { useAuth } from "../hooks/useAuth";
 
 const MAX_ROWS = 5;
 interface Props {
   data: Transaction[] | null;
-  isSideNavOpen: boolean;
 }
 
 function LatestTransactions(props: Props) {
@@ -23,7 +23,9 @@ function LatestTransactions(props: Props) {
           <thead className="">
             <tr className="text-gray-200 bg-gray-300">
               <th className="text-sm font-normal w-52 p-2">Name</th>
-              <th className="text-sm font-normal w-52 hidden sm:block py-2">Date</th>
+              <th className="text-sm font-normal w-52 hidden sm:block py-2">
+                Date
+              </th>
               <th className="text-sm font-normal w-52 py-2">Type</th>
               <th className="text-sm font-normal w-52 py-2">Amount</th>
             </tr>

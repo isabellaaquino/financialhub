@@ -1,7 +1,6 @@
 import { Menu, Transition } from "@headlessui/react";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment } from "react";
 import { useAuth } from "../hooks/useAuth";
-import avatar from "../img/img_avatar.png";
 
 export default function UserDropdown() {
   const { user, SignOut } = useAuth();
@@ -10,7 +9,7 @@ export default function UserDropdown() {
     <div className="w-56 text-right z-10">
       <Menu as="div" className="relative inline-block text-left">
         <div className="flex flex-row items-center">
-          <div className="rounded-full bg-gray-300 p-3 inline-flex items-center">
+          <div className="rounded-full bg-gray-300 p-4 inline-flex items-center">
             <span className="text-green-500 text-md">
               {user &&
                 user.first_name.charAt(0).toUpperCase() +

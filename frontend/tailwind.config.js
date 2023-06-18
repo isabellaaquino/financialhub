@@ -3,6 +3,9 @@ module.exports = {
   content: ["./src/**/*.tsx"],
   theme: {
     extend: {
+      screens: {
+        "2xl": "1595px",
+      },
       fontFamily: {
         logo: ["Poppins", "ui-sans-serif", "system-ui"],
       },
@@ -24,6 +27,7 @@ module.exports = {
         black: {
           300: "#363a3e",
           400: "#272b2f",
+          450: "#1f2326",
           500: "#1a1d20",
         },
         blue: {
