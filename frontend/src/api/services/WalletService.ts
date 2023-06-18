@@ -1,3 +1,4 @@
+import { Wallet } from "../../models/Wallet";
 import { api } from "./Api";
 
 class WalletService {
@@ -9,10 +10,16 @@ class WalletService {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      const data = await response.data;
+      const data = (await response.data) as Wallet;
+      console.log(data);
       return data;
     } catch (error) {
       console.log(error);
+      return {
+        current_amount: 0,
+        monthly_expenses: 0,
+        monthly_incomes: 0,
+      } as Wallet;
     }
   }
 

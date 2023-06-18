@@ -1,27 +1,20 @@
 import { useEffect, useState } from "react";
 import dateService from "../api/services/DateService";
 import transactionService from "../api/services/TransactionService";
-import SideNav from "../components/SideNav";
-import TopNav from "../components/TopNav";
 import { useAuth } from "../hooks/useAuth";
 import { Transaction } from "../models/Transaction";
 import ConfirmModal from "../components/ConfirmModal";
-import { Alert, AlertType } from "../components/Alert";
 import ToolTip from "../components/Tooltip";
 import OptionsDropdown from "../components/OptionsDropdown";
 import { formatValue } from "../utils/utils";
 import Title from "../components/Title";
-import { useViewPort } from "../hooks/useViewPort";
-
-const WINDOW_BREAKPOINT = 1024;
+import { useOutletContext } from "react-router-dom";
 
 function Transactions() {
-  const { authTokens, isSideNavOpen, setIsSideNavOpen } = useAuth();
-  const { width } = useViewPort();
+  const { authTokens, isSideNavOpen } = useAuth();
+  const showAlert: (message: string, type: string) => void = useOutletContext();
 
-  const [isAlertOpen, setAlertOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertType, setAlertType] = useState<AlertType>(AlertType.WARNING);
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [transactions, setTransactions] = useState<Transaction[] | null>();
   const [filteredTransactions, setFilteredTransactions] = useState<
     Transaction[] | null
@@ -33,6 +26,10 @@ function Transactions() {
   const [selectedTransaction, setSelectedTransaction] =
     useState<Transaction | null>(null);
 
+  useEffect(() => {
+    searchTransactions();
+  }, []);
+
   function handleRowClick(index: number) {
     const transaction = transactions?.at(index);
     transaction
@@ -40,21 +37,12 @@ function Transactions() {
       : console.log("Error fetching transaction");
   }
 
-  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
-
   function openConfirmModal(
     event: React.MouseEvent<HTMLSpanElement, MouseEvent>,
     index: number
   ) {
     setSelectedIndex(index);
     setConfirmModalOpen(true);
-  }
-
-  function showAlert(message: string, type: string) {
-    setAlertMessage(message);
-    setAlertType(getAlertType(type));
-    setAlertOpen(true);
-    setTimeout(() => setAlertOpen(false), 4000);
   }
 
   const handleDeleteTransaction = async (
@@ -101,24 +89,8 @@ function Transactions() {
         });
   }
 
-  useEffect(() => {
-    searchTransactions();
-  }, []);
-
-  useEffect(() => {
-    if (width < WINDOW_BREAKPOINT) setIsSideNavOpen(false);
-  }, [width]);
-
   return (
     <div className="Transactions">
-      <Alert
-        isOpen={isAlertOpen}
-        message={alertMessage}
-        type={alertType}
-        setAlertOpen={setAlertOpen}
-      />
-      <SideNav />
-      <TopNav />
       <div className="flex flex-row divide-x divide-black-400">
         <div
           className={`py-8 w-full 2xl:w-[60%] z-20 ${
@@ -285,10 +257,5 @@ function Transactions() {
     </div>
   );
 }
-
-export const getAlertType = (success: string) => {
-  if (!!success) return AlertType.SUCCESS;
-  else return AlertType.ERROR;
-};
 
 export default Transactions;
