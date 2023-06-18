@@ -5,8 +5,12 @@ from django.http import JsonResponse
 def custom_server_error_response(error_message: str = '', status_code=500):
     if 500 <= status_code < 600:
         return JsonResponse({'success': False, 'message': error_message}, status=status_code)
+    raise Exception # TODO: implement custom exceptions
 
 
+def custom_user_error_response(error_message: str = '', status_code=400):
+    if 400 <= status_code < 500:
+        return JsonResponse({'success': False, 'message': error_message}, status=status_code)
     raise Exception # TODO: implement custom exceptions
 
 

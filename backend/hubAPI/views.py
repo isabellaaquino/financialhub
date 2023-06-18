@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.db.models import QuerySet
-from .utils import custom_server_error_response, custom_success_response
+from .utils import custom_server_error_response, custom_success_response, custom_user_error_response
 from hubModels.serializers import MyTokenObtainPairSerializer
 from hubModels.models import HubUser, Wallet, Transaction
 from rest_framework.response import Response
@@ -17,7 +17,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 
-class TransactionDetail(APIView):
+class TransactionAPIView(APIView):
     permission_classes = (IsAuthenticated, )
     serializer_class = TransactionSerializer
 
@@ -47,6 +47,32 @@ class TransactionDetail(APIView):
         return custom_success_response("Transaction deleted with success!")
 
 
+class WalletAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = WalletSerializer
+
+    def get(self, request):
+        user: HubUser = request.user
+
+        wallet = user.get_wallet()
+        wallet_serialized = WalletSerializer(wallet)
+
+        return Response(wallet_serialized.data)
+
+    def put(self, request):
+        user: HubUser = request.user
+        wallet = user.get_wallet()
+
+        try:
+            value = float(request.data)
+        except (ValueError, TypeError):
+            return custom_user_error_response("Entered value needs to be a number. Please try again.", 422)
+
+        wallet.set_balance(value)
+
+        return custom_success_response("Wallet's balance successfully updated!")
+
+
 @api_view(['GET'])
 def get_routes(request):
     routes = [
@@ -61,17 +87,6 @@ def get_routes(request):
     ]
 
     return Response(routes)
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_wallet(request):
-    user: HubUser = request.user
-
-    wallet = user.get_wallet()
-    wallet_serialized = WalletSerializer(wallet)
-
-    return Response(wallet_serialized.data)
 
 
 @api_view(['POST'])
