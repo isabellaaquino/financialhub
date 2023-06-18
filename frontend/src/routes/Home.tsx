@@ -1,23 +1,24 @@
 import { FormEvent, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 import dateService from "../api/services/DateService";
 import transactionService from "../api/services/TransactionService";
 import walletService from "../api/services/WalletService";
 import CurrentMonthChart from "../components/charts/CurrentMonthChart";
 import ProfileChart from "../components/charts/ProfileChart";
-import EditBalance from "../components/EditBalance";
 import LatestTransactions from "../components/LatestTransactions";
 import QuickAccess from "../components/QuickAccess";
 import { useAuth } from "../hooks/useAuth";
 import { SummaryOption } from "../models/Summary";
 import { Transaction } from "../models/Transaction";
-import { Alert, AlertType } from "../components/Alert";
-import { getAlertType } from "./Transactions";
 import { formatValue } from "../utils/utils";
 import { Wallet } from "../models/Wallet";
 
 function Home() {
-  const { authTokens, isSideNavOpen, setIsSideNavOpen } = useAuth();
+  const { authTokens, isSideNavOpen } = useAuth();
+  const showAlert = useOutletContext() as (
+    message: string,
+    type: string
+  ) => void;
 
   const [currentBalance, setCurrentBalance] = useState<number>(5000000);
   const [transactions, setTransactions] = useState<Transaction[] | null>(null);
@@ -26,17 +27,6 @@ function Home() {
   const [isEditingBalance, setIsEditingBalance] = useState(false);
   const [summaryOptionSelected, setSummaryOptionSelected] =
     useState<SummaryOption>(SummaryOption.Month);
-
-  const [isAlertOpen, setAlertOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertType, setAlertType] = useState<AlertType>(AlertType.WARNING);
-
-  function showAlert(message: string, type: AlertType) {
-    setAlertMessage(message);
-    setAlertType(getAlertType(type));
-    setAlertOpen(true);
-    setTimeout(() => setAlertOpen(false), 4000);
-  }
 
   function handleBalanceSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -91,21 +81,12 @@ function Home() {
 
   return (
     <div className="App">
-      <Alert
-        isOpen={isAlertOpen}
-        message={alertMessage}
-        type={alertType}
-        setAlertOpen={setAlertOpen}
-      />
       {
         <div className="w-full">
           <main
             className={`${
               isSideNavOpen ? "ml-72 mr-8" : "ml-8 md:ml-22 lg:ml-24  md: mr-8"
             }`}
-            // style={{
-            //   margin: `${isSideNavOpen ? "0 30px 0 280px" : "0 30px 0 90px"}`,
-            // }}
           >
             <div className="w-full">
               <h1 className="text-4xl font-semibold text-white">Overview</h1>
