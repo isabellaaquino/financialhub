@@ -9,12 +9,16 @@ import { useViewPort } from "../hooks/useViewPort";
 
 const WINDOW_BREAKPOINT = 1024;
 
+export interface OutletDataContext {
+  showAlert: (message: string, type: string) => void;
+}
+
 function Root() {
   let { user } = useAuth();
   const { width } = useViewPort();
   const { setIsSideNavOpen } = useAuth();
 
-  const [isAlertOpen, setAlertOpen] = useState(false);
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState<AlertType>(AlertType.WARNING);
 
@@ -25,8 +29,8 @@ function Root() {
   function showAlert(message: string, type: string) {
     setAlertMessage(message);
     setAlertType(getAlertTypeFromResponse(type));
-    setAlertOpen(true);
-    setTimeout(() => setAlertOpen(false), 4000);
+    setIsAlertOpen(true);
+    setTimeout(() => setIsAlertOpen(false), 4000);
   }
 
   function getAlertTypeFromResponse(success: string) {
@@ -44,10 +48,10 @@ function Root() {
             isOpen={isAlertOpen}
             message={alertMessage}
             type={alertType}
-            setAlertOpen={setAlertOpen}
+            setAlertOpen={setIsAlertOpen}
           />
           <div id="detail">
-            <Outlet context={[showAlert]} />
+            <Outlet context={{ showAlert } as OutletDataContext} />
           </div>
         </>
       ) : (

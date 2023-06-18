@@ -12,71 +12,59 @@ import { SummaryOption } from "../models/Summary";
 import { Transaction } from "../models/Transaction";
 import { formatValue } from "../utils/utils";
 import { Wallet } from "../models/Wallet";
+import { OutletDataContext } from "./Root";
 
 function Home() {
   const { authTokens, isSideNavOpen } = useAuth();
-  const showAlert = useOutletContext() as (
-    message: string,
-    type: string
-  ) => void;
-
-  const [currentBalance, setCurrentBalance] = useState<number>(5000000);
+  const { showAlert } = useOutletContext<OutletDataContext>();
+  
+  const [currentBalance, setCurrentBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[] | null>(null);
-  const [incomeBalance, setIncomeBalance] = useState<number>(1000.2);
-  const [debtBalance, setDebtBalance] = useState<number>(2000.5);
+  const [incomeBalance, setIncomeBalance] = useState<number>(0);
+  const [expenseBalance, setExpenseBalance] = useState<number>(0);
   const [isEditingBalance, setIsEditingBalance] = useState(false);
   const [summaryOptionSelected, setSummaryOptionSelected] =
     useState<SummaryOption>(SummaryOption.Month);
 
-  function handleBalanceSubmit(event: FormEvent<HTMLFormElement>) {
+  async function getWallet(authTokens: string) {
+    const wallet = await walletService.getUserLoggedWallet(authTokens);
+    setCurrentBalance(wallet.current_amount);
+    if (wallet.monthly_expenses) setExpenseBalance(wallet.monthly_expenses);
+    if (wallet.monthly_incomes) setIncomeBalance(wallet.monthly_incomes);
+  }
+
+  async function getTransactions(authTokens: string) {
+    const transactions = await transactionService.getUserLoggedTransactions(
+      authTokens,
+      dateService.currentYear()
+    );
+    setTransactions(transactions);
+  }
+
+  async function handleBalanceSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.target as HTMLFormElement;
     const input = form.elements.namedItem("value") as HTMLInputElement;
 
-    const wallet: Wallet = {
-      current_amount: Number(input.value),
-    };
-
-    if (authTokens) walletService.updateWallet(authTokens.access, wallet);
+    if (authTokens) {
+      const response = await walletService.updateWallet(
+        authTokens.access,
+        Number(input.value)
+      );
+      console.log(response);
+      if (response) {
+        if (response.success) await getWallet(authTokens.access);
+        showAlert(response.message, response.success);
+        setIsEditingBalance(false);
+      }
+    }
   }
 
   useEffect(() => {
-    // user is not logged out when token expires
-    // fetch data using Promise.all to get all in parallel
-
     if (authTokens) {
-      walletService.getUserLoggedWallet(authTokens.access).then((wallet) => {
-        setCurrentBalance(Number(wallet!.current_amount));
-      });
-
-      transactionService
-        .getUserLoggedTransactions(authTokens.access, dateService.currentYear())
-        .then((transactions) => {
-          setTransactions(transactions!);
-        });
+      getWallet(authTokens.access);
+      getTransactions(authTokens.access);
     }
-
-    // const walletPromise = walletService.getUserLoggedWallet(authTokens!.access);
-    // const transactionPromise = transactionService.getUserLoggedTransactions(
-    //   authTokens!.access,
-    //   dateService.currentYear()
-    // );
-
-    // Promise.all([walletPromise, transactionPromise]).then((responses) => {
-    //   responses.map((res) => {
-    //     if (res?.status === 200) {
-    //       if (res?.config.url === "/wallet/") {
-    //         setCurrentBalance(Number(res.current_amount));
-    //       } else if (res?.config.url.includes("/transactions")) {
-    //         setTransactions(res);
-    //       }
-    //     } else {
-    //       console.log(
-    //         "Oops! Unable to fetch data. Please check your internet connection and try again."
-    //       );
-    //     }
-    //   });
-    // });
   }, []);
 
   return (
@@ -110,7 +98,7 @@ function Home() {
                                 className="pl-4 w-48 h-14 pr-5 mt-1 text-3xl text-white rounded-md bg-black-300 focus:outline-none focus:ring-2 focus:ring-green-500"
                                 type="text"
                                 name="value"
-                                placeholder="0.00"
+                                placeholder={currentBalance.toString()}
                               />
                               <button type="submit" className="cursor-pointer">
                                 <span className="material-symbols-rounded text-3xl text-gray-200 p-1 rounded-md hover:bg-gray-300 hover:text-white">
@@ -137,7 +125,9 @@ function Home() {
                             trending_up
                           </span>
                           <div className="pr-10 mb-3">
-                            <p className="text-gray-500 text-sm">Incoming</p>
+                            <p className="text-gray-500 text-sm">
+                              Monthly Incomes
+                            </p>
                             <span className="text-lg text-white">
                               ${incomeBalance.toFixed(2)}
                             </span>
@@ -148,9 +138,11 @@ function Home() {
                             trending_down
                           </span>
                           <div className="pr-10">
-                            <p className="text-gray-500 text-sm">Outgoing</p>
+                            <p className="text-gray-500 text-sm">
+                              Monthly Expenses
+                            </p>
                             <span className="text-lg text-white">
-                              ${debtBalance.toFixed(2)}
+                              ${expenseBalance.toFixed(2)}
                             </span>
                           </div>
                         </div>

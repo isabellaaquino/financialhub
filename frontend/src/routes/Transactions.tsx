@@ -12,10 +12,7 @@ import { useOutletContext } from "react-router-dom";
 
 function Transactions() {
   const { authTokens, isSideNavOpen } = useAuth();
-  const showAlert = useOutletContext() as (
-    message: string,
-    type: string
-  ) => void;
+  const showAlert: (message: string, type: string) => void = useOutletContext();
 
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [transactions, setTransactions] = useState<Transaction[] | null>();
