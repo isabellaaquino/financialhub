@@ -15,6 +15,10 @@ duration_type_provider = DynamicProvider(
 )
 
 
+def get_and_pop(kwarg, key):
+    return kwarg.pop(key) if kwarg.get(key) else None
+
+
 class TransactionFactory:
     def __init__(self) -> None:
         self.faker = Faker()
@@ -53,14 +57,14 @@ class TransactionFactory:
         transaction.save(is_first_save=True)
         return transaction
 
-    def create_transaction_filled(self, wallet, transaction_type=None, **kwargs):
+    def create_transaction_filled(self, wallet, **kwargs):
         values = {
             'wallet': wallet,
-            'title': self.faker.text(max_nb_chars=10),
-            'value': self.faker.random_number(digits=2),
-            'type': self.faker.transaction_type() if not transaction_type else transaction_type,
-            'description': self.faker.sentence(),
-            'date': datetime.datetime.now(),
+            'title': get_and_pop(kwargs, 'title') or self.faker.text(max_nb_chars=10),
+            'value': get_and_pop(kwargs, 'value') or self.faker.random_number(digits=2),
+            'type': get_and_pop(kwargs, 'type') or self.faker.transaction_type(),
+            'description': get_and_pop(kwargs, 'description') or self.faker.sentence(),
+            'date': get_and_pop(kwargs, 'date') or datetime.datetime.now(),
             **kwargs
         }
 

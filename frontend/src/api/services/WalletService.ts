@@ -1,5 +1,3 @@
-import axios from "axios";
-import { Wallet } from "../../models/Wallet";
 import { api } from "./Api";
 
 class WalletService {
@@ -18,10 +16,9 @@ class WalletService {
     }
   }
 
-  async updateWallet(accessToken: string, wallet: Wallet) {
-    console.log(accessToken);
+  async updateWallet(accessToken: string, value: number) {
     try {
-      const response = await api.put("/wallet/", {
+      const response = await api.put("/wallet/", value, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
@@ -29,8 +26,8 @@ class WalletService {
       });
       const data = await response.data;
       return data;
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      return error.response.data;
     }
   }
 }

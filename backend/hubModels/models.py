@@ -1,6 +1,6 @@
 from decimal import Decimal
 from django.db import models, transaction
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Sum
 from django.core.mail import send_mail
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.base_user import AbstractBaseUser
@@ -55,28 +55,28 @@ class HubUser(AbstractBaseUser, PermissionsMixin):
         return user
 
     def get_wallet(self) -> 'Wallet':
-        '''
+        """
         Returns the wallet related to that user.
-        '''
+        """
         return Wallet.objects.get(user_id=self.pk)
 
     def get_full_name(self):
-        '''
+        """
         Returns the first_name plus the last_name, with a space in between.
-        '''
+        """
         full_name = '%s %s' % (self.first_name, self.last_name)
         return full_name.strip()
 
     def get_short_name(self):
-        '''
+        """
         Returns the short name for the user.
-        '''
+        """
         return self.first_name
 
     def email_user(self, subject, message, from_email=None, **kwargs):
-        '''
+        """
         Sends an email to this User.
-        '''
+        """
         send_mail(subject, message, from_email, [self.email], **kwargs)    
 
 
@@ -90,6 +90,10 @@ class Wallet(models.Model):
 
     def update_balance(self, value):
         self.current_amount = self.current_amount + Decimal(value)
+        self.save(update_fields=['current_amount'])
+
+    def set_balance(self, value):
+        self.current_amount = Decimal(value)
         self.save(update_fields=['current_amount'])
 
     def get_current_amount(self):
@@ -110,9 +114,9 @@ class Wallet(models.Model):
     def get_latest_transactions(self) -> QuerySet['Transaction']:
         """
         Return a QuerySet of all Transactions related to a Wallet
-        that has their `date` less than 3 months ago and ordered by date
+        that has their `date` less than 1 month ago and ordered by date
         """
-        three_months = date.today() + relativedelta(months=+3)
+        three_months = date.today() + relativedelta(months=+1)
         return Transaction.objects.filter(wallet_id=self.pk, date__lt=three_months).order_by('date')
 
     def get_saving_plans(self) -> QuerySet['SavingPlan']:
@@ -121,19 +125,21 @@ class Wallet(models.Model):
         """
         return SavingPlan.objects.filter(wallet_id=self.pk)
     
-    def get_monthly_income(self):
+    def get_monthly_incomes(self):
         """
-        Returns the monthly income value of an user's Wallet
+        Returns the monthly income value of a user's Wallet
         """
-        pass
+        one_month = date.today() - relativedelta(months=1)
+        return Transaction.objects.filter(wallet_id=self.pk, date__gte=one_month, type="INCOME") \
+            .aggregate(Sum('value')).get('value__sum')
     
-    def get_monthly_debt(self):
+    def get_monthly_expenses(self):
         """
-        Returns the monthly debt value of an user's Wallet
+        Returns the monthly debt value of a user's Wallet
         """
-        pass
-
-    # TODO: create unittest for all methods
+        one_month = date.today() - relativedelta(months=1)
+        return Transaction.objects.filter(wallet_id=self.pk, date__gte=one_month, type="EXPENSE")\
+            .aggregate(Sum('value')).get('value__sum')
 
 
 class TransactionRecurrency(models.Model):
@@ -152,7 +158,7 @@ class TransactionRecurrency(models.Model):
     duration = models.CharField(max_length=6, choices=DURATION_TYPES)
     end_date = models.DateTimeField(blank=True, null=True)
     
-    def trigger_async_instatiation(self):
+    def trigger_async_instantiation(self):
         pass
     
     def get_amount(self):
@@ -160,6 +166,7 @@ class TransactionRecurrency(models.Model):
 
     def get_duration(self):
         return self.duration        
+
 
 class Transaction(models.Model):
     TRANSACTION_TYPES = [
@@ -184,15 +191,15 @@ class Transaction(models.Model):
     recurrent = models.BooleanField(default=False)
     base_transaction = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
 
-    def save(self, is_first_save=False):
+    def save(self, is_first_save=False, **kwargs):
         # Cloned transactions will never update wallet, since will they will only be a base transaction for future ones
         if self.update_wallet and is_first_save and not self.recurrent:
             amount = self.value if self.type == 'INCOME' else (-self.value)
             self.wallet.update_balance(amount)
             
-        return super().save()
+        return super().save(**kwargs)
         
-    def delete(self, using=None, keep_parents=False):
+    def delete(self, **kwargs):
         # Rollback for the wallet's previous update
         if self.update_wallet:
             # If transaction doesn't have fk to a base
@@ -200,7 +207,7 @@ class Transaction(models.Model):
                 amount = (-self.value) if self.type == 'INCOME' else self.value
                 self.wallet.update_balance(amount)
             
-        return super().delete(using, keep_parents)
+        return super().delete(**kwargs)
 
     @staticmethod
     def create_from_json(data: dict, user_pk: int):
@@ -255,7 +262,7 @@ class Transaction(models.Model):
             if not data.get("duration"):
                 raise PermissionError() # TODO: Update exception
             
-            # TODO: Move this instatiation + fk's handling to another method
+            # TODO: Move this instantiation + fk's handling to another method
             
             transaction.save(is_first_save=True)
             
