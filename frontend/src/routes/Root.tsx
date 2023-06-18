@@ -9,13 +9,11 @@ function Root() {
 
   return (
     <div className="Root bg-black-500">
-      {/* <SignIn /> */}
       {user ? (
         <>
           <SideNav />
           <TopNav />
-          <Home /> 
-          {/* ERRADO CORRIGIR */}
+          <Home />
         </>
       ) : (
         <SignIn />

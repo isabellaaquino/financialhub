@@ -5,7 +5,6 @@ import transactionService from "../api/services/TransactionService";
 import walletService from "../api/services/WalletService";
 import CurrentMonthChart from "../components/charts/CurrentMonthChart";
 import ProfileChart from "../components/charts/ProfileChart";
-import EditBalance from "../components/EditBalance";
 import LatestTransactions from "../components/LatestTransactions";
 import QuickAccess from "../components/QuickAccess";
 import { useAuth } from "../hooks/useAuth";
@@ -108,22 +107,25 @@ function Home() {
             // }}
           >
             <div className="w-full">
-              <h1 className="text-4xl font-semibold text-white">Overview</h1>
+              <h1 className="text-4xl mt-10 font-semibold text-white">
+                Overview
+              </h1>
               <div className="mt-3 py-10 w-full">
                 {currentBalance >= 0 && (
                   <div className="divide-x divide-black-400 flex flex-col lg:flex-row justify-center items-stretch gap-3">
                     <div className="flex flex-col md:flex-row lg:flex-col gap-3">
-                      <div className="CurrentBalance bg-black-400 rounded-md shadow-sm text-left p-10">
+                      <div className="CurrentBalance bg-black-400 rounded-md shadow-sm text-left p-8 w-88">
                         <h2 className="text-md text-green-500">Balance</h2>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 h-16">
                           {!isEditingBalance ? (
-                            <span className="font-medium text-4xl text-white w-48 h-14 mt-1">
+                            <span className="font-medium text-4xl text-white w-48 mt-1">
                               {formatValue(currentBalance, 10_000)}
                             </span>
                           ) : (
                             <form
                               onSubmit={handleBalanceSubmit}
                               id="editBalance"
+                              className="flex flex-row items-center justify-center gap-1"
                             >
                               <input
                                 className="pl-4 w-48 h-14 pr-5 mt-1 text-3xl text-white rounded-md bg-black-300 focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -131,23 +133,28 @@ function Home() {
                                 name="value"
                                 placeholder="0.00"
                               />
+                            </form>
+                          )}
+                          <div>
+                            {isEditingBalance && (
                               <button type="submit" className="cursor-pointer">
                                 <span className="material-symbols-rounded text-3xl text-gray-200 p-1 rounded-md hover:bg-gray-300 hover:text-white">
                                   done
                                 </span>
                               </button>
-                            </form>
-                          )}
-                          <button
-                            onClick={() =>
-                              setIsEditingBalance(!isEditingBalance)
-                            }
-                            className="cursor-pointer"
-                          >
-                            <span className="material-symbols-rounded text-3xl text-gray-200 p-1 rounded-md hover:bg-gray-300 hover:text-white">
-                              {isEditingBalance ? "cancel" : "edit_note"}
-                            </span>
-                          </button>
+                            )}
+
+                            <button
+                              onClick={() =>
+                                setIsEditingBalance(!isEditingBalance)
+                              }
+                              className="cursor-pointer"
+                            >
+                              <span className="material-symbols-rounded text-3xl text-gray-200 p-1 rounded-md hover:bg-gray-300 hover:text-white">
+                                {isEditingBalance ? "cancel" : "edit_note"}
+                              </span>
+                            </button>
+                          </div>
                         </div>
                       </div>
                       <div className="bg-black-400 w-full rounded-md shadow-sm flex flex-col divide-y divide-black-500 py-5 px-7 gap-2">

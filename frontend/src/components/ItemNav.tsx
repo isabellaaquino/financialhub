@@ -18,7 +18,7 @@ function ItemNav(props: Props) {
       className={`lg:mt-3 p-3 flex items-center ${
         location.pathname === props.to
           ? "bg-green-500 text-white w-full"
-          : "text-gray-400"
+          : "text-gray-400 hover:bg-black-300"
       } ${isSideNavOpen && "rounded-l-md"}`}
     >
       <span
