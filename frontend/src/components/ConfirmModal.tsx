@@ -54,7 +54,7 @@ export default function ConfirmModal(props: Props) {
                       onClick={closeModal}
                       type="button"
                       className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-3 py-2 text-sm font-medium text-blue-900 hover:bg-gray-200 focus:outline-none 
-											focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+											focus-visible:ring-2 focus-visible:ring-green-500-500 focus-visible:ring-offset-2"
                     >
                       Cancel
                     </button>
@@ -62,7 +62,7 @@ export default function ConfirmModal(props: Props) {
                       onClick={(e) => props.submitDeletion(e, props.index)}
                       type="button"
                       className="inline-flex justify-center rounded-md border border-transparent bg-red-100 px-3 py-2 text-sm font-medium text-blue-900 hover:bg-gray-200 focus:outline-none 
-											focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+											focus-visible:ring-2 focus-visible:ring-green-500-500 focus-visible:ring-offset-2"
                     >
                       Delete
                     </button>
