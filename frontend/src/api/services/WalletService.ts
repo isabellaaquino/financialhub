@@ -1,4 +1,3 @@
-import axios from "axios";
 import { Wallet } from "../../models/Wallet";
 import { api } from "./Api";
 
@@ -11,17 +10,22 @@ class WalletService {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      const data = await response.data;
+      const data = (await response.data) as Wallet;
+      console.log(data);
       return data;
     } catch (error) {
       console.log(error);
+      return {
+        current_amount: 0,
+        monthly_expenses: 0,
+        monthly_incomes: 0,
+      } as Wallet;
     }
   }
 
-  async updateWallet(accessToken: string, wallet: Wallet) {
-    console.log(accessToken);
+  async updateWallet(accessToken: string, value: number) {
     try {
-      const response = await api.put("/wallet/", {
+      const response = await api.put("/wallet/", value, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
@@ -29,8 +33,8 @@ class WalletService {
       });
       const data = await response.data;
       return data;
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      return error.response.data;
     }
   }
 }

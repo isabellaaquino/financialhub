@@ -19,10 +19,20 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 class WalletSerializer(serializers.ModelSerializer):
+    monthly_incomes = serializers.SerializerMethodField()
+    monthly_expenses = serializers.SerializerMethodField()
 
     class Meta:
         model = Wallet
-        fields = ('current_amount',)
+        fields = ('current_amount', 'monthly_incomes', 'monthly_expenses')
+
+    @staticmethod
+    def get_monthly_incomes(obj):
+        return obj.get_monthly_incomes()
+
+    @staticmethod
+    def get_monthly_expenses(obj):
+        return obj.get_monthly_expenses()
 
 
 class TransactionSerializer(serializers.ModelSerializer):
@@ -34,14 +44,15 @@ class TransactionSerializer(serializers.ModelSerializer):
         model = Transaction
         fields = ('id', 'value', 'date', 'type', 'title', 'description', 'recurrent',
                   'amount', 'duration')
-        
-    
-    def get_amount(self, obj):
+
+    @staticmethod
+    def get_amount(obj):
         if obj.recurrent:
             return obj.get_recurrency().get_amount()
         return None
-    
-    def get_duration(self, obj):
+
+    @staticmethod
+    def get_duration(obj):
         if obj.recurrent:
             return obj.get_recurrency().get_duration()
         return None

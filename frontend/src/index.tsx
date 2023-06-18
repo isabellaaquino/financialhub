@@ -7,6 +7,7 @@ import Error from "./routes/Error";
 import SignUp from "./routes/SignUp";
 import SignIn from "./routes/SignIn";
 import { AuthProvider } from "./context/AuthContext";
+import Home from "./routes/Home";
 import Transactions from "./routes/Transactions";
 
 const router = createBrowserRouter([
@@ -14,6 +15,16 @@ const router = createBrowserRouter([
     path: "/",
     element: <Root />,
     errorElement: <Error />,
+    children: [
+      {
+        index: true,
+        element: <Home />,
+      },
+      {
+        path: "transactions",
+        element: <Transactions />,
+      },
+    ],
   },
   {
     path: "/sign-up",
@@ -23,11 +34,6 @@ const router = createBrowserRouter([
   {
     path: "/sign-in",
     element: <SignIn />,
-    errorElement: <Error />,
-  },
-  {
-    path: "/transactions",
-    element: <Transactions />,
     errorElement: <Error />,
   },
 ]);

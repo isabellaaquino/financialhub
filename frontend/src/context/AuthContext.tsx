@@ -1,5 +1,4 @@
 import { createContext, useEffect, useState } from "react";
-import { api } from "../api/services/Api";
 import authService from "../api/services/AuthService";
 import { User } from "../models/User";
 import jwt_decode from "jwt-decode";
