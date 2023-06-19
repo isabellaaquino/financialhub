@@ -17,20 +17,23 @@ import { OutletDataContext } from "./Root";
 function Home() {
   const { authTokens, isSideNavOpen } = useAuth();
   const { showAlert } = useOutletContext<OutletDataContext>();
-  
+
   const [currentBalance, setCurrentBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[] | null>(null);
   const [incomeBalance, setIncomeBalance] = useState<number>(0);
   const [expenseBalance, setExpenseBalance] = useState<number>(0);
   const [isEditingBalance, setIsEditingBalance] = useState(false);
+  const [isLoadingWallet, setIsLoadingWallet] = useState(false);
   const [summaryOptionSelected, setSummaryOptionSelected] =
     useState<SummaryOption>(SummaryOption.Month);
 
   async function getWallet(authTokens: string) {
+    setIsLoadingWallet(true);
     const wallet = await walletService.getUserLoggedWallet(authTokens);
     setCurrentBalance(wallet.current_amount);
     if (wallet.monthly_expenses) setExpenseBalance(wallet.monthly_expenses);
     if (wallet.monthly_incomes) setIncomeBalance(wallet.monthly_incomes);
+    setIsLoadingWallet(false);
   }
 
   async function getTransactions(authTokens: string) {
@@ -88,9 +91,19 @@ function Home() {
                         <h2 className="text-md text-green-500">Balance</h2>
                         <div className="flex items-center gap-4 h-16">
                           {!isEditingBalance ? (
-                            <span className="font-medium text-4xl text-white w-48 mt-1">
-                              {formatValue(currentBalance, 10_000)}
-                            </span>
+                            <div
+                              className={`${
+                                isLoadingWallet && "animate-pulse"
+                              }font-medium text-4xl text-white w-48 mt-1`}
+                            >
+                              {isLoadingWallet ? (
+                                <div className="animate-pulse h-8 bg-black-300 rounded"></div>
+                              ) : (
+                                <span>
+                                  {formatValue(currentBalance, 10_000)}
+                                </span>
+                              )}
+                            </div>
                           ) : (
                             <form
                               onSubmit={handleBalanceSubmit}
@@ -136,9 +149,13 @@ function Home() {
                             <p className="text-gray-500 text-sm">
                               Monthly Incomes
                             </p>
-                            <span className="text-lg text-white">
-                              ${incomeBalance.toFixed(2)}
-                            </span>
+                            <div className="text-lg text-white">
+                              {isLoadingWallet ? (
+                                <div className="animate-pulse h-5 mt-1 bg-black-300 rounded"></div>
+                              ) : (
+                                <span>${incomeBalance.toFixed(2)}</span>
+                              )}
+                            </div>
                           </div>
                         </div>
                         <div className="flex flex-row gap-5 items-center justify-start pt-5">
@@ -149,9 +166,13 @@ function Home() {
                             <p className="text-gray-500 text-sm">
                               Monthly Expenses
                             </p>
-                            <span className="text-lg text-white">
-                              ${expenseBalance.toFixed(2)}
-                            </span>
+                            <div className="text-lg text-white">
+                              {isLoadingWallet ? (
+                                <div className="animate-pulse h-5 mt-1 bg-black-300 rounded"></div>
+                              ) : (
+                                <span>${expenseBalance.toFixed(2)}</span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>

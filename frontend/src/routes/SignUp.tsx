@@ -39,7 +39,11 @@ function SignUp() {
   return (
     <div className="Login flex flex-col justify-center items-center mt-10">
       <p className="text-red-500">{error}</p>
-      <form onSubmit={(e) => registerUser(e)} className="flex flex-col w-86">
+      <form
+        autoComplete="off"
+        onSubmit={(e) => registerUser(e)}
+        className="flex flex-col w-86"
+      >
         {/* <div>
           <div className="h-40 w-40 bg-gray-200 rounded-full m-auto mb-16">
             <button className="material-symbols-rounded rounded-full bg-blue-800 text-white p-2 hover:bg-blue-900">
@@ -49,62 +53,71 @@ function SignUp() {
         </div> */}
         <div className="flex flex-row gap-3">
           <div className="flex flex-col">
-            <label className="text-left text-sm text-gray-700">
-              First Name
-            </label>
+            <label className="text-left text-sm text-white">First Name</label>
             <input
               type="text"
               placeholder="First name"
               name="firstName"
-              className="text-sm border-b-2 p-3 mb-8 rounded-none w-full focus:outline-none focus:border-b-blue-800"
+              className="mt-2 w-full text-sm text-white pl-3 pr-5 py-2 rounded-md bg-black-300 focus:outline-none focus:ring-2 focus:ring-green-500"
               onChange={handleInputChange}
             />
           </div>
           <div className="flex flex-col">
-            <label className="text-sm text-gray-700">Last Name</label>
+            <label className="text-sm text-white">Last Name</label>
             <input
               type="text"
               placeholder="Last name"
               name="lastName"
-              className="text-sm border-b-2 p-3 mb-8 rounded-none w-full focus:outline-none focus:border-b-blue-800"
+              className="mt-2 w-full text-sm text-white pl-3 pr-5 py-2 rounded-md bg-black-300 focus:outline-none focus:ring-2 focus:ring-green-500"
               onChange={handleInputChange}
             />
           </div>
         </div>
-        <label className="text-sm text-gray-700">Email</label>
-        <input
-          type="text"
-          placeholder="Type your email"
-          name="email"
-          className="text-sm border-b-2 p-3 mb-8 rounded-none w-full focus:outline-none focus:border-b-blue-800"
-          onChange={handleInputChange}
-        />
-        <label className="text-sm text-gray-700">Password</label>
-        <input
-          type="password"
-          placeholder="Type your password"
-          name="password"
-          className="text-sm border-b-2 p-3 mb-8 rounded-none w-full focus:outline-none focus:border-b-blue-800"
-          onChange={handleInputChange}
-        />
-        <label className="text-sm text-gray-700">Confirm Password</label>
-        <input
-          type="password"
-          placeholder="Confirm your password"
-          name="password"
-          className="text-sm border-b-2 p-3 mb-8 rounded-none w-full focus:outline-none focus:border-b-blue-800"
-          onChange={handleInputChange}
-        />
+        <div className="flex flex-col gap-8 mt-8">
+          <div>
+            <label className="text-sm text-white">Email</label>
+            <input
+              type="text"
+              placeholder="Type your email"
+              autoComplete="off"
+              name="email"
+              className="mt-2 w-full text-sm text-white pl-3 pr-5 py-2 rounded-md bg-black-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+              onChange={handleInputChange}
+            />
+          </div>
+          <div>
+            <label className="text-sm text-white">Password</label>
+            <input
+              type="password"
+              placeholder="Type your password"
+              name="password"
+              autoComplete="new-password"
+              className="mt-2 w-full text-sm text-white pl-3 pr-5 py-2 rounded-md bg-black-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+              onChange={handleInputChange}
+            />
+          </div>
+          <div>
+            <label className="text-sm text-white">Confirm Password</label>
+            <input
+              type="password"
+              placeholder="Confirm your password"
+              name="password"
+              className="mt-2 w-full text-sm text-white pl-3 pr-5 py-2 rounded-md bg-black-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+              onChange={handleInputChange}
+            />
+          </div>
+        </div>
+
         <button
           type="submit"
-          className="bg-blue-800 text-white p-3 mb-3 w-full rounded-md hover:bg-blue-900 text-sm"
+          className="bg-green-500 text-white font-semibold mt-8 p-3 mb-3 w-full rounded-md hover:bg-green-600 text-sm"
         >
           Register
         </button>
         <span className="text-gray-500 text-center text-sm">
           Already have an account?{" "}
           <Link
-            className="text-blue-800 cursor-pointer font-medium"
+            className="text-green-500 cursor-pointer font-medium"
             to={`/sign-in`}
           >
             Sign in
