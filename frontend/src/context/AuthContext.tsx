@@ -93,7 +93,7 @@ export const AuthProvider = ({ children }: Props) => {
         authTokens,
       }}
     >
-      {loading ? null : children}
+      {children}
     </AuthContext.Provider>
   );
 };
