@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Transaction, SavingPlan, Wallet
+from .models import Transaction, SavingPlan, Wallet, CustomLabel
 
 from django.utils import timezone
 
@@ -24,7 +24,7 @@ class WalletSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Wallet
-        fields = ('current_amount', 'monthly_incomes', 'monthly_expenses')
+        fields = ('current_amount', 'monthly_incomes', 'monthly_expenses', 'labels')
 
     @staticmethod
     def get_monthly_incomes(obj):
@@ -33,6 +33,12 @@ class WalletSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_monthly_expenses(obj):
         return obj.get_monthly_expenses()
+
+
+class LabelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomLabel
+        fields = ('title', 'color')
 
 
 class TransactionSerializer(serializers.ModelSerializer):
@@ -48,13 +54,13 @@ class TransactionSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_amount(obj):
         if obj.recurrent:
-            return obj.get_recurrency().get_amount()
+            return None
         return None
 
     @staticmethod
     def get_duration(obj):
         if obj.recurrent:
-            return obj.get_recurrency().get_duration()
+            return None
         return None
 
 

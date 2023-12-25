@@ -1,5 +1,3 @@
-import { useState } from "react";
-import AddTransaction from "./AddTransaction";
 import QuickAccessCard from "./QuickAccessCard";
 import Title from "./Title";
 
@@ -14,14 +12,20 @@ function QuickAccess(props: Props) {
       <div className="grid grid-flow-col justify-start gap-2">
         <QuickAccessCard
           text="New transaction"
-          iconName="wallet"
-          isAddTransaction={true}
+          iconName="payments"
+          action="transaction"
+          showAlert={props.showAlert}
+        />
+        <QuickAccessCard
+          text="Manage labels"
+          iconName="new_label"
+          action="label"
           showAlert={props.showAlert}
         />
         <QuickAccessCard
           text="Import file"
           iconName="upload_file"
-          isAddTransaction={false}
+          action="import"
           showAlert={props.showAlert}
         />
       </div>
