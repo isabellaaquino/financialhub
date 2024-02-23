@@ -1,24 +1,12 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useCallback, useState } from "react";
-import { DurationOption, TypeOption } from "../models/Transaction";
-import transactionService from "../api/services/TransactionService";
-import OptionsDropdown from "./OptionsDropdown";
-import { capitalizeStr } from "./utils";
 import { useAuth } from "../hooks/useAuth";
 import ModalLabel from "./ModalLabel";
-import RadioGroup from "./RadioGroup";
-import SwitchButton from "./SwitchButton";
+import { SketchPicker } from "react-color"
 
-export interface TransactionInput {
-  title?: string;
-  description?: string;
-  value: number;
-  date?: string;
-  updateWallet: boolean;
-  type: TypeOption;
-  recurrent: boolean;
-  amount?: number;
-  duration?: DurationOption;
+export interface LabelInput {
+  title: string;
+  color: string;
 }
 
 interface Props {
@@ -30,9 +18,39 @@ interface Props {
 export default function LabelManager(props: Props) {
   const { authTokens } = useAuth();
 
+  const [labelInput, setLabelInput] = useState<LabelInput>({
+    title: "",
+    color: "",
+  });
+
   function closeModal() {
     props.handleState(false);
   }
+
+  const createLabel = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    closeModal();
+    //const response = await transactionService.createTransactionAPI(
+    //  authTokens!.access,
+    //  labelInput
+    //);
+    //if (response) {
+    //  props.handleAlert(response.message, response.success);
+    //}
+  };
+
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<any>) => {
+      setLabelInput((prevState) => {
+        let value = e.target.value;
+        if (e.target.name === "value") {
+          value = parseFloat(e.target.value);
+        }
+        return { ...prevState, [e.target.name]: value };
+      });
+    },
+    [labelInput]
+  );
 
   return (
     <>
@@ -66,8 +84,34 @@ export default function LabelManager(props: Props) {
                     as="h3"
                     className="text-lg font-medium leading-6 text-white"
                   >
-                    Add new transaction
+                    Add new label
                   </Dialog.Title>
+                  <form
+                    onSubmit={(e) => createLabel(e)}
+                    className="flex flex-col gap-10"
+                  >
+                    <div className="mt-10 flex flex-col justify-between gap-5">
+                      <div>
+                        <ModalLabel title="Title" styling="mb-3" />
+                        <input
+                          name="title"
+                          className="w-full text-white pl-3 pr-5 py-2 rounded-md bg-black-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                      <div>
+                        <ModalLabel title="Color" styling="mb-3" />
+                        <input type="color"></input>
+                      </div>
+                    </div>
+                    <button
+                      type="submit"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-green-500 px-3 py-2 text-sm font-medium text-white hover:bg-green-600 focus:outline-none 
+											focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+                    >
+                      Create Label
+                    </button>
+                  </form>
                 </Dialog.Panel>
               </Transition.Child>
             </div>

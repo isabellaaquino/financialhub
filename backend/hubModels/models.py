@@ -134,6 +134,9 @@ class Wallet(models.Model):
         one_month = date.today() - relativedelta(months=1)
         return Transaction.objects.filter(wallet_id=self.pk, date__gte=one_month, type="EXPENSE")\
             .aggregate(Sum('value')).get('value__sum') or 0
+            
+    def get_saving_plans(self):
+        pass
 
 
 class CustomLabel(models.Model):
