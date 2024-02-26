@@ -109,13 +109,13 @@ class Wallet(models.Model):
         """
         Return a QuerySet of all non-recurrent Transactions related to a Wallet
         """
-        return Transaction.objects.filter(wallet_id=self.pk, recurrent=False)
+        return self.transactions.filter(recurrent=False)
 
     def get_transactions_by_year(self, year) -> QuerySet['Transaction']:
         """
         Return a QuerySet of all Transactions related to a Wallet from specific year
         """
-        return Transaction.objects.filter(wallet_id=self.pk, date__year=year).order_by('date')
+        return self.transactions.filter(date__year=year).order_by('date')
 
     def get_latest_transactions(self) -> QuerySet['Transaction']:
         """
@@ -123,14 +123,14 @@ class Wallet(models.Model):
         that has their `date` less than 1 month ago and ordered by date
         """
         three_months = date.today() + relativedelta(months=+1)
-        return Transaction.objects.filter(wallet_id=self.pk, date__lt=three_months).order_by('date')
+        return self.transactions.filter(date__lt=three_months).order_by('date')
     
     def get_monthly_incomes(self):
         """
         Returns the monthly income value of a user's Wallet
         """
         one_month = date.today() - relativedelta(months=1)
-        return Transaction.objects.filter(wallet_id=self.pk, date__gte=one_month, type="INCOME") \
+        return self.transactions.filter(date__gte=one_month, type="INCOME") \
             .aggregate(Sum('value')).get('value__sum') or 0
     
     def get_monthly_expenses(self):
@@ -138,7 +138,7 @@ class Wallet(models.Model):
         Returns the monthly debt value of a user's Wallet
         """
         one_month = date.today() - relativedelta(months=1)
-        return Transaction.objects.filter(wallet_id=self.pk, date__gte=one_month, type="EXPENSE")\
+        return self.transactions.filter(date__gte=one_month, type="EXPENSE")\
             .aggregate(Sum('value')).get('value__sum') or 0
             
     def get_saving_plans(self):
@@ -149,7 +149,7 @@ class Wallet(models.Model):
 
 
 class WalletBasedModel(models.Model):
-    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False, related_name='labels')
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False)
 
     class Meta:
         abstract = True
@@ -167,13 +167,6 @@ class WalletBasedModel(models.Model):
 
 
 class CustomLabel(WalletBasedModel):
-    DEFAULT_COLORS = (
-        ('RED', '#FD151B'),
-        ('YELLOW', '#FFB30F'),
-        ('GREEN', '#849324'),
-        ('BLUE', '#437F97'),
-        ('DARK_BLUE', '#01295F'),
-    )
     # OVERRIDE
     wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False, related_name='labels')
 
@@ -181,7 +174,7 @@ class CustomLabel(WalletBasedModel):
     color = models.CharField(max_length=7, blank=False, null=False)  # HEX FIELD
 
     def __str__(self):
-        return self.title
+        return self.name
 
     @staticmethod
     def create_from_json(data: dict, user_pk: int) -> 'CustomLabel':
@@ -245,7 +238,7 @@ class Transaction(WalletBasedModel):
     ]
 
     title = models.CharField(max_length=200, blank=False, null=False)
-    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False)
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False, related_name='transactions')
     value = models.DecimalField(decimal_places=2, max_digits=15)
     date = models.DateTimeField(auto_now=False)
     type = models.CharField(max_length=100, choices=TRANSACTION_TYPES)
@@ -315,7 +308,6 @@ class Transaction(WalletBasedModel):
             transaction.value = data.get("value")
         else:
             raise PermissionError()
-        
 
         if data.get("type"):
             transaction.type = data.get("type")
@@ -360,7 +352,7 @@ class Transaction(WalletBasedModel):
         return self.label
 
 
-class SavingPlan(models.Model):
+class SavingPlan(WalletBasedModel):
     wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name='saving_plans')
     title = models.CharField(max_length=50)
     amount = models.DecimalField(decimal_places=2, max_digits=15)
