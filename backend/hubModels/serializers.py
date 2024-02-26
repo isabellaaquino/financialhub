@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Transaction, SavingPlan, Wallet
+from .models import Transaction, SavingPlan, Wallet, CustomLabel
 
 from django.utils import timezone
 
@@ -24,7 +24,7 @@ class WalletSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Wallet
-        fields = ('current_amount', 'monthly_incomes', 'monthly_expenses')
+        fields = ('current_amount', 'monthly_incomes', 'monthly_expenses', 'labels')
 
     @staticmethod
     def get_monthly_incomes(obj):
@@ -35,26 +35,33 @@ class WalletSerializer(serializers.ModelSerializer):
         return obj.get_monthly_expenses()
 
 
+class LabelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomLabel
+        fields = ('id', 'name', 'color')
+
+
 class TransactionSerializer(serializers.ModelSerializer):
     date = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S")
     amount = serializers.SerializerMethodField()
     duration = serializers.SerializerMethodField()
+    label = LabelSerializer(source='get_label',read_only=True)
 
     class Meta:
         model = Transaction
-        fields = ('id', 'value', 'date', 'type', 'title', 'description', 'recurrent',
+        fields = ('id', 'value', 'date', 'type', 'title', 'label', 'description', 'recurrent',
                   'amount', 'duration')
 
     @staticmethod
     def get_amount(obj):
         if obj.recurrent:
-            return obj.get_recurrency().get_amount()
+            return None
         return None
 
     @staticmethod
     def get_duration(obj):
         if obj.recurrent:
-            return obj.get_recurrency().get_duration()
+            return None
         return None
 
 

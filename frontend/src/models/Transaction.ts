@@ -1,7 +1,10 @@
+import { CustomLabel } from "./CustomLabel";
+
 export interface Transaction {
   id: number;
   value: number;
   date: string;
+  label?: CustomLabel;
   to_user?: string;
   title: string;
   type: TypeOption;

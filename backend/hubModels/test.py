@@ -39,7 +39,7 @@ class TransactionTestCase(TestCase):
         transaction = self.factory.create_recurrent_transaction(self.user.pk, amount=2, duration="WEEKS")
         self.assertEqual(transaction.recurrent, True)
 
-        recurrency = transaction.get_recurrency()
+        recurrency = transaction.recurrency
         self.assertIsNotNone(recurrency)
         self.assertEqual(recurrency.amount, 2)
         self.assertEqual(recurrency.duration, "WEEKS")

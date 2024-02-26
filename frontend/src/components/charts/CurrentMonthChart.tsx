@@ -214,7 +214,6 @@ function CurrentMonthChart(props: Props) {
     //
     // Change transactions array into dictionary (format: {date: value}) for ApexCharts
     //
-    console.log(option);
     if (option === SummaryOption.Year) return getPairValues(props.data, option);
 
     //if option != Summaryoption.Year, return all transactions from current month

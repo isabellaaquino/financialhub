@@ -12,39 +12,12 @@ from hubModels.serializers import SavingPlanSerializer, WalletSerializer, Transa
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from hubModels.models import CustomLabel
+from hubModels.serializers import LabelSerializer
+
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
-
-
-class TransactionAPIView(APIView):
-    permission_classes = (IsAuthenticated, )
-    serializer_class = TransactionSerializer
-
-    def post(self, request):
-        user: HubUser = request.user
-
-        data = request.data
-        transaction = Transaction.create_from_json(data, user_pk=user.pk)
-
-        # TODO: Change response to message string
-        return custom_success_response("Transaction created with success!")
-
-    def delete(self, request, transaction_pk):
-        user: HubUser = request.user
-
-        if not transaction_pk:
-            return custom_server_error_response("No transaction id was given. Please try again.")
-
-        transaction = Transaction.objects.get(pk=transaction_pk)
-
-        # Transaction does not belong to the requesting user
-        if not transaction.is_from_wallet(user.get_wallet()):
-            raise PermissionError()
-
-        transaction.delete()
-        
-        return custom_success_response("Transaction deleted with success!")
 
 
 class WalletAPIView(APIView):
@@ -71,6 +44,73 @@ class WalletAPIView(APIView):
         wallet.set_balance(value)
 
         return custom_success_response("Wallet's balance successfully updated!")
+
+
+class TransactionAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = TransactionSerializer
+
+    def post(self, request):
+        user: HubUser = request.user
+
+        data = request.data
+        transaction = Transaction.create_from_json(data, user_pk=user.pk)
+
+        # TODO: Change response to message string
+        return custom_success_response("Transaction created with success!")
+
+    def delete(self, request, transaction_pk):
+        user: HubUser = request.user
+
+        if not transaction_pk:
+            return custom_server_error_response("No transaction id was given. Please try again.")
+
+        transaction = Transaction.objects.get(pk=transaction_pk)
+
+        # Transaction does not belong to the requesting user
+        if not transaction.is_from_wallet(user.get_wallet()):
+            raise PermissionError()
+
+        transaction.delete()
+
+        return custom_success_response("Transaction deleted with success!")
+
+
+class LabelAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = LabelSerializer
+
+    def get(self, request):
+        user: HubUser = request.user
+
+        labels = user.get_labels()
+        serializer = self.serializer_class(labels, many=True)
+
+        return Response(serializer.data)
+
+    def post(self, request):
+        user: HubUser = request.user
+
+        data = request.data
+        CustomLabel.create_from_json(data, user_pk=user.pk)
+
+        return custom_success_response("Label created with success!")
+
+    def delete(self, request, label_pk):
+        user: HubUser = request.user
+
+        if not label_pk:
+            return custom_server_error_response("No label id was given. Please try again.")
+
+        label = CustomLabel.objects.get(pk=label_pk)
+
+        # Transaction does not belong to the requesting user
+        if not label.is_from_wallet(user.get_wallet()):
+            raise PermissionError()
+
+        label.delete()
+
+        return custom_success_response("Label deleted with success!")
 
 
 @api_view(['GET'])

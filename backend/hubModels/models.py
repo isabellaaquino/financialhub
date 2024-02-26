@@ -60,6 +60,12 @@ class HubUser(AbstractBaseUser, PermissionsMixin):
         """
         return Wallet.objects.get(user_id=self.pk)
 
+    def get_labels(self) -> QuerySet['CustomLabel']:
+        """
+        Return all CustomLabels related to that user
+        """
+        return self.get_wallet().get_labels()
+
     def get_full_name(self):
         """
         Returns the first_name plus the last_name, with a space in between.
@@ -77,7 +83,7 @@ class HubUser(AbstractBaseUser, PermissionsMixin):
         """
         Sends an email to this User.
         """
-        send_mail(subject, message, from_email, [self.email], **kwargs)    
+        send_mail(subject, message, from_email, [self.email], **kwargs)
 
 
 class Wallet(models.Model):
@@ -103,13 +109,13 @@ class Wallet(models.Model):
         """
         Return a QuerySet of all non-recurrent Transactions related to a Wallet
         """
-        return Transaction.objects.filter(wallet_id=self.pk, recurrent=False)
+        return self.transactions.filter(recurrent=False)
 
     def get_transactions_by_year(self, year) -> QuerySet['Transaction']:
         """
         Return a QuerySet of all Transactions related to a Wallet from specific year
         """
-        return Transaction.objects.filter(wallet_id=self.pk, date__year=year).order_by('date')
+        return self.transactions.filter(date__year=year).order_by('date')
 
     def get_latest_transactions(self) -> QuerySet['Transaction']:
         """
@@ -117,29 +123,85 @@ class Wallet(models.Model):
         that has their `date` less than 1 month ago and ordered by date
         """
         three_months = date.today() + relativedelta(months=+1)
-        return Transaction.objects.filter(wallet_id=self.pk, date__lt=three_months).order_by('date')
-
-    def get_saving_plans(self) -> QuerySet['SavingPlan']:
-        """
-        Return a QuerySet of all SavingPlans related to a Wallet
-        """
-        return SavingPlan.objects.filter(wallet_id=self.pk)
+        return self.transactions.filter(date__lt=three_months).order_by('date')
     
     def get_monthly_incomes(self):
         """
         Returns the monthly income value of a user's Wallet
         """
         one_month = date.today() - relativedelta(months=1)
-        return Transaction.objects.filter(wallet_id=self.pk, date__gte=one_month, type="INCOME") \
-            .aggregate(Sum('value')).get('value__sum')
+        return self.transactions.filter(date__gte=one_month, type="INCOME") \
+            .aggregate(Sum('value')).get('value__sum') or 0
     
     def get_monthly_expenses(self):
         """
         Returns the monthly debt value of a user's Wallet
         """
         one_month = date.today() - relativedelta(months=1)
-        return Transaction.objects.filter(wallet_id=self.pk, date__gte=one_month, type="EXPENSE")\
-            .aggregate(Sum('value')).get('value__sum')
+        return self.transactions.filter(date__gte=one_month, type="EXPENSE")\
+            .aggregate(Sum('value')).get('value__sum') or 0
+            
+    def get_saving_plans(self):
+        pass
+
+    def get_labels(self) -> QuerySet['CustomerLabel']:
+        return self.labels.all()
+
+
+class WalletBasedModel(models.Model):
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False)
+
+    class Meta:
+        abstract = True
+
+    def get_wallet(self):
+        return self.wallet
+
+    def is_from_wallet(self, wallet):
+        if not isinstance(wallet, Wallet):
+            raise Exception  # TODO: customize exception
+
+        if not self.get_wallet() == wallet:
+            return False
+        return True
+
+
+class CustomLabel(WalletBasedModel):
+    # OVERRIDE
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False, related_name='labels')
+
+    name = models.CharField(max_length=30, blank=False, null=False)
+    color = models.CharField(max_length=7, blank=False, null=False)  # HEX FIELD
+
+    def __str__(self):
+        return self.name
+
+    @staticmethod
+    def create_from_json(data: dict, user_pk: int) -> 'CustomLabel':
+        try:
+            user: HubUser = HubUser.objects.get(pk=user_pk)
+        except HubUser.DoesNotExist:
+            raise PermissionError()
+
+        user_wallet = user.get_wallet()
+
+        if not user_wallet:
+            raise PermissionError()
+
+        label = CustomLabel()
+        label.wallet = user_wallet
+
+        if not data.get("name"):
+            raise Exception("Title is required.")
+        label.name = data.get("name")
+
+        if not data.get("color"):
+            raise Exception("Color is required.")
+        label.color = data.get("color")
+
+        label.save()
+
+        return label
 
 
 class TransactionRecurrency(models.Model):
@@ -168,27 +230,25 @@ class TransactionRecurrency(models.Model):
         return self.duration        
 
 
-class Transaction(models.Model):
+class Transaction(WalletBasedModel):
     TRANSACTION_TYPES = [
         ('EXPENSE', 'Expense'),
         ('TRANSFER', 'Transfer'),
         ('INCOME', 'Income'),
     ]
 
-    title = models.CharField(max_length=200, default='Amazon Prime') # TODO: remove default value
-    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False)
+    title = models.CharField(max_length=200, blank=False, null=False)
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False, related_name='transactions')
     value = models.DecimalField(decimal_places=2, max_digits=15)
     date = models.DateTimeField(auto_now=False)
     type = models.CharField(max_length=100, choices=TRANSACTION_TYPES)
-    # TODO: Implement user be able to create and store their own labels
-    user_label = models.CharField(max_length=30, blank=True, null=True)
+    label = models.ForeignKey(CustomLabel, on_delete=models.SET_NULL, null=True, blank=True)
     # Django convention is to avoid setting null=True to CharFields
-    from_user = models.CharField(max_length=50, blank=True, null=True)
-    to_user = models.CharField(max_length=100, blank=True, null=True)
-    description = models.CharField(max_length=200, blank=True, null=True)
+    description = models.CharField(max_length=200, blank=True, null=True)  # TODO: review if description should exist
     update_wallet = models.BooleanField(default=True)
     # Recurrency section
     recurrent = models.BooleanField(default=False)
+    recurrency = models.OneToOneField(TransactionRecurrency, on_delete=models.CASCADE, null=True, related_name='+')
     base_transaction = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, is_first_save=False, **kwargs):
@@ -210,7 +270,7 @@ class Transaction(models.Model):
         return super().delete(**kwargs)
 
     @staticmethod
-    def create_from_json(data: dict, user_pk: int):
+    def create_from_json(data: dict, user_pk: int) -> 'Transaction':
         """
         Creates a transaction from a frontend request
         @params: 
@@ -233,6 +293,12 @@ class Transaction(models.Model):
         # TODO: Update required attributes
         if data.get("title"):
             transaction.title = data.get("title")
+
+        if data.get("label_id"):
+            custom_label = CustomLabel.objects.get(pk=data.get("label_id"))
+            if custom_label.get_wallet() != user_wallet:
+                raise PermissionError()
+            transaction.label = custom_label
             
         if data.get("description"):
             transaction.description = data.get("description")
@@ -242,7 +308,6 @@ class Transaction(models.Model):
             transaction.value = data.get("value")
         else:
             raise PermissionError()
-        
 
         if data.get("type"):
             transaction.type = data.get("type")
@@ -257,46 +322,38 @@ class Transaction(models.Model):
             # When a transaction is set to recurrent, we'll instantiate a copy of this transaction to be the base
             # for recurrency editions
             if not data.get("amount"):
-                raise PermissionError() # TODO: Update exception
+                raise PermissionError()  # TODO: Update exception
             
             if not data.get("duration"):
-                raise PermissionError() # TODO: Update exception
+                raise PermissionError()  # TODO: Update exception
             
             # TODO: Move this instantiation + fk's handling to another method
-            
+
             transaction.save(is_first_save=True)
             
-            TransactionRecurrency.objects.create(
+            recurrency = TransactionRecurrency.objects.create(
                 transaction=transaction,
                 amount=data.get("amount"),
                 duration=data.get("duration"),
             )
+
+            transaction.recurrency = recurrency
+            transaction.save()
             
         else:
             transaction.save(is_first_save=True)
 
         return transaction
-    
-    def get_wallet(self):
-        return self.wallet
-    
-    def get_recurrency(self):
-        return TransactionRecurrency.objects.get(transaction_id=self.pk) if self.recurrent else None
-    
-    def is_from_wallet(self, wallet):
-        if not isinstance(wallet, Wallet):
-            raise Exception # TODO: customize exception
-        
-        if not self.get_wallet() == wallet:
-            return False
-        return True
 
     def is_recurrent(self):
         return self.recurrent
 
+    def get_label(self):
+        return self.label
 
-class SavingPlan(models.Model):
-    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE)
+
+class SavingPlan(WalletBasedModel):
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name='saving_plans')
     title = models.CharField(max_length=50)
     amount = models.DecimalField(decimal_places=2, max_digits=15)
     active = models.BooleanField(default=True)

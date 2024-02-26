@@ -248,6 +248,16 @@ function Transactions() {
                       )}
                     </dd>
                   </div>
+                  <div className="bg-black-400 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt className="text-sm font-medium text-gray-200">
+                      Label
+                    </dt>
+                    <dd className="mt-1 text-sm text-white sm:col-span-2 sm:mt-0">
+                      <span className={`py-0.5 px-2 w-2 ${selectedTransaction?.label?.name ? 'border rounded-2xl' : ''} font-normal`} style={selectedTransaction?.label && {borderColor: `${selectedTransaction?.label?.color}`}} >
+                        {selectedTransaction?.label?.name}
+                      </span>
+                    </dd>
+                  </div>
                 </dl>
               </div>
             </div>
