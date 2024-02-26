@@ -60,6 +60,12 @@ class HubUser(AbstractBaseUser, PermissionsMixin):
         """
         return Wallet.objects.get(user_id=self.pk)
 
+    def get_labels(self) -> QuerySet['CustomLabel']:
+        """
+        Return all CustomLabels related to that user
+        """
+        return self.get_wallet().get_labels()
+
     def get_full_name(self):
         """
         Returns the first_name plus the last_name, with a space in between.
@@ -77,7 +83,7 @@ class HubUser(AbstractBaseUser, PermissionsMixin):
         """
         Sends an email to this User.
         """
-        send_mail(subject, message, from_email, [self.email], **kwargs)    
+        send_mail(subject, message, from_email, [self.email], **kwargs)
 
 
 class Wallet(models.Model):
@@ -138,14 +144,71 @@ class Wallet(models.Model):
     def get_saving_plans(self):
         pass
 
+    def get_labels(self) -> QuerySet['CustomerLabel']:
+        return self.labels.all()
 
-class CustomLabel(models.Model):
-    user = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name='labels')
-    title = models.CharField(max_length=30, blank=False, null=False)
-    color = models.CharField(max_length=6, blank=False, null=False)
+
+class WalletBasedModel(models.Model):
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False, related_name='labels')
+
+    class Meta:
+        abstract = True
+
+    def get_wallet(self):
+        return self.wallet
+
+    def is_from_wallet(self, wallet):
+        if not isinstance(wallet, Wallet):
+            raise Exception  # TODO: customize exception
+
+        if not self.get_wallet() == wallet:
+            return False
+        return True
+
+
+class CustomLabel(WalletBasedModel):
+    DEFAULT_COLORS = (
+        ('RED', '#FD151B'),
+        ('YELLOW', '#FFB30F'),
+        ('GREEN', '#849324'),
+        ('BLUE', '#437F97'),
+        ('DARK_BLUE', '#01295F'),
+    )
+    # OVERRIDE
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False, related_name='labels')
+
+    name = models.CharField(max_length=30, blank=False, null=False)
+    color = models.CharField(max_length=7, blank=False, null=False)  # HEX FIELD
 
     def __str__(self):
         return self.title
+
+    @staticmethod
+    def create_from_json(data: dict, user_pk: int) -> 'CustomLabel':
+        try:
+            user: HubUser = HubUser.objects.get(pk=user_pk)
+        except HubUser.DoesNotExist:
+            raise PermissionError()
+
+        user_wallet = user.get_wallet()
+
+        if not user_wallet:
+            raise PermissionError()
+
+        label = CustomLabel()
+        label.wallet = user_wallet
+
+        if not data.get("name"):
+            raise Exception("Title is required.")
+        label.name = data.get("name")
+
+        if not data.get("color"):
+            raise Exception("Color is required.")
+        label.color = data.get("color")
+
+        label.save()
+
+        return label
 
 
 class TransactionRecurrency(models.Model):
@@ -174,7 +237,7 @@ class TransactionRecurrency(models.Model):
         return self.duration        
 
 
-class Transaction(models.Model):
+class Transaction(WalletBasedModel):
     TRANSACTION_TYPES = [
         ('EXPENSE', 'Expense'),
         ('TRANSFER', 'Transfer'),
@@ -214,7 +277,7 @@ class Transaction(models.Model):
         return super().delete(**kwargs)
 
     @staticmethod
-    def create_from_json(data: dict, user_pk: int):
+    def create_from_json(data: dict, user_pk: int) -> 'Transaction':
         """
         Creates a transaction from a frontend request
         @params: 
@@ -237,6 +300,12 @@ class Transaction(models.Model):
         # TODO: Update required attributes
         if data.get("title"):
             transaction.title = data.get("title")
+
+        if data.get("label_id"):
+            custom_label = CustomLabel.objects.get(pk=data.get("label_id"))
+            if custom_label.get_wallet() != user_wallet:
+                raise PermissionError()
+            transaction.label = custom_label
             
         if data.get("description"):
             transaction.description = data.get("description")
@@ -283,20 +352,12 @@ class Transaction(models.Model):
             transaction.save(is_first_save=True)
 
         return transaction
-    
-    def get_wallet(self):
-        return self.wallet
-    
-    def is_from_wallet(self, wallet):
-        if not isinstance(wallet, Wallet):
-            raise Exception # TODO: customize exception
-        
-        if not self.get_wallet() == wallet:
-            return False
-        return True
 
     def is_recurrent(self):
         return self.recurrent
+
+    def get_label(self):
+        return self.label
 
 
 class SavingPlan(models.Model):

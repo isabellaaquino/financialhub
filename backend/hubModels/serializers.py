@@ -38,17 +38,18 @@ class WalletSerializer(serializers.ModelSerializer):
 class LabelSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomLabel
-        fields = ('title', 'color')
+        fields = ('id', 'name', 'color')
 
 
 class TransactionSerializer(serializers.ModelSerializer):
     date = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S")
     amount = serializers.SerializerMethodField()
     duration = serializers.SerializerMethodField()
+    label = LabelSerializer(source='get_label',read_only=True)
 
     class Meta:
         model = Transaction
-        fields = ('id', 'value', 'date', 'type', 'title', 'description', 'recurrent',
+        fields = ('id', 'value', 'date', 'type', 'title', 'label', 'description', 'recurrent',
                   'amount', 'duration')
 
     @staticmethod
