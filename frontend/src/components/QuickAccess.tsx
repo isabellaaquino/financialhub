@@ -1,8 +1,10 @@
+import { CustomLabel } from "../models/CustomLabel";
 import QuickAccessCard from "./QuickAccessCard";
 import Title from "./Title";
 
 interface Props {
   showAlert(message: string, type: string): void;
+  userLabels?: CustomLabel[];
 }
 
 function QuickAccess(props: Props) {
@@ -15,6 +17,7 @@ function QuickAccess(props: Props) {
           iconName="payments"
           action="transaction"
           showAlert={props.showAlert}
+          userLabels={props.userLabels}
         />
         <QuickAccessCard
           text="Manage labels"

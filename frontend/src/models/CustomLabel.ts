@@ -1,4 +1,5 @@
 export interface CustomLabel {
-    title: string;
+    id: Number;
+    name: string;
     color: string;
 }

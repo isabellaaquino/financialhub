@@ -13,6 +13,8 @@ import { Transaction } from "../models/Transaction";
 import { formatValue } from "../utils/utils";
 import { Wallet } from "../models/Wallet";
 import { OutletDataContext } from "./Root";
+import labelService from "../api/services/LabelService";
+import { CustomLabel } from "../models/CustomLabel";
 
 function Home() {
   const { authTokens, isSideNavOpen } = useAuth();
@@ -20,6 +22,7 @@ function Home() {
   
   const [currentBalance, setCurrentBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[] | null>(null);
+  const [labels, setLabels] = useState<CustomLabel[] | undefined>();
   const [incomeBalance, setIncomeBalance] = useState<number>(0);
   const [expenseBalance, setExpenseBalance] = useState<number>(0);
   const [isEditingBalance, setIsEditingBalance] = useState(false);
@@ -41,6 +44,13 @@ function Home() {
     setTransactions(transactions);
   }
 
+  async function getUserLabels(authTokens: string) {
+    const labels = await labelService.getUserLoggedLabels(
+      authTokens,
+    );
+    setLabels(labels);
+  }
+
   async function handleBalanceSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.target as HTMLFormElement;
@@ -51,7 +61,6 @@ function Home() {
         authTokens.access,
         Number(input.value)
       );
-      console.log(response);
       if (response) {
         if (response.success) await getWallet(authTokens.access);
         showAlert(response.message, response.success);
@@ -64,6 +73,7 @@ function Home() {
     if (authTokens) {
       getWallet(authTokens.access);
       getTransactions(authTokens.access);
+      getUserLabels(authTokens.access);
     }
   }, []);
 
@@ -172,7 +182,7 @@ function Home() {
                 )}
               </div>
               <div className="rounded-md pt-5 py-10">
-                <QuickAccess showAlert={showAlert} />
+                <QuickAccess showAlert={showAlert} userLabels={labels}/>
               </div>
             </div>
 

@@ -26,6 +26,7 @@ function LatestTransactions(props: Props) {
               <th className="text-sm font-normal w-52 hidden sm:block py-2">
                 Date
               </th>
+              <th className="text-sm font-normal w-52 py-2">Label</th>
               <th className="text-sm font-normal w-52 py-2">Type</th>
               <th className="text-sm font-normal w-52 py-2">Amount</th>
             </tr>
@@ -41,6 +42,11 @@ function LatestTransactions(props: Props) {
                     <td className="p-2 py-5">{l.title}</td>
                     <td className="text-gray-400 hidden sm:block py-5">
                       {dateService.formatDateValue(l.date.toLocaleString())}
+                    </td>
+                    <td className="text-gray-50">
+                      <span className={`py-0.5 px-2 w-2 ${l?.label?.name ? 'border rounded-2xl' : ''} font-normal`} style={l?.label && {borderColor: `${l?.label?.color}`}} >
+                        {l?.label?.name}
+                      </span>
                     </td>
                     <td className="text-gray-50">
                       <span

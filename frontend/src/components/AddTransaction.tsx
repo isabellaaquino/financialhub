@@ -1,4 +1,4 @@
-import { Dialog, Transition } from "@headlessui/react";
+import { Dialog, Listbox, Transition } from "@headlessui/react";
 import { Fragment, useCallback, useState } from "react";
 import { DurationOption, TypeOption } from "../models/Transaction";
 import transactionService from "../api/services/TransactionService";
@@ -8,10 +8,13 @@ import { useAuth } from "../hooks/useAuth";
 import ModalLabel from "./ModalLabel";
 import RadioGroup from "./RadioGroup";
 import SwitchButton from "./SwitchButton";
+import LabelPicker from "./LabelPicker";
+import { CustomLabel } from "../models/CustomLabel";
 
 export interface TransactionInput {
   title?: string;
   description?: string;
+  label_id?: Number,
   value: number;
   date?: string;
   updateWallet: boolean;
@@ -25,6 +28,7 @@ interface Props {
   isOpen: boolean;
   handleState(state: boolean): void;
   handleAlert(message: string, type: string): void;
+  userLabels?: CustomLabel[];
 }
 
 export default function AddTransaction(props: Props) {
@@ -34,8 +38,14 @@ export default function AddTransaction(props: Props) {
   const [isUpdatingWallet, setIsUpdatingWallet] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState(DurationOption.DAYS);
   const [error, setError] = useState("");
+  const [selectedLabel, setSelectedLabel] = useState<CustomLabel>({
+    id: -1,
+    name: "",
+    color: ""
+  });
   const [transactionInput, setTransactionInput] = useState<TransactionInput>({
     title: "",
+    label_id: -1,
     description: "",
     value: 0,
     date: new Date().toISOString().split("T")[0],
@@ -45,6 +55,7 @@ export default function AddTransaction(props: Props) {
     amount: undefined,
     duration: selectedDuration,
   });
+
 
   function closeModal() {
     props.handleState(false);
@@ -75,6 +86,13 @@ export default function AddTransaction(props: Props) {
     setSelectedDuration(duration);
     setTransactionInput((prevState) => {
       return { ...prevState, ["duration"]: duration };
+    });
+  };
+
+  const handleLabelChange = (label: CustomLabel) => {
+    setSelectedLabel(label);
+    setTransactionInput((prevState) => {
+      return { ...prevState, ["label_id"]: label.id };
     });
   };
 
@@ -133,26 +151,30 @@ export default function AddTransaction(props: Props) {
                 <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-lg bg-black-400 p-6 text-left align-middle shadow-xl transition-all">
                   <Dialog.Title
                     as="h3"
-                    className="text-lg font-medium leading-6 text-white"
+                    className="text-lg font-medium leading-6 text-white mb-5"
                   >
                     Add new transaction
                   </Dialog.Title>
                   <form
                     onSubmit={(e) => createTransaction(e)}
-                    className="flex flex-col gap-10"
+                    className="flex flex-col gap-5"
                   >
-                    <div className="mt-10">
-                      <div>
-                        <ModalLabel title="Title" styling="mb-3" />
+                    <div className="flex flex-row gap-5">
+                      <div className="w-full">
+                        <ModalLabel title="Title" styling="mb-2"/>
                         <input
                           name="title"
                           className="w-full text-white pl-3 pr-5 py-2 rounded-md bg-black-300 focus:outline-none focus:ring-2 focus:ring-green-500"
                           onChange={handleInputChange}
                         />
                       </div>
+                      <div className="w-full">
+                        <ModalLabel title="Label" styling="mb-2" tooltipText="Labels are used to classify your transactions."/>
+                        <LabelPicker selectedLabel={selectedLabel} setSelectedLabel={handleLabelChange} labels={props.userLabels}/>
+                      </div>
                     </div>
                     <div className="flex flex-row gap-5">
-                      <div className="w-1/2">
+                      <div className="w-full">
                         <ModalLabel title="Amount" styling="mb-2" />
                         <div className="relative">
                           <input
@@ -169,7 +191,7 @@ export default function AddTransaction(props: Props) {
                           </div>
                         </div>
                       </div>
-                      <div className="w-1/2">
+                      <div className="w-full">
                         <ModalLabel
                           title={
                             transactionInput.recurrent ? "Start date" : "Date"

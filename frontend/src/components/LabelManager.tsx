@@ -2,12 +2,10 @@ import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useCallback, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import ModalLabel from "./ModalLabel";
-import { SketchPicker } from "react-color"
+import labelService from "../api/services/LabelService";
+import LabelPicker from "./LabelPicker";
+import { CustomLabel } from "../models/CustomLabel";
 
-export interface LabelInput {
-  title: string;
-  color: string;
-}
 
 interface Props {
   isOpen: boolean;
@@ -18,8 +16,9 @@ interface Props {
 export default function LabelManager(props: Props) {
   const { authTokens } = useAuth();
 
-  const [labelInput, setLabelInput] = useState<LabelInput>({
-    title: "",
+  const [labelInput, setLabelInput] = useState<CustomLabel>({
+    id: -1,
+    name: "",
     color: "",
   });
 
@@ -30,23 +29,18 @@ export default function LabelManager(props: Props) {
   const createLabel = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     closeModal();
-    //const response = await transactionService.createTransactionAPI(
-    //  authTokens!.access,
-    //  labelInput
-    //);
-    //if (response) {
-    //  props.handleAlert(response.message, response.success);
-    //}
+    const response = await labelService.createLabelAPI(
+     authTokens!.access,
+     labelInput
+    );
+    if (response) {
+     props.handleAlert(response.message, response.success);
+    }
   };
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<any>) => {
-      setLabelInput((prevState) => {
-        let value = e.target.value;
-        if (e.target.name === "value") {
-          value = parseFloat(e.target.value);
-        }
-        return { ...prevState, [e.target.name]: value };
+      setLabelInput((prevState) => {return { ...prevState, [e.target.name]: e.target.value };
       });
     },
     [labelInput]
@@ -92,16 +86,16 @@ export default function LabelManager(props: Props) {
                   >
                     <div className="mt-10 flex flex-col justify-between gap-5">
                       <div>
-                        <ModalLabel title="Title" styling="mb-3" />
+                        <ModalLabel title="Name" styling="mb-3" />
                         <input
-                          name="title"
+                          name="name"
                           className="w-full text-white pl-3 pr-5 py-2 rounded-md bg-black-300 focus:outline-none focus:ring-2 focus:ring-green-500"
                           onChange={handleInputChange}
                         />
                       </div>
                       <div>
                         <ModalLabel title="Color" styling="mb-3" />
-                        <input type="color"></input>
+                        <input name="color" type="color" onChange={handleInputChange}></input>
                       </div>
                     </div>
                     <button

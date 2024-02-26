@@ -1,12 +1,14 @@
 import { ReactElement, useState } from "react";
 import AddTransaction from "./AddTransaction";
 import LabelManager from "./LabelManager";
+import { CustomLabel } from "../models/CustomLabel";
 
 interface Props {
   text: string;
   iconName: string;
   action: string;
   showAlert(message: string, type: string): void;
+  userLabels?: CustomLabel[];
 }
 function QuickAccessCard(props: Props) {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,6 +34,7 @@ function QuickAccessCard(props: Props) {
           handleAlert={props.showAlert}
           isOpen={isOpen}
           handleState={handleModal}
+          userLabels={props.userLabels}
         />
       )}
 
