@@ -1,8 +1,6 @@
-import { useState } from "react";
+import dateService from "../api/services/DateService";
 import { Transaction, TypeOption } from "../models/Transaction";
 import Title from "./Title";
-import dateService from "../api/services/DateService";
-import { useAuth } from "../hooks/useAuth";
 
 const MAX_ROWS = 5;
 interface Props {
@@ -44,7 +42,14 @@ function LatestTransactions(props: Props) {
                       {dateService.formatDateValue(l.date.toLocaleString())}
                     </td>
                     <td className="text-gray-50">
-                      <span className={`py-0.5 px-2 w-2 ${l?.label?.name ? 'border rounded-2xl' : ''} font-normal`} style={l?.label && {borderColor: `${l?.label?.color}`}} >
+                      <span
+                        className={`py-0.5 px-2 w-2 ${
+                          l?.label?.name ? "border rounded-2xl" : ""
+                        } font-normal`}
+                        style={
+                          l?.label && { borderColor: `${l?.label?.color}` }
+                        }
+                      >
                         {l?.label?.name}
                       </span>
                     </td>

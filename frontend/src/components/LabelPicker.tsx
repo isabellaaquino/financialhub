@@ -1,4 +1,4 @@
-import { Dialog, Listbox, Transition } from "@headlessui/react";
+import { Listbox, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { CustomLabel } from "../models/CustomLabel";
@@ -17,7 +17,16 @@ export default function LabelPicker(props: Props) {
       <Listbox value={props.selectedLabel} onChange={props.setSelectedLabel}>
         <div className="relative">
           <Listbox.Button className="relative w-full cursor-default rounded-lg text-white bg-black-300 py-2 pl-3 pr-10 text-left border border-gray-300 focus:outline-none focus-visible:border-green-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-green-300 sm:text-sm">
-            <span className={`py-0.5 px-2 w-2 ${props.selectedLabel.name ? 'border rounded-2xl' : ''} font-normal`} style={props.selectedLabel && {borderColor: `${props.selectedLabel?.color}`}} >
+            <span
+              className={`py-0.5 px-2 w-2 ${
+                props.selectedLabel.name ? "border rounded-2xl" : ""
+              } font-normal`}
+              style={
+                props.selectedLabel && {
+                  borderColor: `${props.selectedLabel?.color}`,
+                }
+              }
+            >
               {props.selectedLabel?.name}
             </span>
             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -46,13 +55,15 @@ export default function LabelPicker(props: Props) {
                   {({ selected }) => (
                     <div className="w-100">
                       <span
-                        className={`py-0.5 px-2 w-2  ${selected ? "font-semibold" : "font-normal"}`} style={{borderColor: `${label.color}`}}
+                        className={`py-0.5 px-2 w-2  ${
+                          selected ? "font-semibold" : "font-normal"
+                        }`}
+                        style={{ borderColor: `${label.color}` }}
                       >
                         {label.name}
                       </span>
                       {selected ? (
-                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600">
-                        </span>
+                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600"></span>
                       ) : null}
                     </div>
                   )}

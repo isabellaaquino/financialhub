@@ -28,7 +28,7 @@ function QuickAccess(props: Props) {
         <QuickAccessCard
           text="Import file"
           iconName="upload_file"
-          action="import"
+          action="upload_file"
           showAlert={props.showAlert}
         />
       </div>

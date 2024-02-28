@@ -1,7 +1,6 @@
-import axios from "axios";
+import { TransactionInput } from "../../components/AddTransaction";
 import { Transaction } from "../../models/Transaction";
 import { api } from "./Api";
-import { TransactionInput } from "../../components/AddTransaction";
 
 class TransactionService {
   async getUserLoggedTransactions(

@@ -13,3 +13,8 @@ export function formatValue(value: number, limit: number): string {
 
   return "$" + value.toFixed(2) + abbreviations[abbreviationIndex];
 }
+
+export function getKeyByEnumValue(myEnum: any, enumValue: number | string) {
+  let keys = Object.keys(myEnum).filter((x) => myEnum[x] == enumValue);
+  return keys.length > 0 ? keys[0] : "";
+}

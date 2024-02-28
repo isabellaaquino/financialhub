@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { RadioGroup as RadioGroupHeadless } from "@headlessui/react";
+import { useEffect, useState } from "react";
 import { TypeOption } from "../models/Transaction";
 
 interface Props {

@@ -11,7 +11,6 @@ class WalletService {
         },
       });
       const data = (await response.data) as Wallet;
-      console.log(data);
       return data;
     } catch (error) {
       console.log(error);

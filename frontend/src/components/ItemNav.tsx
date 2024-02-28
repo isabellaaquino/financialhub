@@ -28,9 +28,7 @@ function ItemNav(props: Props) {
       >
         {props.iconName}
       </span>
-      <p
-        className={isSideNavOpen ? "inline ml-4" : "hidden ml-0"}
-      >
+      <p className={isSideNavOpen ? "inline ml-4" : "hidden ml-0"}>
         {props.text}
       </p>
     </Link>

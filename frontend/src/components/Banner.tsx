@@ -1,5 +1,3 @@
-import { text } from "node:stream/consumers";
-
 interface Props {
   text: string;
 }

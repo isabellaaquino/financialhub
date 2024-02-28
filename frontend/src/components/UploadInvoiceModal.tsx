@@ -1,9 +1,10 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useCallback, useState } from "react";
-import labelService from "../api/services/LabelService";
+import { Fragment, useState } from "react";
+import fileService from "../api/services/FileService";
 import { useAuth } from "../hooks/useAuth";
-import { CustomLabel } from "../models/CustomLabel";
+import { BankInstitutions } from "../models/Invoices";
 import ModalLabel from "./ModalLabel";
+import OptionsDropdown from "./OptionsDropdown";
 
 interface Props {
   isOpen: boolean;
@@ -11,39 +12,33 @@ interface Props {
   handleAlert(message: string, type: string): void;
 }
 
-export default function LabelManager(props: Props) {
+export default function UploadInvoiceModal(props: Props) {
   const { authTokens } = useAuth();
 
-  const [labelInput, setLabelInput] = useState<CustomLabel>({
-    id: -1,
-    name: "",
-    color: "",
-  });
+  const [fileStream, setFileStream] = useState<File>(new File([], ""));
+  const [bankInstitution, setBankInstitution] = useState<String>("");
 
   function closeModal() {
     props.handleState(false);
   }
 
-  const createLabel = async (event: React.FormEvent<HTMLFormElement>) => {
+  async function handleOnSubmit(e: any) {
+    const file: File = e.target.files[0];
+    setFileStream(file);
+  }
+
+  const sendFile = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    closeModal();
-    const response = await labelService.createLabelAPI(
+    const response = await fileService.sendPDFFile(
       authTokens!.access,
-      labelInput
+      fileStream,
+      bankInstitution
     );
     if (response) {
+      closeModal();
       props.handleAlert(response.message, response.success);
     }
   };
-
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<any>) => {
-      setLabelInput((prevState) => {
-        return { ...prevState, [e.target.name]: e.target.value };
-      });
-    },
-    [labelInput]
-  );
 
   return (
     <>
@@ -77,28 +72,28 @@ export default function LabelManager(props: Props) {
                     as="h3"
                     className="text-lg font-medium leading-6 text-white"
                   >
-                    Add new label
+                    Import Invoice
                   </Dialog.Title>
                   <form
-                    onSubmit={(e) => createLabel(e)}
+                    onSubmit={(e) => sendFile(e)}
                     className="flex flex-col gap-10"
                   >
-                    <div className="mt-10 flex flex-col justify-between gap-5">
-                      <div>
-                        <ModalLabel title="Name" styling="mb-3" />
+                    <div className="mt-10 flex flex-row justify-between gap-10">
+                      <div className="w-full">
+                        <ModalLabel title="PDF" styling="mb-3" />
                         <input
-                          name="name"
+                          type="file"
                           className="w-full text-white pl-3 pr-5 py-2 rounded-md bg-black-300 focus:outline-none focus:ring-2 focus:ring-green-500"
-                          onChange={handleInputChange}
+                          onChange={handleOnSubmit}
                         />
                       </div>
-                      <div>
-                        <ModalLabel title="Color" styling="mb-3" />
-                        <input
-                          name="color"
-                          type="color"
-                          onChange={handleInputChange}
-                        ></input>
+                      <div className="w-full">
+                        <ModalLabel title="Bank Institution" styling="mb-3" />
+                        <OptionsDropdown
+                          selectedValue={bankInstitution}
+                          handleValueChange={(e) => setBankInstitution(e)}
+                          options={Object.values(BankInstitutions)}
+                        />
                       </div>
                     </div>
                     <button
@@ -106,7 +101,7 @@ export default function LabelManager(props: Props) {
                       className="inline-flex justify-center rounded-md border border-transparent bg-green-500 px-3 py-2 text-sm font-medium text-white hover:bg-green-600 focus:outline-none 
 											focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
                     >
-                      Create Label
+                      Process File
                     </button>
                   </form>
                 </Dialog.Panel>

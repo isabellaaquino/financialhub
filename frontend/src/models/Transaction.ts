@@ -23,7 +23,7 @@ export enum TypeOption {
 export enum DurationOption {
   DAYS = "days",
   MONTHS = "months",
-  YEARS = "years"
+  YEARS = "years",
 }
 
-export type TypeOptionType = typeof TypeOption[keyof typeof TypeOption]
+export type TypeOptionType = (typeof TypeOption)[keyof typeof TypeOption];

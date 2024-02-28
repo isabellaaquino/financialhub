@@ -2,6 +2,7 @@ import { ReactElement, useState } from "react";
 import AddTransaction from "./AddTransaction";
 import LabelManager from "./LabelManager";
 import { CustomLabel } from "../models/CustomLabel";
+import UploadInvoiceModal from "./UploadFileModal";
 
 interface Props {
   text: string;
@@ -29,6 +30,7 @@ function QuickAccessCard(props: Props) {
         <h3 className="mt-2 whitespace-normal text-white">{props.text}</h3>
       </div>
 
+      {/* TODO: Analyze how to make these components routes to facilitate the navigation between modal */}
       {props.action === "transaction" && (
         <AddTransaction
           handleAlert={props.showAlert}
@@ -40,6 +42,14 @@ function QuickAccessCard(props: Props) {
 
       {props.action === "label" && (
         <LabelManager
+          handleAlert={props.showAlert}
+          isOpen={isOpen}
+          handleState={handleModal}
+        />
+      )}
+
+      {props.action === "upload_file" && (
+        <UploadInvoiceModal
           handleAlert={props.showAlert}
           isOpen={isOpen}
           handleState={handleModal}

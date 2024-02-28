@@ -1,12 +1,8 @@
-import axios from "axios";
 import { CustomLabel } from "../../models/CustomLabel";
 import { api } from "./Api";
-import { TransactionInput } from "../../components/AddTransaction";
 
 class LabelService {
-  async getUserLoggedLabels(
-    accessToken: string,
-  ): Promise<CustomLabel[]> {
+  async getUserLoggedLabels(accessToken: string): Promise<CustomLabel[]> {
     try {
       const endpoint = "/labels/";
       const response = await api.get(endpoint, {

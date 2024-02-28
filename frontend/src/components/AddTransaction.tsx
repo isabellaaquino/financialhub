@@ -1,20 +1,20 @@
-import { Dialog, Listbox, Transition } from "@headlessui/react";
+import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useCallback, useState } from "react";
-import { DurationOption, TypeOption } from "../models/Transaction";
 import transactionService from "../api/services/TransactionService";
-import OptionsDropdown from "./OptionsDropdown";
-import { capitalizeStr } from "./utils";
 import { useAuth } from "../hooks/useAuth";
+import { CustomLabel } from "../models/CustomLabel";
+import { DurationOption, TypeOption } from "../models/Transaction";
+import LabelPicker from "./LabelPicker";
 import ModalLabel from "./ModalLabel";
+import OptionsDropdown from "./OptionsDropdown";
 import RadioGroup from "./RadioGroup";
 import SwitchButton from "./SwitchButton";
-import LabelPicker from "./LabelPicker";
-import { CustomLabel } from "../models/CustomLabel";
+import { capitalizeStr } from "./utils";
 
 export interface TransactionInput {
   title?: string;
   description?: string;
-  label_id?: Number,
+  label_id?: Number;
   value: number;
   date?: string;
   updateWallet: boolean;
@@ -41,7 +41,7 @@ export default function AddTransaction(props: Props) {
   const [selectedLabel, setSelectedLabel] = useState<CustomLabel>({
     id: -1,
     name: "",
-    color: ""
+    color: "",
   });
   const [transactionInput, setTransactionInput] = useState<TransactionInput>({
     title: "",
@@ -55,7 +55,6 @@ export default function AddTransaction(props: Props) {
     amount: undefined,
     duration: selectedDuration,
   });
-
 
   function closeModal() {
     props.handleState(false);
@@ -161,7 +160,7 @@ export default function AddTransaction(props: Props) {
                   >
                     <div className="flex flex-row gap-5">
                       <div className="w-full">
-                        <ModalLabel title="Title" styling="mb-2"/>
+                        <ModalLabel title="Title" styling="mb-2" />
                         <input
                           name="title"
                           className="w-full text-white pl-3 pr-5 py-2 rounded-md bg-black-300 focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -169,8 +168,16 @@ export default function AddTransaction(props: Props) {
                         />
                       </div>
                       <div className="w-full">
-                        <ModalLabel title="Label" styling="mb-2" tooltipText="Labels are used to classify your transactions."/>
-                        <LabelPicker selectedLabel={selectedLabel} setSelectedLabel={handleLabelChange} labels={props.userLabels}/>
+                        <ModalLabel
+                          title="Label"
+                          styling="mb-2"
+                          tooltipText="Labels are used to classify your transactions."
+                        />
+                        <LabelPicker
+                          selectedLabel={selectedLabel}
+                          setSelectedLabel={handleLabelChange}
+                          labels={props.userLabels}
+                        />
                       </div>
                     </div>
                     <div className="flex flex-row gap-5">

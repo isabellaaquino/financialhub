@@ -41,7 +41,7 @@ export default function ConfirmModal(props: Props) {
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel className="max-w-md transform rounded-2xl bg-black-400 p-6 align-middle shadow-xl transition-all">
-                <span className="material-symbols-rounded">warning</span>
+                  <span className="material-symbols-rounded">warning</span>
                   <Dialog.Title
                     as="h1"
                     className="text-lg font-medium leading-6 mb-4 text-gray-900"

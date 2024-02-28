@@ -1,5 +1,4 @@
-import { ApexOptions } from "apexcharts";
-import React, { Component, useState } from "react";
+import { useState } from "react";
 import Chart from "react-apexcharts";
 
 function ProfileChart() {
