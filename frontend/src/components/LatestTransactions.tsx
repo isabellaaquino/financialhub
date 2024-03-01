@@ -1,81 +1,81 @@
-import { useState } from "react";
-import { Transaction, TypeOption } from "../models/Transaction";
-import Title from "./Title";
-import dateService from "../api/services/DateService";
-import { useAuth } from "../hooks/useAuth";
+import { Chip } from "@mui/material";
+import { Transaction, typeOptionColor } from "../models/Transaction";
+import {
+  DataGrid,
+  GridRowsProp,
+  GridColDef,
+  GridValueFormatterParams,
+} from "@mui/x-data-grid";
 
-const MAX_ROWS = 5;
+const MAX_ROWS = 10;
+
 interface Props {
   data: Transaction[] | null;
+  headOnly: boolean;
 }
 
 function LatestTransactions(props: Props) {
+  const columns: GridColDef[] = [
+    { field: "col1", headerName: "Name", width: 300 },
+    { field: "col2", headerName: "Label", width: 300 },
+    {
+      field: "col3",
+      headerName: "Type",
+      width: 300,
+      renderCell: (params) => {
+        const { bgColor, color } = typeOptionColor(params.value);
+        return (
+          <Chip
+            label={params.value}
+            style={{ color, backgroundColor: bgColor }}
+          />
+        );
+      },
+    },
+    {
+      field: "col4",
+      headerName: "Value",
+      width: 300,
+      valueFormatter: (params: GridValueFormatterParams) => {
+        return parseInt(params.value.toString()).toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        });
+      },
+    },
+    {
+      field: "col5",
+      headerName: "Date",
+      width: 300,
+    },
+  ];
+
+  function transformData(data: Transaction[] | null): GridRowsProp | [] {
+    return data
+      ? data.map((item) => ({
+          id: item.id,
+          col1: item.title,
+          col2: item.label || "",
+          col3: item.type,
+          col4: item.value,
+          col5: new Date(item.date).toLocaleDateString(),
+        }))
+      : [];
+  }
+
   return (
-    <div className="LatestTransactions md:ml-0">
-      <Title text="Latest Transactions" />
-      <input
-        className="w-full bg-black-500 rounded-md h-8 px-5 py-5 text-white mb-2 text-sm"
-        placeholder="Search"
-        type="text"
+    <>
+      <DataGrid
+        rows={
+          props.headOnly
+            ? transformData(props.data).slice(0, MAX_ROWS)
+            : transformData(props.data)
+        }
+        columns={columns}
+        hideFooter={props.headOnly}
+        autoHeight
       />
-      {props.data && props.data.length > 0 ? (
-        <table className="table-auto divide-y divide-gray-300 w-full text-left text-sm mt-5">
-          <thead className="">
-            <tr className="text-gray-200 bg-gray-300">
-              <th className="text-sm font-normal w-52 p-2">Name</th>
-              <th className="text-sm font-normal w-52 hidden sm:block py-2">
-                Date
-              </th>
-              <th className="text-sm font-normal w-52 py-2">Label</th>
-              <th className="text-sm font-normal w-52 py-2">Type</th>
-              <th className="text-sm font-normal w-52 py-2">Amount</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {props.data &&
-              props.data.slice(0, MAX_ROWS).map((l, i) => {
-                return (
-                  <tr
-                    key={i}
-                    className="hover:bg-gray-300 cursor-pointer border-none text-gray-100"
-                  >
-                    <td className="p-2 py-5">{l.title}</td>
-                    <td className="text-gray-400 hidden sm:block py-5">
-                      {dateService.formatDateValue(l.date.toLocaleString())}
-                    </td>
-                    <td className="text-gray-50">
-                      <span className={`py-0.5 px-2 w-2 ${l?.label?.name ? 'border rounded-2xl' : ''} font-normal`} style={l?.label && {borderColor: `${l?.label?.color}`}} >
-                        {l?.label?.name}
-                      </span>
-                    </td>
-                    <td className="text-gray-50">
-                      <span
-                        className={`py-2 px-3 rounded-md font-medium text-xs ${
-                          l.type === TypeOption.EXPENSE
-                            ? `bg-red-100 text-red-400 `
-                            : l.type === TypeOption.TRANSFER
-                            ? `bg-purple-100 text-purple-400`
-                            : `bg-green-100 text-green-400`
-                        }`}
-                      >
-                        {l.type}
-                      </span>
-                    </td>
-                    <td>
-                      {Number(l.value).toLocaleString("en-US", {
-                        style: "currency",
-                        currency: "USD",
-                      })}
-                    </td>
-                  </tr>
-                );
-              })}
-          </tbody>
-        </table>
-      ) : (
-        <p className="text-center text-gray-500 text-sm my-5">No data found</p>
-      )}
-    </div>
+    </>
   );
 }
 

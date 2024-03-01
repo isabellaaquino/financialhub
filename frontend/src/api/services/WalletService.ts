@@ -11,7 +11,6 @@ class WalletService {
         },
       });
       const data = (await response.data) as Wallet;
-      console.log(data);
       return data;
     } catch (error) {
       console.log(error);
@@ -23,7 +22,13 @@ class WalletService {
     }
   }
 
-  async updateWallet(accessToken: string, value: number) {
+  async updateWallet({
+    accessToken,
+    value,
+  }: {
+    accessToken: string;
+    value: number;
+  }) {
     try {
       const response = await api.put("/wallet/", value, {
         headers: {

@@ -1,7 +1,6 @@
-import axios from "axios";
 import { Transaction } from "../../models/Transaction";
 import { api } from "./Api";
-import { TransactionInput } from "../../components/AddTransaction";
+import { NewTransactionFormData } from "../../schemas/newTransactionSchema";
 
 class TransactionService {
   async getUserLoggedTransactions(
@@ -25,12 +24,19 @@ class TransactionService {
     }
   }
 
-  async createTransactionAPI(
-    accessToken: string,
-    transaction: TransactionInput
-  ): Promise<{ [key: string]: string } | null> {
+  async createTransactionAPI({
+    accessToken,
+    transaction,
+  }: {
+    accessToken: string;
+    transaction: NewTransactionFormData;
+  }): Promise<{ [key: string]: string } | null> {
     try {
-      const response = await api.post("/transaction/", transaction, {
+      const newTransaction = {
+        ...transaction,
+        date: transaction.date.toDate(),
+      };
+      const response = await api.post("/transaction/", newTransaction, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,

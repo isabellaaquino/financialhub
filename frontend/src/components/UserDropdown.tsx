@@ -1,62 +1,98 @@
-import { Menu, Transition } from "@headlessui/react";
-import { Fragment } from "react";
+import { Settings, Logout } from "@mui/icons-material";
+import {
+  Box,
+  Tooltip,
+  IconButton,
+  Avatar,
+  Menu,
+  MenuItem,
+  Divider,
+  ListItemIcon,
+} from "@mui/material";
 import { useAuth } from "../hooks/useAuth";
+import { useState } from "react";
 
 export default function UserDropdown() {
   const { user, SignOut } = useAuth();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   return (
-    <div className="w-56 text-right z-40">
-      <Menu as="div" className="relative inline-block text-left">
-        <div className="flex flex-row items-center">
-          <Menu.Button className="p-1 md:p-1 rounded-full hover:md:bg-black-400 focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-opacity-75">
-            <div className="rounded-full bg-gray-300 p-4 md:p-2 inline-flex items-center">
-              <span className="text-green-500 text-sm font-semibold">
-                {user &&
-                  user.first_name.charAt(0).toUpperCase() +
-                    user.last_name.charAt(0).toUpperCase()}
-              </span>
-            </div>
-          </Menu.Button>
-        </div>
-        <Transition
-          as={Fragment}
-          enter="transition ease-out duration-100"
-          enterFrom="transform opacity-0 scale-95"
-          enterTo="transform opacity-100 scale-100"
-          leave="transition ease-in duration-75"
-          leaveFrom="transform opacity-100 scale-100"
-          leaveTo="transform opacity-0 scale-95"
-        >
-          <Menu.Items className="absolute right-0 mt-1 w-56 origin-top-right divide-y divide-black-300 rounded-md border border-black-300 bg-black-400 focus:outline-none">
-            <div className="px-1 py-1">
-              <Menu.Item>
-                {({ active }) => (
-                  <button className="group flex w-full items-center rounded-md px-2 py-2 text-white text-sm hover:bg-green-500">
-                    <span className="material-symbols-rounded pr-2">build</span>{" "}
-                    Settings
-                  </button>
-                )}
-              </Menu.Item>
-            </div>
-            <div className="px-1 py-1">
-              <Menu.Item>
-                {({ active }) => (
-                  <button
-                    onClick={SignOut}
-                    className="group flex w-full items-center rounded-md px-2 py-2 text-white text-sm hover:bg-green-500"
-                  >
-                    <span className="material-symbols-rounded pr-2">
-                      logout
-                    </span>
-                    Sign Out
-                  </button>
-                )}
-              </Menu.Item>
-            </div>
-          </Menu.Items>
-        </Transition>
+    <>
+      <Box sx={{ display: "flex", alignItems: "center", textAlign: "center" }}>
+        <Tooltip title="Account settings">
+          <IconButton
+            onClick={handleClick}
+            size="small"
+            sx={{ ml: 2 }}
+            aria-controls={open ? "account-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? "true" : undefined}
+          >
+            <Avatar sx={{ width: 32, height: 32 }}>
+              {user?.first_name.slice(0, 1)}
+            </Avatar>
+          </IconButton>
+        </Tooltip>
+      </Box>
+      <Menu
+        anchorEl={anchorEl}
+        id="account-menu"
+        open={open}
+        onClose={handleClose}
+        onClick={handleClose}
+        slotProps={{
+          paper: {
+            elevation: 0,
+            sx: {
+              overflow: "visible",
+              filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+              mt: 1.5,
+              "& .MuiAvatar-root": {
+                width: 32,
+                height: 32,
+                ml: -0.5,
+                mr: 1,
+              },
+              "&::before": {
+                content: '""',
+                display: "block",
+                position: "absolute",
+                top: 0,
+                right: 14,
+                width: 10,
+                height: 10,
+                bgcolor: "background.paper",
+                transform: "translateY(-50%) rotate(45deg)",
+                zIndex: 0,
+              },
+            },
+          },
+        }}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+      >
+        <Divider />
+        <MenuItem onClick={handleClose}>
+          <ListItemIcon>
+            <Settings fontSize="small" />
+          </ListItemIcon>
+          Settings
+        </MenuItem>
+        <MenuItem onClick={SignOut}>
+          <ListItemIcon>
+            <Logout fontSize="small" />
+          </ListItemIcon>
+          Logout
+        </MenuItem>
       </Menu>
-    </div>
+    </>
   );
 }
