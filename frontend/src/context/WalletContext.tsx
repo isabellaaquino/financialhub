@@ -1,6 +1,4 @@
-import { createContext, useEffect, useState } from "react";
-import { Wallet } from "../models/Wallet";
-import { Transaction } from "../models/Transaction";
+import { createContext, useState } from "react";
 import transactionService from "../api/services/TransactionService";
 import walletService from "../api/services/WalletService";
 import dateService from "../api/services/DateService";

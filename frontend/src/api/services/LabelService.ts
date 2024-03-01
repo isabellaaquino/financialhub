@@ -1,12 +1,9 @@
-import axios from "axios";
 import { CustomLabel } from "../../models/CustomLabel";
+import { NewLabelFormData } from "../../schemas/newLabelSchema";
 import { api } from "./Api";
-import { TransactionInput } from "../../components/AddTransaction";
 
 class LabelService {
-  async getUserLoggedLabels(
-    accessToken: string,
-  ): Promise<CustomLabel[]> {
+  async getUserLoggedLabels(accessToken: string): Promise<CustomLabel[]> {
     try {
       const endpoint = "/labels/";
       const response = await api.get(endpoint, {
@@ -16,6 +13,7 @@ class LabelService {
         },
       });
       const data = response.data as CustomLabel[];
+      console.log(data);
       return data;
     } catch (error) {
       console.log(error);
@@ -23,10 +21,13 @@ class LabelService {
     }
   }
 
-  async createLabelAPI(
-    accessToken: string,
-    label: CustomLabel
-  ): Promise<{ [key: string]: string } | null> {
+  async createLabelAPI({
+    accessToken,
+    label,
+  }: {
+    accessToken: string;
+    label: NewLabelFormData;
+  }): Promise<{ [key: string]: string } | null> {
     try {
       const response = await api.post("/label/", label, {
         headers: {

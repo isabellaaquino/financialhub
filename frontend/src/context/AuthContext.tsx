@@ -1,14 +1,18 @@
 import { createContext, useEffect, useState } from "react";
 import authService from "../api/services/AuthService";
 import { User } from "../models/User";
-import jwt_decode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { UserInput } from "../routes/SignUp";
 
 interface AuthContextData {
   user: User | null;
-  isSideNavOpen: boolean;
-  setIsSideNavOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  SignIn(email: string, password: string): Promise<void>;
+  SignIn({
+    email,
+    password,
+  }: {
+    email: string;
+    password: string;
+  }): Promise<void>;
   SignUp(user: UserInput): Promise<string | null>;
   SignOut(): void;
   authTokens: AuthTokens | null;
@@ -25,7 +29,6 @@ interface AuthTokens {
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 export const AuthProvider = ({ children }: Props) => {
-  let [isSideNavOpen, setIsSideNavOpen] = useState(false);
   let [loading, setLoading] = useState(true);
   let [authTokens, setAuthTokens] = useState<AuthTokens | null>(() =>
     localStorage.getItem("authTokens")
@@ -34,14 +37,20 @@ export const AuthProvider = ({ children }: Props) => {
   );
   let [loggedUser, setLoggedUser] = useState<User | null>(() =>
     localStorage.getItem("authTokens")
-      ? jwt_decode(localStorage.getItem("authTokens")!)
+      ? jwtDecode(localStorage.getItem("authTokens")!)
       : null
   );
 
-  async function SignIn(email: string, password: string) {
+  async function SignIn({
+    email,
+    password,
+  }: {
+    email: string;
+    password: string;
+  }) {
     const response = (await authService.signIn(email, password)) as AuthTokens;
     setAuthTokens(response);
-    setLoggedUser(jwt_decode(response.access));
+    setLoggedUser(jwtDecode(response.access));
     localStorage.setItem("authTokens", JSON.stringify(response));
   }
 
@@ -62,7 +71,7 @@ export const AuthProvider = ({ children }: Props) => {
       )) as AuthTokens;
 
       setAuthTokens(response);
-      setLoggedUser(jwt_decode(response.access));
+      setLoggedUser(jwtDecode(response.access));
       localStorage.setItem("authTokens", JSON.stringify(response));
     } catch {
       SignOut();
@@ -85,8 +94,6 @@ export const AuthProvider = ({ children }: Props) => {
     <AuthContext.Provider
       value={{
         user: loggedUser,
-        isSideNavOpen,
-        setIsSideNavOpen,
         SignIn,
         SignUp,
         SignOut,
