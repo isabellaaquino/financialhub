@@ -22,7 +22,13 @@ class WalletService {
     }
   }
 
-  async updateWallet(accessToken: string, value: number) {
+  async updateWallet({
+    accessToken,
+    value,
+  }: {
+    accessToken: string;
+    value: number;
+  }) {
     try {
       const response = await api.put("/wallet/", value, {
         headers: {

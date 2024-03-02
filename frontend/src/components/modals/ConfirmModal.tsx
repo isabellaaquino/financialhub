@@ -1,4 +1,4 @@
-import { Dialog, Transition } from "@headlessui/react";
+// import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 
 interface Props {
@@ -15,7 +15,7 @@ export default function ConfirmModal(props: Props) {
 
   return (
     <>
-      <Transition appear show={props.isOpen} as={Fragment}>
+      {/* <Transition appear show={props.isOpen} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={closeModal}>
           <Transition.Child
             as={Fragment}
@@ -72,7 +72,7 @@ export default function ConfirmModal(props: Props) {
             </div>
           </div>
         </Dialog>
-      </Transition>
+      </Transition> */}
     </>
   );
 }

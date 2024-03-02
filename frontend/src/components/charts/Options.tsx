@@ -1,5 +1,4 @@
-import { Listbox, Transition } from "@headlessui/react";
-import { Fragment } from "react";
+// import { Listbox, Transition } from "@headlessui/react";
 import { SummaryOption } from "../../models/Summary";
 
 const options = Object.values(SummaryOption);
@@ -12,7 +11,7 @@ interface Props {
 export default function Options(props: Props) {
   return (
     <div className="w-28 z-10">
-      <Listbox value={props.option} onChange={props.handleOption}>
+      {/* <Listbox value={props.option} onChange={props.handleOption}>
         <div className="relative mt-1">
           <Listbox.Button className="relative w-full cursor-default rounded-lg bg-black-400 py-2 pl-3 pr-10 text-left border focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
             <span className="block truncate">{props.option}</span>
@@ -58,7 +57,7 @@ export default function Options(props: Props) {
             </Listbox.Options>
           </Transition>
         </div>
-      </Listbox>
+      </Listbox> */}
     </div>
   );
 }

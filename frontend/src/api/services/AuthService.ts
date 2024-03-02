@@ -1,5 +1,3 @@
-import { AxiosResponse } from "axios";
-import { User } from "../../models/User";
 import { UserInput } from "../../routes/SignUp";
 import { api } from "./Api";
 

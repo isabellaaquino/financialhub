@@ -1,6 +1,5 @@
 import { useCallback, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { setSourceMapRange } from "typescript";
 import { useAuth } from "../hooks/useAuth";
 
 export interface UserInput {
@@ -27,7 +26,7 @@ function SignUp() {
         return { ...prevState, [e.target.name]: e.target.value };
       });
     },
-    [userInput]
+    []
   );
 
   const registerUser = async (event: React.FormEvent<HTMLFormElement>) => {

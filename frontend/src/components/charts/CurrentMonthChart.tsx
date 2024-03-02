@@ -4,6 +4,9 @@ import dateService, { MONTHS_IN_YEAR } from "../../api/services/DateService";
 import { SummaryOption } from "../../models/Summary";
 import { Transaction } from "../../models/Transaction";
 import { ApexOptions } from "apexcharts";
+import { Box } from "@mui/material";
+import { grey } from "@mui/material/colors";
+import { darkTheme } from "../../theme";
 
 interface Props {
   data: Transaction[];
@@ -26,16 +29,16 @@ function CurrentMonthChart(props: Props) {
       },
       plotOptions: {
         bar: {
-          columnWidth: "80%",
-          distributed: true,
+          columnWidth: "70%",
         },
       },
+      colors: [darkTheme.palette.primary.main],
       legend: {
         show: false,
       },
       title: {
         text: `${
-          props.option === SummaryOption.Month ? "Monthly" : "Annual"
+          props.option === SummaryOption.Month ? "Daily" : "Annual"
         } expenses`,
         align: "left",
         style: {
@@ -49,36 +52,38 @@ function CurrentMonthChart(props: Props) {
         type: "numeric",
         labels: {
           style: {
-            colors: "#5c636f",
+            colors: grey[700],
           },
           show: true,
           formatter: function (value: string) {
-            return String(value).substring(0, 2);
+            return String(value).substring(0, 5);
           },
         },
       },
       yaxis: {
+        stepSize: 250,
         labels: {
-          show: false,
-          formatter: function (val) {
-            return "$" + val.toFixed(2);
+          show: true,
+          style: {
+            colors: grey[700],
           },
-          // labels: {
-          //   show: true,
-          //   formatter: function (value: string) {
-          //     return `$${value}`;
-          //   },
-          // },
+          formatter: function (val) {
+            return val.toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            });
+          },
         },
       },
       grid: {
-        show: false,
+        show: true,
+        borderColor: grey[900],
       },
       dataLabels: { enabled: false },
       tooltip: {
         theme: "dark",
         x: {
-          formatter(val, opts) {
+          formatter(val) {
             // const seriesName = opts.series[opts.seriesIndex].name;
             return String(val);
           },
@@ -101,12 +106,12 @@ function CurrentMonthChart(props: Props) {
     });
 
     const dataSet = categories.map((c) => {
-      const data = result.find(({ date, value }) => date === c);
+      const data = result.find(({ date }) => date === c);
       return { x: c, y: data ? data.value : 0 };
     });
 
     setLineChartData(dataSet);
-  }, [props.option]);
+  }, [props.option, props.data]);
 
   useEffect(() => {
     setState((prevState) => {
@@ -227,7 +232,13 @@ function CurrentMonthChart(props: Props) {
   }
 
   return (
-    <div className="CurrentMonthChart px-10 h-full">
+    <Box
+      border="1px solid"
+      borderColor={darkTheme.palette.background.paper}
+      borderRadius={2}
+      padding={3}
+      height={380}
+    >
       <Chart
         options={state.options}
         series={state.series}
@@ -235,7 +246,7 @@ function CurrentMonthChart(props: Props) {
         width="100%"
         height="100%"
       />
-    </div>
+    </Box>
   );
 }
 
