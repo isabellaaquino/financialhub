@@ -7,32 +7,45 @@ import SignIn from "./routes/SignIn";
 import Home from "./routes/Home";
 import Transactions from "./routes/Transactions";
 import App from "./App";
+import PersistLogin from "./components/auth/PersistLogin";
+import Anonymous from "./components/auth/Anonymous";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Root />,
+    element: <PersistLogin />,
     errorElement: <Error />,
     children: [
       {
-        index: true,
-        element: <Home />,
-      },
-      {
-        path: "transactions",
-        element: <Transactions />,
+        element: <Root />,
+        children: [
+          {
+            index: true,
+            element: <Home />,
+          },
+          {
+            path: "transactions",
+            element: <Transactions />,
+          },
+        ],
       },
     ],
   },
   {
-    path: "/sign-up",
-    element: <SignUp />,
-    errorElement: <Error />,
-  },
-  {
-    path: "/sign-in",
-    element: <SignIn />,
-    errorElement: <Error />,
+    path: "/auth",
+    element: <Anonymous />,
+    children: [
+      {
+        path: "sign-up",
+        element: <SignUp />,
+        errorElement: <Error />,
+      },
+      {
+        path: "sign-in",
+        element: <SignIn />,
+        errorElement: <Error />,
+      },
+    ],
   },
 ]);
 

@@ -3,12 +3,11 @@ import { TextField } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
-import { useAuth } from "../../hooks/useAuth";
 import {
   EditBalanceFormData,
   editBalanceFormSchema,
 } from "../../schemas/editBalanceSchema";
-import walletService from "../../api/services/WalletService";
+import { useWallet } from "../../hooks/api/useWallet";
 
 interface Props {
   setState: React.Dispatch<React.SetStateAction<boolean>>;
@@ -16,7 +15,8 @@ interface Props {
 
 function EditBalanceForm(props: Props) {
   const queryClient = useQueryClient();
-  const { authTokens } = useAuth();
+  const { updateWallet } = useWallet();
+
   const {
     handleSubmit,
     control,
@@ -26,10 +26,10 @@ function EditBalanceForm(props: Props) {
   });
 
   const { mutateAsync } = useMutation({
-    mutationFn: walletService.updateWallet,
+    mutationFn: updateWallet,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["wallet", authTokens!.access],
+        queryKey: ["wallet"],
       });
       props.setState(false);
     },
@@ -40,7 +40,6 @@ function EditBalanceForm(props: Props) {
 
   async function editBalance(data: EditBalanceFormData) {
     await mutateAsync({
-      accessToken: authTokens!.access,
       value: data.balance,
     });
   }

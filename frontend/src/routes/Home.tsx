@@ -4,24 +4,19 @@ import CurrentMonthChart from "../components/charts/CurrentMonthChart";
 import ProfileChart from "../components/charts/ProfileChart";
 import LatestTransactions from "../components/LatestTransactions";
 import AddIcon from "@mui/icons-material/Add";
-import { useAuth } from "../hooks/useAuth";
 import { Box, Button, Grid, Typography } from "@mui/material";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import AddTransaction from "../components/modals/AddTransaction";
 import WalletGridRow from "../components/dashboard/WalletGridRow";
 import { SummaryOption } from "../models/Summary";
 import AddLabel from "../components/modals/AddLabel";
-import { useTransactions } from "../hooks/useTransactions";
+import { useTransactions } from "../hooks/api/useTransactions";
 
 function Home() {
-  const { authTokens } = useAuth();
   const [_, setSearchParams] = useSearchParams();
-
-  const { data: transactions } = useTransactions(
-    authTokens!.access,
-    dateService.currentYear()
-  );
-
+  const {
+    query: { data: transactions },
+  } = useTransactions(dateService.currentYear());
   return (
     <>
       <Box

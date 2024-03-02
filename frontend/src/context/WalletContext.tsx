@@ -1,13 +1,9 @@
 import { createContext, useState } from "react";
-import transactionService from "../api/services/TransactionService";
-import walletService from "../api/services/WalletService";
-import dateService from "../api/services/DateService";
-
 interface WalletContextData {
   wallet: string;
   transactions: string;
-	getWallet(authTokens: string): Promise<void>;
-	getTransactions(authTokens: string): Promise<void>;
+  getWallet(authTokens: string): Promise<void>;
+  getTransactions(authTokens: string): Promise<void>;
 }
 
 interface Props {
@@ -16,22 +12,25 @@ interface Props {
 
 const WalletContext = createContext<WalletContextData>({} as WalletContextData);
 export const WalletProvider = ({ children }: Props) => {
-  let [wallet, setWallet] = useState<string | null>(() =>  localStorage.getItem("wallet"));
-  let [transactions, setTransactions] = useState<string | null>(() => localStorage.getItem("wallet"));
+  let [wallet, setWallet] = useState<string | null>(() =>
+    localStorage.getItem("wallet")
+  );
+  let [transactions, setTransactions] = useState<string | null>(() =>
+    localStorage.getItem("wallet")
+  );
 
+  // async function getWallet(authTokens: string) {
+  //   const wallet = await walletService.getUserLoggedWallet(authTokens);
+  //   //setWallet(wallet)
+  // }
 
-  async function getWallet(authTokens: string) {
-    const wallet = await walletService.getUserLoggedWallet(authTokens);
-    //setWallet(wallet)
-  }
-
-  async function getTransactions(authTokens: string) {
-    const transactions = await transactionService.getUserLoggedTransactions(
-      authTokens,
-      dateService.currentYear()
-    );
-    //setTransactions(transactions);
-  }
+  // async function getTransactions(authTokens: string) {
+  //   const transactions = await transactionService.getUserLoggedTransactions(
+  //     authTokens,
+  //     dateService.currentYear()
+  //   );
+  //   //setTransactions(transactions);
+  // }
 
   // return (
   //   <WalletContext.Provider

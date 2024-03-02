@@ -1,8 +1,8 @@
-import { createContext, useEffect, useState } from "react";
-import authService from "../api/services/AuthService";
+import { createContext, useState } from "react";
 import { User } from "../models/User";
 import { jwtDecode } from "jwt-decode";
 import { UserInput } from "../routes/SignUp";
+import { api } from "../api/services/Api";
 
 interface AuthContextData {
   user: User | null;
@@ -15,6 +15,7 @@ interface AuthContextData {
   }): Promise<void>;
   SignUp(user: UserInput): Promise<string | null>;
   SignOut(): void;
+  refresh: () => Promise<void>;
   authTokens: AuthTokens | null;
 }
 
@@ -29,17 +30,9 @@ interface AuthTokens {
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 export const AuthProvider = ({ children }: Props) => {
-  let [loading, setLoading] = useState(true);
-  let [authTokens, setAuthTokens] = useState<AuthTokens | null>(() =>
-    localStorage.getItem("authTokens")
-      ? JSON.parse(localStorage.getItem("authTokens")!)
-      : null
-  );
-  let [loggedUser, setLoggedUser] = useState<User | null>(() =>
-    localStorage.getItem("authTokens")
-      ? jwtDecode(localStorage.getItem("authTokens")!)
-      : null
-  );
+  // let [loading, setLoading] = useState(true);
+  let [authTokens, setAuthTokens] = useState<AuthTokens | null>(null);
+  let [loggedUser, setLoggedUser] = useState<User | null>(null);
 
   async function SignIn({
     email,
@@ -48,47 +41,98 @@ export const AuthProvider = ({ children }: Props) => {
     email: string;
     password: string;
   }) {
-    const response = (await authService.signIn(email, password)) as AuthTokens;
-    setAuthTokens(response);
-    setLoggedUser(jwtDecode(response.access));
-    localStorage.setItem("authTokens", JSON.stringify(response));
+    try {
+      const response = await api.post(
+        "/token/",
+        {
+          email: email,
+          password: password,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+      const data = await response.data;
+      setAuthTokens(data);
+      setLoggedUser(jwtDecode(data.access));
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async function SignUp(user: UserInput) {
-    return await authService.signUp(user);
+    try {
+      const response = await api.post("/register/", user);
+      if (response.status !== 200) return null;
+      return (await response.data) as string;
+    } catch (error) {
+      console.log(error);
+    }
+
+    return null;
   }
 
   function SignOut() {
     setAuthTokens(null);
     setLoggedUser(null);
-    localStorage.removeItem("authTokens");
   }
 
-  async function RefreshToken() {
-    try {
-      const response = (await authService.refreshToken(
-        authTokens?.refresh
-      )) as AuthTokens;
+  async function refresh() {
+    const response = await api.post(
+      "/token/refresh/",
+      { refresh: authTokens?.refresh },
+      {
+        withCredentials: true,
+      }
+    );
+    setAuthTokens((prev) => {
+      if (prev) {
+        console.log(prev);
+        console.log(response.data);
+        return response.data;
+      }
+      return null;
+    });
+    setLoggedUser(jwtDecode(response.data.access));
 
-      setAuthTokens(response);
-      setLoggedUser(jwtDecode(response.access));
-      localStorage.setItem("authTokens", JSON.stringify(response));
-    } catch {
-      SignOut();
-    }
-
-    if (loading) setLoading(false);
+    return response.data.access;
   }
+  // async function RefreshToken() {
+  //   try {
+  //     const response = (await authService.refreshToken(
+  //       authTokens?.refresh
+  //     )) as AuthTokens;
 
-  useEffect(() => {
-    if (loading) RefreshToken();
+  //     setAuthTokens(response);
+  //     setLoggedUser(jwtDecode(response.access));
+  //   } catch {
+  //     SignOut();
+  //   }
 
-    let interval = setInterval(() => {
-      if (authTokens) RefreshToken();
-    }, 1000 * 60 * 4); //5 minutes
+  //   if (loading) setLoading(false);
+  // }
 
-    return () => clearInterval(interval);
-  }, [authTokens, loading]);
+  // async refreshToken(token: string | undefined) {
+  //   try {
+  //     const response = await api.post("/token/refresh/", {
+  //       refresh: token,
+  //     });
+  //     const data = await response.data;
+  //     return data;
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
+
+  // useEffect(() => {
+  //   if (loading) RefreshToken();
+
+  //   let interval = setInterval(() => {
+  //     if (authTokens) RefreshToken();
+  //   }, 1000 * 60 * 4); //5 minutes
+
+  //   return () => clearInterval(interval);
+  // }, [authTokens, loading]);
 
   return (
     <AuthContext.Provider
@@ -97,6 +141,7 @@ export const AuthProvider = ({ children }: Props) => {
         SignIn,
         SignUp,
         SignOut,
+        refresh,
         authTokens,
       }}
     >

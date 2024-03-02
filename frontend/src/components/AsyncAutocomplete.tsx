@@ -2,17 +2,15 @@ import * as React from "react";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
-import { useAuth } from "../hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
-import labelService from "../api/services/LabelService";
-import { Controller } from "react-hook-form";
+import { useLabels } from "../hooks/api/useLabels";
 
 export default function AsyncAutocomplete({ onChange, value }: any) {
-  const { authTokens } = useAuth();
+  const { getLabels } = useLabels();
   const [open, setOpen] = React.useState(false);
   const { data: labels, isLoading } = useQuery({
-    queryKey: ["labels", authTokens!.access],
-    queryFn: () => labelService.getUserLoggedLabels(authTokens!.access),
+    queryKey: ["labels"],
+    queryFn: () => getLabels(),
     enabled: open,
   });
 

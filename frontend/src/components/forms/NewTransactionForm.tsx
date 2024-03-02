@@ -24,17 +24,17 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { TypeOption, typeOptionMask } from "../../models/Transaction";
 import { grey } from "@mui/material/colors";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import transactionService from "../../api/services/TransactionService";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import dateService from "../../api/services/DateService";
 import AsyncAutocomplete from "../AsyncAutocomplete";
 import AddIcon from "@mui/icons-material/Add";
 import { useSnackbar } from "notistack";
+import { useTransactions } from "../../hooks/api/useTransactions";
 
 function NewTransactionForm() {
   const queryClient = useQueryClient();
-  const { authTokens } = useAuth();
+  const { createTransaction } = useTransactions(dateService.currentYear());
   const { enqueueSnackbar } = useSnackbar();
   const [_, setSearchParams] = useSearchParams();
   const {
@@ -46,21 +46,17 @@ function NewTransactionForm() {
   });
 
   const { mutateAsync } = useMutation({
-    mutationFn: transactionService.createTransactionAPI,
+    mutationFn: createTransaction,
     onSuccess: () => {
       setSearchParams((state) => {
         state.delete("transaction");
         return state;
       });
       queryClient.invalidateQueries({
-        queryKey: [
-          "transactions",
-          authTokens!.access,
-          dateService.currentYear(),
-        ],
+        queryKey: ["transactions", dateService.currentYear()],
       });
       queryClient.invalidateQueries({
-        queryKey: ["wallet", authTokens!.access],
+        queryKey: ["wallet"],
       });
       enqueueSnackbar("Transaction created successfully!", {
         variant: "success",
@@ -77,11 +73,9 @@ function NewTransactionForm() {
       });
     },
   });
-  console.log(errors);
 
   async function addNewTransaction(data: NewTransactionFormData) {
-    console.log(data);
-    await mutateAsync({ accessToken: authTokens!.access, transaction: data });
+    await mutateAsync({ transaction: data });
   }
 
   return (

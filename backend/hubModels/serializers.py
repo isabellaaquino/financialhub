@@ -3,8 +3,8 @@ from .models import Transaction, SavingPlan, Wallet, CustomLabel
 
 from django.utils import timezone
 
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
+from rest_framework_simplejwt.exceptions import InvalidToken
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -17,6 +17,14 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         return token
 
+class MyTokenRefreshSerializer(TokenRefreshSerializer):
+    refresh = None
+    def validate(self, attrs):
+        attrs['refresh'] = self.context['request'].COOKIES.get('refresh_token')
+        if attrs['refresh']:
+            return super().validate(attrs)
+        else:
+            raise InvalidToken('No valid token found in cookie \'refresh_token\'')
 
 class WalletSerializer(serializers.ModelSerializer):
     monthly_incomes = serializers.SerializerMethodField()

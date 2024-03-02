@@ -3,18 +3,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
 import { useSnackbar } from "notistack";
 import {
   NewLabelFormData,
   newLabelFormSchema,
 } from "../../schemas/newLabelSchema";
-import labelService from "../../api/services/LabelService";
 import { grey } from "@mui/material/colors";
+import { useLabels } from "../../hooks/api/useLabels";
 
 function NewLabelForm() {
   const queryClient = useQueryClient();
-  const { authTokens } = useAuth();
+  const { createLabel } = useLabels();
   const { enqueueSnackbar } = useSnackbar();
   const [_, setSearchParams] = useSearchParams();
   const {
@@ -26,14 +25,14 @@ function NewLabelForm() {
   });
 
   const { mutateAsync } = useMutation({
-    mutationFn: labelService.createLabelAPI,
+    mutationFn: createLabel,
     onSuccess: () => {
       setSearchParams((state) => {
         state.delete("label");
         return state;
       });
       queryClient.invalidateQueries({
-        queryKey: ["labels", authTokens!.access],
+        queryKey: ["labels"],
       });
       enqueueSnackbar("Label created successfully!", {
         variant: "success",
@@ -52,7 +51,7 @@ function NewLabelForm() {
   });
 
   async function addNewLabel(data: NewLabelFormData) {
-    await mutateAsync({ accessToken: authTokens!.access, label: data });
+    await mutateAsync({ label: data });
   }
 
   return (
