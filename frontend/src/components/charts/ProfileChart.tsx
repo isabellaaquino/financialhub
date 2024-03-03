@@ -3,16 +3,28 @@ import { grey } from "@mui/material/colors";
 import { ApexOptions } from "apexcharts";
 import { useState } from "react";
 import Chart from "react-apexcharts";
+import { AggregatedExpense } from "../../models/Transaction";
 import { darkTheme } from "../../theme";
 
-function ProfileChart() {
+interface Props {
+  data: AggregatedExpense[];
+}
+
+function ProfileChart(props: Props) {
+  const { data } = props;
+
+  const colors = data.map((obj) => obj.label_color);
+  const amounts = data.map((obj) => obj.total_amount);
+  const labels = data.map((obj) => obj.label_name);
+
   const [state, _] = useState<{
     series: ApexAxisChartSeries | ApexNonAxisChartSeries;
     options: ApexOptions;
   }>({
-    series: [500, 2000, 200],
+    series: amounts,
     options: {
-      labels: ["iFood", "Bills", "Uber"],
+      labels: labels,
+      colors: colors,
       chart: {
         id: "pie",
         toolbar: { show: false },

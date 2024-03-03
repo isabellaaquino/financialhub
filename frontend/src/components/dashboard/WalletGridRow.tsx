@@ -1,14 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
-import walletService from "../../api/services/WalletService";
-import { useAuth } from "../../hooks/useAuth";
-import { Grid, Box, Typography, TextField, IconButton } from "@mui/material";
-import { grey } from "@mui/material/colors";
-import { darkTheme } from "../../theme";
-import { formatValue } from "../../utils/utils";
-import { useState } from "react";
-import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
+import ModeEditIcon from "@mui/icons-material/ModeEdit";
+import { Box, Grid, IconButton, Typography } from "@mui/material";
+import { grey } from "@mui/material/colors";
+import { useState } from "react";
+import { useAuth } from "../../hooks/useAuth";
+import { useWallet } from "../../hooks/useWallet";
+import { darkTheme } from "../../theme";
+import { formatValue } from "../../utils/utils";
 import EditBalanceForm from "../forms/EditBalanceForm";
 
 function WalletGridRow() {
@@ -20,10 +19,7 @@ function WalletGridRow() {
     isPending,
     isError,
     error,
-  } = useQuery({
-    queryKey: ["wallet", authTokens!.access],
-    queryFn: () => walletService.getUserLoggedWallet(authTokens!.access),
-  });
+  } = useWallet(authTokens!.access);
 
   if (isPending) return <span>Loading...</span>;
 

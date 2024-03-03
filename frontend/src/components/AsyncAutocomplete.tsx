@@ -1,11 +1,10 @@
-import * as React from "react";
-import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
-import { useAuth } from "../hooks/useAuth";
+import TextField from "@mui/material/TextField";
 import { useQuery } from "@tanstack/react-query";
+import * as React from "react";
 import labelService from "../api/services/LabelService";
-import { Controller } from "react-hook-form";
+import { useAuth } from "../hooks/useAuth";
 
 export default function AsyncAutocomplete({ onChange, value }: any) {
   const { authTokens } = useAuth();

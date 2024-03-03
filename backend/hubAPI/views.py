@@ -1,3 +1,5 @@
+import os
+
 from django.http import JsonResponse
 from django.db.models import QuerySet
 from .utils import custom_server_error_response, custom_success_response, custom_user_error_response
@@ -7,13 +9,14 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from rest_framework.parsers import JSONParser
+from rest_framework.parsers import JSONParser, FileUploadParser
 from hubModels.serializers import SavingPlanSerializer, WalletSerializer, TransactionSerializer
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from hubModels.models import CustomLabel
 from hubModels.serializers import LabelSerializer
+from hubModels.importer import PDFInvoiceImporter, InvoiceProcessingException
 
 
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -111,6 +114,40 @@ class LabelAPIView(APIView):
         label.delete()
 
         return custom_success_response("Label deleted with success!")
+
+
+class ImportInvoicesAPIView(APIView):
+    parser_classes = [FileUploadParser]
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, institution):
+        user: HubUser = request.user
+
+        file_bytes = request.stream.body
+
+        file_path = 'hubAPI/imported_files/buffer.pdf'
+
+        with open(file_path, 'wb') as file:
+            file.write(file_bytes)
+
+        try:
+            invoice_dict = PDFInvoiceImporter(file_path, institution).process_file()
+        except InvoiceProcessingException:
+            os.remove(file_path)
+            return custom_user_error_response(InvoiceProcessingException.message)
+
+        os.remove(file_path)
+
+        if not invoice_dict.get('value') and not invoice_dict.get('date'):
+            return custom_user_error_response(InvoiceProcessingException.message)
+
+        response = {
+            'success': True,
+            'invoice_dict': invoice_dict,
+            'message': 'Invoice was successfully imported. Please finish creating your transaction.'
+        }
+
+        return JsonResponse(response, status=200)
 
 
 @api_view(['GET'])

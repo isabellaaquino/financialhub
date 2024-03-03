@@ -1,6 +1,6 @@
 import { Transaction } from "../../models/Transaction";
-import { api } from "./Api";
 import { NewTransactionFormData } from "../../schemas/newTransactionSchema";
+import { api } from "./Api";
 
 class TransactionService {
   async getUserLoggedTransactions(
@@ -51,10 +51,13 @@ class TransactionService {
     return null;
   }
 
-  async deleteTransactionAPI(
-    accessToken: string,
-    transaction_pk: number
-  ): Promise<{ [key: string]: string } | null> {
+  async deleteTransactionAPI({
+    accessToken,
+    transaction_pk,
+  }: {
+    accessToken: string;
+    transaction_pk: Number;
+  }): Promise<{ [key: string]: string } | null> {
     try {
       const response = await api.delete(`/transaction/${transaction_pk}`, {
         headers: {
