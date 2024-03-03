@@ -1,7 +1,7 @@
-import { ReactElement, useState } from "react";
+import { useState } from "react";
+import { CustomLabel } from "../models/CustomLabel";
 import AddTransaction from "./AddTransaction";
 import LabelManager from "./LabelManager";
-import { CustomLabel } from "../models/CustomLabel";
 import UploadInvoiceModal from "./UploadFileModal";
 
 interface Props {

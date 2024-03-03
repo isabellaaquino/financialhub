@@ -14,6 +14,12 @@ export interface Transaction {
   duration?: DurationOption;
 }
 
+export interface AggregatedExpense {
+  label_name: string;
+  label_color: string;
+  total_amount: number;
+}
+
 export enum TypeOption {
   EXPENSE = "EXPENSE",
   TRANSFER = "TRANSFER",

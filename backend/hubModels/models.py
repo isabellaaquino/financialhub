@@ -1,6 +1,6 @@
 from decimal import Decimal
 from django.db import models, transaction
-from django.db.models import QuerySet, Sum
+from django.db.models import QuerySet, Sum, Count, F
 from django.core.mail import send_mail
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.base_user import AbstractBaseUser
@@ -139,6 +139,16 @@ class Wallet(models.Model):
         one_month = date.today() - relativedelta(months=1)
         return self.transactions.filter(date__gte=one_month, type="EXPENSE")\
             .aggregate(Sum('value')).get('value__sum') or 0
+
+    def get_aggregated_expenses(self):
+        """
+        Returns the top 5 expenses of a user's Wallet grouped by label
+        """
+        one_month = date.today() - relativedelta(months=1)
+        return (self.transactions.filter(date__gte=one_month, type="EXPENSE")
+                .values(label_name=F("label__name"), label_color=F("label__color"))
+                .annotate(total_amount=Sum('value'))
+                .order_by('-total_amount'))[:5]
             
     def get_saving_plans(self):
         pass
@@ -293,8 +303,8 @@ class Transaction(WalletBasedModel):
         if data.get("title"):
             transaction.title = data.get("title")
 
-        if data.get("label_id"):
-            custom_label = CustomLabel.objects.get(pk=data.get("label_id"))
+        if data.get("label"):
+            custom_label = CustomLabel.objects.get(pk=data.get("label").get("id"))
             if custom_label.get_wallet() != user_wallet:
                 raise PermissionError()
             transaction.label = custom_label

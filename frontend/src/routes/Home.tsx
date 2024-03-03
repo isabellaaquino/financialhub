@@ -1,17 +1,18 @@
+import AddIcon from "@mui/icons-material/Add";
+import FileUploadIcon from "@mui/icons-material/FileUpload";
+import { Box, Button, Grid, Typography } from "@mui/material";
 import { Link, useSearchParams } from "react-router-dom";
 import dateService from "../api/services/DateService";
+import LatestTransactions from "../components/LatestTransactions";
 import CurrentMonthChart from "../components/charts/CurrentMonthChart";
 import ProfileChart from "../components/charts/ProfileChart";
-import LatestTransactions from "../components/LatestTransactions";
-import AddIcon from "@mui/icons-material/Add";
-import { useAuth } from "../hooks/useAuth";
-import { Box, Button, Grid, Typography } from "@mui/material";
-import FileUploadIcon from "@mui/icons-material/FileUpload";
-import AddTransaction from "../components/modals/AddTransaction";
 import WalletGridRow from "../components/dashboard/WalletGridRow";
-import { SummaryOption } from "../models/Summary";
 import AddLabel from "../components/modals/AddLabel";
+import AddTransaction from "../components/modals/AddTransaction";
+import { useAuth } from "../hooks/useAuth";
 import { useTransactions } from "../hooks/useTransactions";
+import { useWallet } from "../hooks/useWallet";
+import { SummaryOption } from "../models/Summary";
 
 function Home() {
   const { authTokens } = useAuth();
@@ -21,6 +22,8 @@ function Home() {
     authTokens!.access,
     dateService.currentYear()
   );
+
+  const { data: wallet } = useWallet(authTokens!.access);
 
   return (
     <>
@@ -86,7 +89,13 @@ function Home() {
           )}
         </Grid>
         <Grid item xs={12} lg={6}>
-          <ProfileChart />
+          {wallet?.aggregated_expenses ? (
+            <ProfileChart data={wallet.aggregated_expenses} />
+          ) : (
+            <Typography component="p" variant="body1">
+              Unable to load chart due to insufficient data.
+            </Typography>
+          )}
         </Grid>
         <Grid item xs={12}>
           <Box height={"auto"}>

@@ -1,9 +1,5 @@
-import {
-  NewTransactionFormData,
-  newTransactionFormSchema,
-} from "../../schemas/newTransactionSchema";
-import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import AddIcon from "@mui/icons-material/Add";
 import {
   Box,
   Button,
@@ -18,19 +14,23 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { TypeOption, typeOptionMask } from "../../models/Transaction";
 import { grey } from "@mui/material/colors";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import transactionService from "../../api/services/TransactionService";
-import { useSearchParams } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
-import dateService from "../../api/services/DateService";
-import AsyncAutocomplete from "../AsyncAutocomplete";
-import AddIcon from "@mui/icons-material/Add";
 import { useSnackbar } from "notistack";
+import { Controller, useForm } from "react-hook-form";
+import { useSearchParams } from "react-router-dom";
+import dateService from "../../api/services/DateService";
+import transactionService from "../../api/services/TransactionService";
+import { useAuth } from "../../hooks/useAuth";
+import { TypeOption, typeOptionMask } from "../../models/Transaction";
+import {
+  NewTransactionFormData,
+  newTransactionFormSchema,
+} from "../../schemas/newTransactionSchema";
+import AsyncAutocomplete from "../AsyncAutocomplete";
 
 function NewTransactionForm() {
   const queryClient = useQueryClient();
@@ -80,7 +80,6 @@ function NewTransactionForm() {
   console.log(errors);
 
   async function addNewTransaction(data: NewTransactionFormData) {
-    console.log(data);
     await mutateAsync({ accessToken: authTokens!.access, transaction: data });
   }
 

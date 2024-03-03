@@ -19,12 +19,13 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 class WalletSerializer(serializers.ModelSerializer):
-    monthly_incomes = serializers.SerializerMethodField()
-    monthly_expenses = serializers.SerializerMethodField()
+    monthly_incomes = serializers.SerializerMethodField(source='get_monthly_incomes')
+    monthly_expenses = serializers.SerializerMethodField(source='get_monthly_expenses')
+    aggregated_expenses = serializers.SerializerMethodField(source='get_aggregated_expenses')
 
     class Meta:
         model = Wallet
-        fields = ('current_amount', 'monthly_incomes', 'monthly_expenses', 'labels')
+        fields = ('current_amount', 'monthly_incomes', 'monthly_expenses', 'aggregated_expenses', 'labels')
 
     @staticmethod
     def get_monthly_incomes(obj):
@@ -33,6 +34,10 @@ class WalletSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_monthly_expenses(obj):
         return obj.get_monthly_expenses()
+
+    @staticmethod
+    def get_aggregated_expenses(obj):
+        return obj.get_aggregated_expenses()
 
 
 class LabelSerializer(serializers.ModelSerializer):
@@ -43,6 +48,7 @@ class LabelSerializer(serializers.ModelSerializer):
 
 class TransactionSerializer(serializers.ModelSerializer):
     date = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S")
+    value = serializers.DecimalField(decimal_places=2, max_digits=10)
     amount = serializers.SerializerMethodField()
     duration = serializers.SerializerMethodField()
     label = LabelSerializer(source='get_label',read_only=True)
