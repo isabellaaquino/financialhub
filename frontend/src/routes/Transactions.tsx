@@ -4,11 +4,14 @@ import LatestTransactions from "../components/LatestTransactions";
 import SearchIcon from "@mui/icons-material/Search";
 import { grey } from "@mui/material/colors";
 import { useTransactions } from "../hooks/api/useTransactions";
+import { useQuery } from "@tanstack/react-query";
 
 function Transactions() {
-  const {
-    query: { data: transactions },
-  } = useTransactions(dateService.currentYear());
+  const { getTransactions } = useTransactions();
+  const { data: transactions } = useQuery({
+    queryKey: ["transactions", dateService.currentYear()],
+    queryFn: () => getTransactions(dateService.currentYear()),
+  });
   return (
     <>
       <Typography component="h1" variant="h4" fontWeight={600} mb={4}>

@@ -10,13 +10,16 @@ import AddTransaction from "../components/modals/AddTransaction";
 import WalletGridRow from "../components/dashboard/WalletGridRow";
 import { SummaryOption } from "../models/Summary";
 import AddLabel from "../components/modals/AddLabel";
+import { useQuery } from "@tanstack/react-query";
 import { useTransactions } from "../hooks/api/useTransactions";
 
 function Home() {
   const [_, setSearchParams] = useSearchParams();
-  const {
-    query: { data: transactions },
-  } = useTransactions(dateService.currentYear());
+  const { getTransactions } = useTransactions();
+  const { data: transactions } = useQuery({
+    queryKey: ["transactions", dateService.currentYear()],
+    queryFn: () => getTransactions(dateService.currentYear()),
+  });
   return (
     <>
       <Box

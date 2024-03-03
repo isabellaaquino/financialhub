@@ -2,14 +2,13 @@ from django.http import JsonResponse
 from django.db.models import QuerySet
 from .utils import custom_server_error_response, custom_success_response, custom_user_error_response
 from hubModels.serializers import MyTokenObtainPairSerializer, MyTokenRefreshSerializer
-from hubModels.models import HubUser, Wallet, Transaction
+from hubModels.models import HubUser, Transaction
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from rest_framework.parsers import JSONParser
+from rest_framework.permissions import IsAuthenticated
 from hubModels.serializers import SavingPlanSerializer, WalletSerializer, TransactionSerializer
-
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from hubModels.models import CustomLabel
@@ -21,36 +20,48 @@ class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
     def finalize_response(self, request, response, *args, **kwargs):
+        print("aT: " + response.data.get('access'))
         if response.data.get('refresh'):
-            # cookie_max_age = 3600 * 24 * 14 # 14 days
             response.set_cookie(
                 key=settings.SIMPLE_JWT["AUTH_COOKIE"],
                 value=response.data['refresh'],
-                domain=settings.SIMPLE_JWT["AUTH_COOKIE_DOMAIN"],
-                path=settings.SIMPLE_JWT["AUTH_COOKIE_PATH"],
+                # domain=settings.SIMPLE_JWT["AUTH_COOKIE_DOMAIN"],
+                # path=settings.SIMPLE_JWT["AUTH_COOKIE_PATH"],
                 expires=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"],
                 secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
                 httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
                 samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
-            )
+            )   
             del response.data['refresh']
         return super().finalize_response(request, response, *args, **kwargs)
 
 
 class MyTokenRefreshView(TokenRefreshView):
-    '''
-    Overrides default refresh token request from Django JWT, getting from cookies
-    '''
     serializer_class = MyTokenRefreshSerializer
-    
+
+    def post(self, request):
+        refresh_token = request.COOKIES.get('refresh_token')
+
+        if not refresh_token:
+            print('error: Refresh token is required')
+            return Response({'error': 'Refresh token is required'}, status=403)
+
+        try:
+            token = RefreshToken(refresh_token)
+            access_token = str(token.access_token)
+            print("new aT: " + access_token)
+            return Response({'access_token': access_token, 'refresh_token': refresh_token})
+        except Exception as e:
+            print(str(e))
+            return Response({'error': str(e)}, status=403)
+
     def finalize_response(self, request, response, *args, **kwargs):
         if response.data.get('refresh'):
-            # cookie_max_age = 3600 * 24 * 14 # 14 days
             response.set_cookie(
                 key=settings.SIMPLE_JWT["AUTH_COOKIE"],
                 value=response.data['refresh'],
-                domain=settings.SIMPLE_JWT["AUTH_COOKIE_DOMAIN"],
-                path=settings.SIMPLE_JWT["AUTH_COOKIE_PATH"],
+                # domain=settings.SIMPLE_JWT["AUTH_COOKIE_DOMAIN"],
+                # path=settings.SIMPLE_JWT["AUTH_COOKIE_PATH"],
                 expires=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"],
                 secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
                 httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],

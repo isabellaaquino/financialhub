@@ -1,9 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
 import { Transaction } from "../../models/Transaction";
 import useAxiosPrivate from "../useAxiosPrivate";
 import { NewTransactionFormData } from "../../schemas/newTransactionSchema";
 
-export function useTransactions(currentYear: number) {
+export function useTransactions() {
   const axiosPrivate = useAxiosPrivate();
 
   async function getTransactions(year: number = 0): Promise<Transaction[]> {
@@ -53,10 +52,10 @@ export function useTransactions(currentYear: number) {
     return null;
   }
 
-  const query = useQuery({
-    queryKey: ["transactions", currentYear],
-    queryFn: () => getTransactions(currentYear),
-  });
+  // const query = useQuery({
+  //   queryKey: ["transactions", currentYear],
+  //   queryFn: () => getTransactions(currentYear),
+  // });
 
-  return { query, getTransactions, createTransaction, deleteTransaction };
+  return { getTransactions, createTransaction, deleteTransaction };
 }

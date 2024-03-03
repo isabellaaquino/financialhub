@@ -8,8 +8,8 @@ import Home from "./routes/Home";
 import Transactions from "./routes/Transactions";
 import App from "./App";
 import PersistLogin from "./components/auth/PersistLogin";
-import Anonymous from "./components/auth/Anonymous";
-
+import "./main.css";
+import AuthRoot from "./routes/AuthRoot";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -32,18 +32,17 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    path: "/auth",
-    element: <Anonymous />,
+    path: "/auth/",
+    element: <AuthRoot />,
+    errorElement: <Error />,
     children: [
       {
         path: "sign-up",
         element: <SignUp />,
-        errorElement: <Error />,
       },
       {
         path: "sign-in",
         element: <SignIn />,
-        errorElement: <Error />,
       },
     ],
   },

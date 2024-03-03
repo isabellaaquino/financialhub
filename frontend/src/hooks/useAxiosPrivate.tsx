@@ -3,7 +3,7 @@ import { useAuth } from "./useAuth";
 import { apiPrivate } from "../api/services/Api";
 
 function useAxiosPrivate() {
-  const { authTokens, refresh } = useAuth();
+  const { authTokens, SignOut, refresh } = useAuth();
 
   useEffect(() => {
     const requestIntercept = apiPrivate.interceptors.request.use(
@@ -20,15 +20,15 @@ function useAxiosPrivate() {
       (response) => response,
       async (err) => {
         const prevRequest = err?.config;
-        if (
-          (err?.response?.status === 403 || err?.response?.status === 401) &&
-          !prevRequest?.sent
-        ) {
+        if (err?.response?.status === 401 && !prevRequest?.sent) {
           prevRequest.sent = true;
-          console.log(authTokens?.refresh);
           const newAccessToken = await refresh();
           prevRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+          console.log("old expired. New aT: " + newAccessToken);
           return apiPrivate(prevRequest);
+        } else if (err?.response?.status === 403 && !prevRequest?.sent) {
+          prevRequest.sent = true;
+          SignOut();
         }
         return Promise.reject(err);
       }

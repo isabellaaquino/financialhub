@@ -1,5 +1,4 @@
 import { CssBaseline, ThemeProvider } from "@mui/material";
-import React from "react";
 import { AuthProvider } from "./context/AuthContext";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./main";
@@ -11,7 +10,7 @@ function App() {
   const queryClient = new QueryClient();
 
   return (
-    <React.StrictMode>
+    // <React.StrictMode>
       <ThemeProvider theme={darkTheme}>
         <CssBaseline />
         <QueryClientProvider client={queryClient}>
@@ -22,7 +21,7 @@ function App() {
           </SnackbarProvider>
         </QueryClientProvider>
       </ThemeProvider>
-    </React.StrictMode>
+    // </React.StrictMode>
   );
 }
 

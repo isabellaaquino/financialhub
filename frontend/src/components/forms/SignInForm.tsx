@@ -1,10 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Container, TextField, Button, Typography } from "@mui/material";
+import { TextField, Button, Typography, Box } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { SignInFormData, signInFormSchema } from "../../schemas/signInSchema";
 import { useMutation } from "@tanstack/react-query";
+import { grey } from "@mui/material/colors";
 
 function SignInForm() {
   let navigate = useNavigate();
@@ -26,17 +27,31 @@ function SignInForm() {
   async function signIn(data: SignInFormData) {
     await mutateAsync({ email: data.email, password: data.password });
   }
+
   return (
-    <form
-      onSubmit={handleSubmit(signIn)}
-      className="flex justify-center items-center m-10"
-      style={{
-        margin: "0 auto",
-        marginTop: 60,
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 6,
+        width: "400px",
       }}
     >
-      <Container
-        sx={{ display: "flex", flexDirection: "column", gap: 3, width: 500 }}
+      <Box>
+        <Typography variant="h5" component="h1" fontWeight={600} lineHeight={1.8}>
+          Welcome back
+        </Typography>
+        <Typography variant="body2" component="p" color={grey[500]}>
+          Please sign in to access your account
+        </Typography>
+      </Box>
+      <form
+        onSubmit={handleSubmit(signIn)}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "30px",
+        }}
       >
         <Controller
           name="email"
@@ -44,6 +59,7 @@ function SignInForm() {
           render={({ field: { onChange, value }, fieldState: { error } }) => (
             <TextField
               fullWidth
+              size="small"
               autoFocus
               helperText={error ? error.message : null}
               // size="small"
@@ -62,6 +78,7 @@ function SignInForm() {
           render={({ field: { onChange, value }, fieldState: { error } }) => (
             <TextField
               fullWidth
+              size="small"
               autoFocus
               helperText={error ? error.message : null}
               // size="small"
@@ -74,14 +91,14 @@ function SignInForm() {
             />
           )}
         />
-        <Button type="submit" variant="contained" size="large">
+        <Button type="submit" variant="contained" size="medium">
           Sign In
         </Button>
-        <Typography color="gray" fontSize="medium" textAlign="center">
-          Don't have an account? <Link to="/sign-up">Sign up</Link>
+        <Typography color="gray" variant="body2" component="p" textAlign="center">
+          Don't have an account? <Link to="/auth/sign-up">Sign up</Link>
         </Typography>
-      </Container>
-    </form>
+      </form>
+    </Box>
   );
 }
 

@@ -13,7 +13,7 @@ interface AuthContextData {
     email: string;
     password: string;
   }): Promise<void>;
-  SignUp(user: UserInput): Promise<string | null>;
+  SignUp({ user }: { user: UserInput }): Promise<string | null>;
   SignOut(): void;
   refresh: () => Promise<void>;
   authTokens: AuthTokens | null;
@@ -30,7 +30,6 @@ interface AuthTokens {
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 export const AuthProvider = ({ children }: Props) => {
-  // let [loading, setLoading] = useState(true);
   let [authTokens, setAuthTokens] = useState<AuthTokens | null>(null);
   let [loggedUser, setLoggedUser] = useState<User | null>(null);
 
@@ -60,7 +59,7 @@ export const AuthProvider = ({ children }: Props) => {
     }
   }
 
-  async function SignUp(user: UserInput) {
+  async function SignUp({ user }: { user: UserInput }) {
     try {
       const response = await api.post("/register/", user);
       if (response.status !== 200) return null;
@@ -78,6 +77,7 @@ export const AuthProvider = ({ children }: Props) => {
   }
 
   async function refresh() {
+    console.log("old aT: " + authTokens?.access);
     const response = await api.post(
       "/token/refresh/",
       { refresh: authTokens?.refresh },
@@ -85,54 +85,13 @@ export const AuthProvider = ({ children }: Props) => {
         withCredentials: true,
       }
     );
-    setAuthTokens((prev) => {
-      if (prev) {
-        console.log(prev);
-        console.log(response.data);
-        return response.data;
-      }
-      return null;
+    setAuthTokens({
+      access: response.data.access_token,
+      refresh: response.data.refresh_token,
     });
-    setLoggedUser(jwtDecode(response.data.access));
-
-    return response.data.access;
+    setLoggedUser(jwtDecode(response.data.access_token));
+    return response.data.access_token;
   }
-  // async function RefreshToken() {
-  //   try {
-  //     const response = (await authService.refreshToken(
-  //       authTokens?.refresh
-  //     )) as AuthTokens;
-
-  //     setAuthTokens(response);
-  //     setLoggedUser(jwtDecode(response.access));
-  //   } catch {
-  //     SignOut();
-  //   }
-
-  //   if (loading) setLoading(false);
-  // }
-
-  // async refreshToken(token: string | undefined) {
-  //   try {
-  //     const response = await api.post("/token/refresh/", {
-  //       refresh: token,
-  //     });
-  //     const data = await response.data;
-  //     return data;
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   if (loading) RefreshToken();
-
-  //   let interval = setInterval(() => {
-  //     if (authTokens) RefreshToken();
-  //   }, 1000 * 60 * 4); //5 minutes
-
-  //   return () => clearInterval(interval);
-  // }, [authTokens, loading]);
 
   return (
     <AuthContext.Provider
