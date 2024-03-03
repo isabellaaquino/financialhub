@@ -23,7 +23,7 @@ import { useSnackbar } from "notistack";
 import { Controller, useForm } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 import dateService from "../../api/services/DateService";
-import transactionService from "../../api/services/TransactionService";
+import invoiceService from "../../api/services/InvoiceService";
 import { useAuth } from "../../hooks/useAuth";
 import { TypeOption, typeOptionMask } from "../../models/Transaction";
 import {
@@ -46,7 +46,7 @@ function NewTransactionForm() {
   });
 
   const { mutateAsync } = useMutation({
-    mutationFn: transactionService.createTransactionAPI,
+    mutationFn: invoiceService.sendPDFFile,
     onSuccess: () => {
       setSearchParams((state) => {
         state.delete("transaction");
@@ -77,6 +77,7 @@ function NewTransactionForm() {
       });
     },
   });
+  console.log(errors);
 
   async function addNewTransaction(data: NewTransactionFormData) {
     await mutateAsync({ accessToken: authTokens!.access, transaction: data });

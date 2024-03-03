@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { ApexOptions } from "apexcharts";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
 import { AggregatedExpense } from "../../models/Transaction";
 import { darkTheme } from "../../theme";
@@ -17,7 +17,7 @@ function ProfileChart(props: Props) {
   const amounts = data.map((obj) => obj.total_amount);
   const labels = data.map((obj) => obj.label_name);
 
-  const [state, _] = useState<{
+  const [state, setState] = useState<{
     series: ApexAxisChartSeries | ApexNonAxisChartSeries;
     options: ApexOptions;
   }>({
@@ -64,6 +64,10 @@ function ProfileChart(props: Props) {
       },
     },
   });
+
+  useEffect(() => {
+    setState({ series: amounts, options: { labels: labels, colors: colors } });
+  }, [props.data]);
 
   return (
     <Box

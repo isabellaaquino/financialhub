@@ -17,10 +17,15 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         return token
 
+class LabelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomLabel
+        fields = ('id', 'name', 'color')
 
 class WalletSerializer(serializers.ModelSerializer):
     monthly_incomes = serializers.SerializerMethodField(source='get_monthly_incomes')
     monthly_expenses = serializers.SerializerMethodField(source='get_monthly_expenses')
+    labels = LabelSerializer(many=True)
     aggregated_expenses = serializers.SerializerMethodField(source='get_aggregated_expenses')
 
     class Meta:
@@ -38,12 +43,6 @@ class WalletSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_aggregated_expenses(obj):
         return obj.get_aggregated_expenses()
-
-
-class LabelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomLabel
-        fields = ('id', 'name', 'color')
 
 
 class TransactionSerializer(serializers.ModelSerializer):

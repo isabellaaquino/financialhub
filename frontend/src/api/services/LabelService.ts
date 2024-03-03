@@ -1,26 +1,7 @@
-import { CustomLabel } from "../../models/CustomLabel";
 import { NewLabelFormData } from "../../schemas/newLabelSchema";
 import { api } from "./Api";
 
 class LabelService {
-  async getUserLoggedLabels(accessToken: string): Promise<CustomLabel[]> {
-    try {
-      const endpoint = "/labels/";
-      const response = await api.get(endpoint, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      const data = response.data as CustomLabel[];
-      console.log(data);
-      return data;
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
-  }
-
   async createLabelAPI({
     accessToken,
     label,
