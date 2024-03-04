@@ -1,6 +1,6 @@
+import dayjs, { Dayjs } from "dayjs";
 import { z } from "zod";
 import { TypeOption } from "../models/Transaction";
-import dayjs, { Dayjs } from "dayjs";
 
 export const newTransactionFormSchema = z.object({
   title: z.string().min(1, "Title must be at least 1 character long."),

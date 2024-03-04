@@ -1,4 +1,3 @@
-import dateService from "../api/services/DateService";
 import { Box, InputAdornment, TextField, Typography } from "@mui/material";
 import LatestTransactions from "../components/LatestTransactions";
 import SearchIcon from "@mui/icons-material/Search";
@@ -9,8 +8,8 @@ import { useQuery } from "@tanstack/react-query";
 function Transactions() {
   const { getTransactions } = useTransactions();
   const { data: transactions } = useQuery({
-    queryKey: ["transactions", dateService.currentYear()],
-    queryFn: () => getTransactions(dateService.currentYear()),
+    queryKey: ["transactions"],
+    queryFn: () => getTransactions(),
   });
   return (
     <>

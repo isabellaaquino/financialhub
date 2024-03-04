@@ -17,6 +17,11 @@ export function formatValue(value: number, limit: number): string {
   return "R$" + value.toFixed(2) + abbreviations[abbreviationIndex];
 }
 
+export function getKeyByEnumValue(myEnum: any, enumValue: number | string) {
+  let keys = Object.keys(myEnum).filter((x) => myEnum[x] == enumValue);
+  return keys.length > 0 ? keys[0] : "";
+}
+
 export type ResponseType = { [key: string]: string };
 
 export function capitalizeStr(type: string) {

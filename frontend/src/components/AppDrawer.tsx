@@ -6,18 +6,9 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
-import { grey } from "@mui/material/colors";
 import { darkTheme } from "../theme";
 import { navigation } from "../navigation";
-import {
-  AppBar,
-  Box,
-  Drawer,
-  MenuItem,
-  Toolbar,
-  Typography,
-} from "@mui/material";
-import Select from "@mui/material/Select";
+import { AppBar, Box, Drawer, Toolbar, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 import UserDropdown from "./UserDropdown";
 

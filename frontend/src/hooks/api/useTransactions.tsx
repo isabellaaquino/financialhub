@@ -50,12 +50,14 @@ export function useTransactions() {
     return null;
   }
 
-  async function deleteTransaction(
-    transaction_pk: number
-  ): Promise<{ [key: string]: string } | null> {
+  async function deleteTransaction({
+    transactionId,
+  }: {
+    transactionId: number;
+  }): Promise<{ [key: string]: string } | null> {
     try {
       const response = await axiosPrivate.delete(
-        `/transaction/${transaction_pk}`
+        `/transaction/${transactionId}`
       );
       return await response.data;
     } catch (error) {
@@ -63,11 +65,6 @@ export function useTransactions() {
     }
     return null;
   }
-
-  // const query = useQuery({
-  //   queryKey: ["transactions", currentYear],
-  //   queryFn: () => getTransactions(currentYear),
-  // });
 
   return { getTransactions, createTransaction, deleteTransaction };
 }

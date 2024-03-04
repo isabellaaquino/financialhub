@@ -1,14 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
-import { Grid, Box, Typography, IconButton } from "@mui/material";
-import { grey } from "@mui/material/colors";
-import { darkTheme } from "../../theme";
-import { formatValue } from "../../utils/utils";
-import { useState } from "react";
-import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
+import ModeEditIcon from "@mui/icons-material/ModeEdit";
+import { Box, Grid, IconButton, Typography } from "@mui/material";
+import { grey } from "@mui/material/colors";
+import { useState } from "react";
+import { darkTheme } from "../../theme";
+import { formatValue } from "../../utils/utils";
 import EditBalanceForm from "../forms/EditBalanceForm";
 import { useWallet } from "../../hooks/api/useWallet";
+import { useQuery } from "@tanstack/react-query";
 
 function WalletGridRow() {
   const { getWallet } = useWallet();

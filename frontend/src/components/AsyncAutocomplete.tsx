@@ -1,10 +1,11 @@
-import * as React from "react";
-import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useQuery } from "@tanstack/react-query";
 import { useLabels } from "../hooks/api/useLabels";
 import { CustomLabel } from "../models/CustomLabel";
+import { useState } from "react";
+import { TextField } from "@mui/material";
+import React from "react";
 
 interface Props {
   onChange: any;
@@ -15,7 +16,7 @@ interface Props {
 
 export default function AsyncAutocomplete(props: Props) {
   const { getLabels } = useLabels();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const { data: labels, isLoading } = useQuery({
     queryKey: ["labels"],
     queryFn: () => getLabels(),

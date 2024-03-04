@@ -1,9 +1,5 @@
-import {
-  NewTransactionFormData,
-  newTransactionFormSchema,
-} from "../../schemas/newTransactionSchema";
-import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import AddIcon from "@mui/icons-material/Add";
 import {
   Box,
   Button,
@@ -18,19 +14,22 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { TypeOption, typeOptionMask } from "../../models/Transaction";
 import { grey } from "@mui/material/colors";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Controller, useForm } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
-import dateService from "../../api/services/DateService";
+import {
+  NewTransactionFormData,
+  newTransactionFormSchema,
+} from "../../schemas/newTransactionSchema";
 import AsyncAutocomplete from "../AsyncAutocomplete";
-import AddIcon from "@mui/icons-material/Add";
 import { useSnackbar } from "notistack";
 import { useTransactions } from "../../hooks/api/useTransactions";
 import dayjs from "dayjs";
+import { TypeOption, typeOptionMask } from "../../models/Transaction";
 
 function NewTransactionForm() {
   const queryClient = useQueryClient();
@@ -66,7 +65,7 @@ function NewTransactionForm() {
         return state;
       });
       queryClient.invalidateQueries({
-        queryKey: ["transactions", dateService.currentYear()],
+        queryKey: ["transactions"],
       });
       queryClient.invalidateQueries({
         queryKey: ["wallet"],
