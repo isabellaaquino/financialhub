@@ -138,7 +138,7 @@ export default function DrawerAppBar(props: Props) {
               gap: 2,
             }}
           >
-            <Select
+            {/* <Select
               labelId="demo-select-small-label"
               id="demo-select-small"
               value={2021}
@@ -151,13 +151,10 @@ export default function DrawerAppBar(props: Props) {
                 width: "120px",
               }}
             >
-              {/* <MenuItem value="">
-                <em>None</em>
-              </MenuItem> */}
               <MenuItem value={2021}>2021</MenuItem>
               <MenuItem value={2022}>2022</MenuItem>
               <MenuItem value={2023}>2023</MenuItem>
-            </Select>
+            </Select> */}
 
             <UserDropdown />
           </Box>

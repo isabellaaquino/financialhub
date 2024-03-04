@@ -37,7 +37,7 @@ function LatestTransactions(props: Props) {
       headerName: "Value",
       width: 300,
       valueFormatter: (params: GridValueFormatterParams) => {
-        return parseInt(params.value.toString()).toLocaleString("pt-BR", {
+        return parseFloat(params.value).toLocaleString("pt-BR", {
           style: "currency",
           currency: "BRL",
         });

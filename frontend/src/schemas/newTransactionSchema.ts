@@ -3,14 +3,17 @@ import { TypeOption } from "../models/Transaction";
 import dayjs, { Dayjs } from "dayjs";
 
 export const newTransactionFormSchema = z.object({
-  title: z.string().min(1, "Invalid email"),
-  value: z.coerce.number(),
+  title: z.string().min(1, "Title must be at least 1 character long."),
+  value: z.string().min(1, "Please select an amount >= 1.").transform((value) => {
+    const normalizedValue = value.replace(',', '.');
+    return parseFloat(normalizedValue);
+  }),
   label: z.object({
     id: z.number(),
-    name: z.string(),
+    name: z.string().min(1, "Please select a label."),
     color: z.string(),
   }),
-  date: z.instanceof(dayjs as unknown as typeof Dayjs),
+  date: z.custom<Dayjs>((val) => val instanceof dayjs, "Please select a date"),
   type: z.nativeEnum(TypeOption).default(TypeOption.EXPENSE),
   updateWallet: z.boolean().default(false),
   recurring: z.boolean().default(false),

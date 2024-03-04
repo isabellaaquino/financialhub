@@ -1,5 +1,5 @@
-from django.http import JsonResponse
 from django.db.models import QuerySet
+from django.db.models import Sum
 from .utils import custom_server_error_response, custom_success_response, custom_user_error_response
 from hubModels.serializers import MyTokenObtainPairSerializer, MyTokenRefreshSerializer
 from hubModels.models import HubUser, Transaction
@@ -10,10 +10,12 @@ from rest_framework.permissions import IsAuthenticated
 from hubModels.serializers import SavingPlanSerializer, WalletSerializer, TransactionSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-
+from datetime import date
+from datetime import timedelta
 from hubModels.models import CustomLabel
 from hubModels.serializers import LabelSerializer
 from django.conf import settings
+from django.db.models.functions import TruncDate
 
 
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -31,7 +33,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
                 secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
                 httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
                 samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
-            )   
+            )
             del response.data['refresh']
         return super().finalize_response(request, response, *args, **kwargs)
 
@@ -204,11 +206,46 @@ def get_saving_plans(request):
 def get_transactions(request):
     user: HubUser = request.user
     transactions: QuerySet
-    if (request.query_params.get('year') != ""):
-        transactions = user.get_wallet().get_transactions_by_year(
-            request.query_params.get('year'))
+
+    start_date_str = request.query_params.get('start_date')
+    end_date_str = request.query_params.get('end_date')
+    # number of transactions returned
+    limit = request.query_params.get('limit')
+    # return only values grouped by date for charts
+    chart_data = request.query_params.get('chart_data')
+
+    if start_date_str and end_date_str:
+        start_date = date.fromisoformat(start_date_str)
+        end_date = date.fromisoformat(end_date_str)
+        transactions = user.get_wallet().get_transactions_in_range(start_date, end_date)
     else:
         transactions = user.get_wallet().get_transactions()
+
+    if limit and int(limit) > 0:
+        transactions = transactions[:int(limit)]
+
+    if int(chart_data) == 1:
+        # Group by date and sum values
+        grouped_transactions = transactions.annotate(
+            transaction_date=TruncDate('date')
+        ).values('date').annotate(
+            value=Sum('value')
+        )
+
+        grouped_transactions_list = list(grouped_transactions)
+        all_dates = [start_date + timedelta(days=x)
+                     for x in range((end_date - start_date).days + 1)]
+        all_transactions_dates = [
+            item.get('date') for item in grouped_transactions_list]
+
+        for d in all_dates:
+            if d not in all_transactions_dates:
+                grouped_transactions_list.append({'date': d, 'value': 0})
+                
+        for item in grouped_transactions_list:
+            item['date'] = item['date'].strftime('%m-%d-%Y')
+
+        return Response(grouped_transactions_list)
 
     transactions_serialized = TransactionSerializer(transactions, many=True)
     return Response(transactions_serialized.data)

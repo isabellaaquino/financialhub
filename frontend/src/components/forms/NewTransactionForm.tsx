@@ -25,16 +25,16 @@ import { TypeOption, typeOptionMask } from "../../models/Transaction";
 import { grey } from "@mui/material/colors";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
 import dateService from "../../api/services/DateService";
 import AsyncAutocomplete from "../AsyncAutocomplete";
 import AddIcon from "@mui/icons-material/Add";
 import { useSnackbar } from "notistack";
 import { useTransactions } from "../../hooks/api/useTransactions";
+import dayjs from "dayjs";
 
 function NewTransactionForm() {
   const queryClient = useQueryClient();
-  const { createTransaction } = useTransactions(dateService.currentYear());
+  const { createTransaction } = useTransactions();
   const { enqueueSnackbar } = useSnackbar();
   const [_, setSearchParams] = useSearchParams();
   const {
@@ -43,6 +43,19 @@ function NewTransactionForm() {
     formState: { errors },
   } = useForm<NewTransactionFormData>({
     resolver: zodResolver(newTransactionFormSchema),
+    values: {
+      title: "",
+      value: 0,
+      label: {
+        id: 0,
+        name: "",
+        color: "",
+      },
+      date: dayjs(new Date().toLocaleDateString(), "DD-MM-YYYY"),
+      type: TypeOption.EXPENSE,
+      updateWallet: false,
+      recurring: false,
+    },
   });
 
   const { mutateAsync } = useMutation({
@@ -78,6 +91,14 @@ function NewTransactionForm() {
     await mutateAsync({ transaction: data });
   }
 
+  function formatCurrency(value: string) {
+    let formattedValue = value.replace(/\D/g, "");
+    formattedValue = formattedValue.replace(/(\d)(\d{2})$/, "$1,$2");
+    formattedValue = formattedValue.replace(/(?=(\d{3})+(\D))\B/g, ".");
+
+    return formattedValue;
+  }
+
   return (
     <form
       onSubmit={handleSubmit(addNewTransaction)}
@@ -92,12 +113,12 @@ function NewTransactionForm() {
       <Controller
         name="title"
         control={control}
-        render={({ field: { onChange, value }, fieldState: { error } }) => (
+        render={({ field: { onChange, value } }) => (
           <TextField
             fullWidth
             autoFocus
-            helperText={error ? error.message : null}
-            error={!!error}
+            helperText={errors.title ? errors.title.message : " "}
+            error={!!errors.title}
             onChange={onChange}
             value={value}
             label="Title"
@@ -117,9 +138,13 @@ function NewTransactionForm() {
         <Controller
           name="label"
           control={control}
-          // onChange={(e: any, data: any) => data}
           render={({ field: { onChange, value } }) => (
-            <AsyncAutocomplete onChange={onChange} value={value} />
+            <AsyncAutocomplete
+              onChange={onChange}
+              value={value}
+              helperText={errors.label ? errors.label.name?.message : " "}
+              error={!!errors.label?.name}
+            />
           )}
         />
 
@@ -131,6 +156,7 @@ function NewTransactionForm() {
               return state;
             })
           }
+          sx={{ mb: 3 }}
         >
           <AddIcon />
         </Button>
@@ -147,14 +173,18 @@ function NewTransactionForm() {
         <Controller
           name="value"
           control={control}
-          render={({ field: { onChange, value }, fieldState: { error } }) => (
+          render={({ field: { onChange, value } }) => (
             <TextField
               fullWidth
               autoFocus
-              helperText={error ? error.message : null}
-              error={!!error}
-              onChange={onChange}
-              value={value}
+              helperText={errors.value ? errors.value.message : " "}
+              error={!!errors.value}
+              onChange={(e) => {
+                const formattedValue = formatCurrency(e.target.value);
+                onChange(formattedValue);
+              }}
+              value={value === 0 ? "" : value}
+              placeholder="0,00"
               label="Amount"
               variant="outlined"
               size="small"
@@ -171,14 +201,20 @@ function NewTransactionForm() {
         <Controller
           name="date"
           control={control}
-          render={({ field: { onChange, value }, fieldState: { error } }) => (
+          render={({ field: { onChange, value } }) => (
             <>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   label="Date"
                   value={value}
                   onChange={onChange}
-                  slotProps={{ textField: { size: "small" } }}
+                  slotProps={{
+                    textField: {
+                      size: "small",
+                      error: !!errors.date,
+                      helperText: errors.date ? errors.date.message : " ",
+                    },
+                  }}
                 />
               </LocalizationProvider>
             </>
@@ -188,10 +224,7 @@ function NewTransactionForm() {
       <Controller
         name="type"
         control={control}
-        render={({
-          field: { onChange, value, name },
-          fieldState: { error },
-        }) => (
+        render={({ field: { onChange, value, name } }) => (
           <FormControl>
             <FormLabel
               sx={{ mb: 1, "&.Mui-disabled": { color: "white" } }}
@@ -231,10 +264,7 @@ function NewTransactionForm() {
             <Controller
               name="updateWallet"
               control={control}
-              render={({
-                field: { onChange, value, name },
-                fieldState: { error },
-              }) => (
+              render={({ field: { onChange, value, name } }) => (
                 <Checkbox
                   name={name}
                   checked={value}
@@ -251,10 +281,7 @@ function NewTransactionForm() {
             <Controller
               name="recurring"
               control={control}
-              render={({
-                field: { onChange, value, name },
-                fieldState: { error },
-              }) => (
+              render={({ field: { onChange, value, name } }) => (
                 <Checkbox
                   name={name}
                   checked={value}

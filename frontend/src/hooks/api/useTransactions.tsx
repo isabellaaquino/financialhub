@@ -5,13 +5,25 @@ import { NewTransactionFormData } from "../../schemas/newTransactionSchema";
 export function useTransactions() {
   const axiosPrivate = useAxiosPrivate();
 
-  async function getTransactions(year: number = 0): Promise<Transaction[]> {
+  async function getTransactions(
+    limit: number = 0,
+    startDate?: Date,
+    endDate?: Date,
+    formatDataForCharts: boolean = false
+  ): Promise<Transaction[]> {
     try {
-      const endpoint =
-        year === 0 ? "/transactions/" : `/transactions?year=${year}`;
+      let endpoint = `/transactions?limit=${limit}&chart_data=${
+        formatDataForCharts ? 1 : 0
+      }`;
+      if (startDate)
+        endpoint += `&start_date=${startDate.toISOString().split("T")[0]}`;
+      if (endDate)
+        endpoint += `&end_date=${endDate.toISOString().split("T")[0]}`;
       const response = await axiosPrivate.get(endpoint);
-      const data = response.data as Transaction[];
-      return data;
+      const transactions = response.data.map((t: Transaction) => {
+        return { ...t, value: Number(t.value) } as Transaction;
+      });
+      return transactions;
     } catch (error) {
       console.log(error);
       throw error;
@@ -26,7 +38,7 @@ export function useTransactions() {
     try {
       const newTransaction = {
         ...transaction,
-        date: transaction.date.toDate(),
+        date: transaction.date,
       };
       const response = await axiosPrivate.post("/transaction/", newTransaction);
       if (response.status !== 200) return null;

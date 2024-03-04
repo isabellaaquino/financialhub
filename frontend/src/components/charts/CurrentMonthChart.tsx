@@ -1,22 +1,66 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Chart from "react-apexcharts";
-import dateService, { MONTHS_IN_YEAR } from "../../api/services/DateService";
-import { SummaryOption } from "../../models/Summary";
-import { Transaction } from "../../models/Transaction";
 import { ApexOptions } from "apexcharts";
-import { Box } from "@mui/material";
+import {
+  Box,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Typography,
+} from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { darkTheme } from "../../theme";
+import { useQuery } from "@tanstack/react-query";
+import { useTransactions } from "../../hooks/api/useTransactions";
 
-interface Props {
-  data: Transaction[];
-  option: SummaryOption;
+enum RangeOptions {
+  LastWeek = 0,
+  LastTwoWeeks = 1,
+  LastMonth = 2,
 }
 
-function CurrentMonthChart(props: Props) {
+function CurrentMonthChart() {
+  const { getTransactions } = useTransactions();
+  const [range, setRange] = useState<RangeOptions>(RangeOptions.LastWeek);
   const [lineChartData, setLineChartData] = useState<
-    { x: string; y: string | number }[]
-  >([]);
+    { x: string; y: string | number }[] | null
+  >(null);
+
+  const formatDataForCharts = true;
+  const endDate = new Date("2024-03-04");
+  const startDate = useMemo(() => {
+    if (range === RangeOptions.LastWeek) {
+      const today = new Date();
+      const lastWeek = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate() - 6
+      );
+      return lastWeek;
+    } else if (range === RangeOptions.LastTwoWeeks) {
+      const today = new Date();
+      const lastTwoWeeks = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate() - 13
+      );
+      return lastTwoWeeks;
+    } else {
+      const today = new Date();
+      const lastMonth = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate() - 29
+      );
+      return lastMonth;
+    }
+  }, [range]);
+
+  const { data: transactions } = useQuery({
+    queryKey: ["transactions", startDate, endDate, formatDataForCharts],
+    queryFn: () => getTransactions(0, startDate, endDate, formatDataForCharts),
+  });
 
   const [state, setState] = useState<{
     options: ApexOptions;
@@ -36,18 +80,6 @@ function CurrentMonthChart(props: Props) {
       legend: {
         show: false,
       },
-      title: {
-        text: `${
-          props.option === SummaryOption.Month ? "Daily" : "Annual"
-        } expenses`,
-        align: "left",
-        style: {
-          fontFamily: "Inter",
-          fontSize: "16px",
-          fontWeight: "medium",
-          color: "white",
-        },
-      },
       xaxis: {
         type: "numeric",
         labels: {
@@ -56,7 +88,10 @@ function CurrentMonthChart(props: Props) {
           },
           show: true,
           formatter: function (value: string) {
-            return String(value).substring(0, 5);
+            return new Date(value).toLocaleString("pt-BR", {
+              day: "2-digit",
+              month: "2-digit",
+            });
           },
         },
       },
@@ -84,7 +119,6 @@ function CurrentMonthChart(props: Props) {
         theme: "dark",
         x: {
           formatter(val) {
-            // const seriesName = opts.series[opts.seriesIndex].name;
             return String(val);
           },
         },
@@ -99,19 +133,15 @@ function CurrentMonthChart(props: Props) {
   });
 
   useEffect(() => {
-    let categories: string[] = [];
-    const result = createLineChartData(props.option);
-    result.map((transaction) => {
-      categories.push(transaction.date);
-    });
-
-    const dataSet = categories.map((c) => {
-      const data = result.find(({ date }) => date === c);
-      return { x: c, y: data ? data.value : 0 };
-    });
-
+    const dataSet = transactions
+      ? transactions
+          .map((t) => {
+            return { x: t.date, y: t.value };
+          })
+          .sort((a, b) => new Date(a.x).getTime() - new Date(b.x).getTime())
+      : null;
     setLineChartData(dataSet);
-  }, [props.option, props.data]);
+  }, [transactions, range]);
 
   useEffect(() => {
     setState((prevState) => {
@@ -122,113 +152,22 @@ function CurrentMonthChart(props: Props) {
         series: [
           {
             ...prevState.series,
-            data: lineChartData,
+            data: lineChartData ?? [],
           },
         ],
       };
     });
   }, [lineChartData]);
 
-  function compare(
-    a: {
-      [id: string]: string;
-    },
-    b: {
-      [id: string]: string;
+  function rangeOptionMask(option: RangeOptions) {
+    switch (option) {
+      case RangeOptions.LastMonth:
+        return "Last month";
+      case RangeOptions.LastWeek:
+        return "Last week";
+      case RangeOptions.LastTwoWeeks:
+        return "Last two weeks";
     }
-  ) {
-    if (a.date < b.date) {
-      return -1;
-    }
-    if (a.date > b.date) {
-      return 1;
-    }
-    return 0;
-  }
-
-  function daysInCurrentMonth() {
-    //returns an array of days in current month (format: dd/MM/yyyy): [01/02/2023, 02/02/2023...]
-    return Array.from(
-      Array(dateService.numberOfDaysInCurrentMonth()),
-      (_, i) => {
-        return `${dateService.formatNumberValue(
-          i + 1,
-          2
-        )}/${dateService.formatNumberValue(
-          new Date().getMonth() + 1,
-          2
-        )}/${dateService.currentYear()}`;
-      }
-    );
-  }
-
-  function getPairValues(transactions: Transaction[], option: SummaryOption) {
-    let dataSet: { [id: string]: string }[] = [];
-
-    if (option === SummaryOption.Year) {
-      //change dataSet to have only the month value instead of full date (makes it easier to reduce() the dataSet after)
-      dataSet = transactions.map((x) => {
-        let dict: { [id: string]: string } = {};
-        dict["date"] = MONTHS_IN_YEAR[new Date(Date.parse(x.date)).getMonth()];
-        dict["value"] = Number(x.value).toFixed(2);
-        return dict;
-      });
-    } else {
-      //change dataSet as dictionary {date: "dd/MM/yyyy", value: "0"}
-      dataSet = transactions.map((transaction) => {
-        let dict: { [id: string]: string } = {};
-        dict["date"] = new Date(
-          Date.parse(transaction.date)
-        ).toLocaleDateString();
-        dict["value"] = transaction.value.toString();
-        return dict;
-      });
-    }
-
-    //sum values with same months or full date (depends on option parameter)
-    const map = dataSet.reduce((acc, { date, value }) => {
-      let val = Number(value) + (Number(acc[date]) || 0);
-      acc[date] = val.toFixed(2);
-      return acc;
-    }, {});
-
-    const result = Object.entries(map).map(([key, value]) => {
-      return { date: key, value: value };
-    });
-
-    if (option === SummaryOption.Year) {
-      //fill the rest of months without value in database with 0
-      MONTHS_IN_YEAR.forEach((date) => {
-        if (!result.some((r) => r.date === date))
-          result.push({ date: date, value: "0" });
-      });
-      return result.sort(dateService.compareMonths);
-    }
-
-    const days = daysInCurrentMonth();
-    //fill the rest of days without value in database with 0
-    days.forEach((date) => {
-      if (!result.some((r) => r.date === date))
-        result.push({ date: date, value: "0" });
-    });
-
-    return result.sort(compare);
-  }
-
-  function createLineChartData(option: SummaryOption) {
-    //
-    // Change transactions array into dictionary (format: {date: value}) for ApexCharts
-    //
-    if (option === SummaryOption.Year) return getPairValues(props.data, option);
-
-    //if option != Summaryoption.Year, return all transactions from current month
-    const transactions = props.data.filter((transaction) => {
-      return (
-        new Date(Date.parse(transaction.date)).getMonth() + 1 ===
-        dateService.currentMonth()
-      );
-    });
-    return getPairValues(transactions, option);
   }
 
   return (
@@ -239,12 +178,43 @@ function CurrentMonthChart(props: Props) {
       padding={3}
       height={380}
     >
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Typography component="h2" variant="body1" mb={1}>
+          Daily expenses
+        </Typography>
+        <FormControl sx={{ width: "200px" }}>
+          <InputLabel>Range</InputLabel>
+          <Select
+            size="small"
+            value={range}
+            label="Range"
+            onChange={(e) => setRange(Number(e.target.value))}
+          >
+            {Object.keys(RangeOptions)
+              .filter((key) => isNaN(Number(key)))
+              .map((_, index) => {
+                return (
+                  <MenuItem key={index} value={index}>
+                    {rangeOptionMask(index)}
+                  </MenuItem>
+                );
+              })}
+          </Select>
+        </FormControl>
+      </Box>
+
       <Chart
         options={state.options}
         series={state.series}
         type="bar"
         width="100%"
-        height="100%"
+        height="300px"
       />
     </Box>
   );

@@ -50,7 +50,7 @@ class LabelSerializer(serializers.ModelSerializer):
 
 
 class TransactionSerializer(serializers.ModelSerializer):
-    date = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S")
+    date = serializers.DateField(format="%m-%d-%Y", input_formats=['%m-%d-%Y'])
     amount = serializers.SerializerMethodField()
     duration = serializers.SerializerMethodField()
     label = LabelSerializer(source='get_label',read_only=True)

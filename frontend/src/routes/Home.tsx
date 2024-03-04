@@ -1,5 +1,4 @@
 import { Link, useSearchParams } from "react-router-dom";
-import dateService from "../api/services/DateService";
 import CurrentMonthChart from "../components/charts/CurrentMonthChart";
 import ProfileChart from "../components/charts/ProfileChart";
 import LatestTransactions from "../components/LatestTransactions";
@@ -8,17 +7,17 @@ import { Box, Button, Grid, Typography } from "@mui/material";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import AddTransaction from "../components/modals/AddTransaction";
 import WalletGridRow from "../components/dashboard/WalletGridRow";
-import { SummaryOption } from "../models/Summary";
 import AddLabel from "../components/modals/AddLabel";
 import { useQuery } from "@tanstack/react-query";
 import { useTransactions } from "../hooks/api/useTransactions";
 
+const QUERY_LIMIT = 10;
 function Home() {
-  const [_, setSearchParams] = useSearchParams();
   const { getTransactions } = useTransactions();
+  const [_, setSearchParams] = useSearchParams();
   const { data: transactions } = useQuery({
-    queryKey: ["transactions", dateService.currentYear()],
-    queryFn: () => getTransactions(dateService.currentYear()),
+    queryKey: ["transactions"],
+    queryFn: () => getTransactions(QUERY_LIMIT),
   });
   return (
     <>
@@ -73,10 +72,7 @@ function Home() {
         <WalletGridRow />
         <Grid item xs={12} lg={6}>
           {transactions ? (
-            <CurrentMonthChart
-              data={transactions}
-              option={SummaryOption.Month}
-            />
+            <CurrentMonthChart />
           ) : (
             <Typography component="p" variant="body1">
               Unable to load chart due to insufficient data.

@@ -22,6 +22,10 @@ function NewLabelForm() {
     formState: { errors },
   } = useForm<NewLabelFormData>({
     resolver: zodResolver(newLabelFormSchema),
+    values: {
+      name: "",
+      color: "#000000",
+    },
   });
 
   const { mutateAsync } = useMutation({
@@ -68,12 +72,12 @@ function NewLabelForm() {
       <Controller
         name="name"
         control={control}
-        render={({ field: { onChange, value }, fieldState: { error } }) => (
+        render={({ field: { onChange, value } }) => (
           <TextField
             fullWidth
             autoFocus
-            helperText={error ? error.message : null}
-            error={!!error}
+            helperText={errors.name ? errors.name.message : " "}
+            error={!!errors.name}
             onChange={onChange}
             value={value}
             label="Name"
@@ -93,17 +97,13 @@ function NewLabelForm() {
         <Controller
           name="color"
           control={control}
-          render={({
-            field: { onChange, value, name },
-            fieldState: { error },
-          }) => (
+          render={({ field: { onChange, value, name } }) => (
             <>
-              <Typography>{value ?? "#000000"}</Typography>
+              <Typography>{value}</Typography>
               <TextField
                 name={name}
-                error={!!error}
                 onChange={onChange}
-                value={value ?? "#000000"}
+                value={value}
                 label="Color"
                 variant="outlined"
                 size="small"
