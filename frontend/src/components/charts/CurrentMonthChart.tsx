@@ -1,11 +1,11 @@
+import { Box } from "@mui/material";
+import { grey } from "@mui/material/colors";
+import { ApexOptions } from "apexcharts";
 import { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
 import dateService, { MONTHS_IN_YEAR } from "../../api/services/DateService";
 import { SummaryOption } from "../../models/Summary";
-import { Transaction } from "../../models/Transaction";
-import { ApexOptions } from "apexcharts";
-import { Box } from "@mui/material";
-import { grey } from "@mui/material/colors";
+import { Transaction, TypeOption } from "../../models/Transaction";
 import { darkTheme } from "../../theme";
 
 interface Props {
@@ -225,7 +225,7 @@ function CurrentMonthChart(props: Props) {
     const transactions = props.data.filter((transaction) => {
       return (
         new Date(Date.parse(transaction.date)).getMonth() + 1 ===
-        dateService.currentMonth()
+          dateService.currentMonth() && transaction.type == TypeOption.EXPENSE
       );
     });
     return getPairValues(transactions, option);
