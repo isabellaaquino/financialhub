@@ -80,6 +80,7 @@ function NewLabelForm() {
             error={!!errors.name}
             onChange={onChange}
             value={value}
+            defaultValue = {''}
             label="Name"
             variant="outlined"
             size="small"
@@ -105,6 +106,7 @@ function NewLabelForm() {
                 onChange={onChange}
                 value={value}
                 label="Color"
+                defaultValue = {''}
                 variant="outlined"
                 size="small"
                 type="color"

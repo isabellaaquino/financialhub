@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { TextField } from "@mui/material";
+import { InputAdornment, TextField } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
@@ -8,6 +8,7 @@ import {
   editBalanceFormSchema,
 } from "../../schemas/editBalanceSchema";
 import { useWallet } from "../../hooks/api/useWallet";
+import { formatCurrency } from "../../utils/utils";
 
 interface Props {
   setState: React.Dispatch<React.SetStateAction<boolean>>;
@@ -20,7 +21,6 @@ function EditBalanceForm(props: Props) {
   const {
     handleSubmit,
     control,
-    formState: { errors },
   } = useForm<EditBalanceFormData>({
     resolver: zodResolver(editBalanceFormSchema),
   });
@@ -56,12 +56,23 @@ function EditBalanceForm(props: Props) {
         render={({ field: { onChange, value }, fieldState: { error } }) => (
           <TextField
             error={!!error}
-            onChange={onChange}
+            onChange={(e) => {
+              const formattedValue = formatCurrency(e.target.value);
+              onChange(formattedValue);
+            }}
             value={value}
             label=""
             variant="outlined"
             size="small"
+            defaultValue={""}
             sx={{ borderColor: grey[800], maxHeight: "32px" }}
+            placeholder="0,00"
+            InputProps={{
+              style: { fontSize: "20px", height: "38px" },
+              startAdornment: (
+                <InputAdornment position="start">R$</InputAdornment>
+              ),
+            }}
           />
         )}
       />

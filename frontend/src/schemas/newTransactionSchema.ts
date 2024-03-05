@@ -4,10 +4,12 @@ import { TypeOption } from "../models/Transaction";
 
 export const newTransactionFormSchema = z.object({
   title: z.string().min(1, "Title must be at least 1 character long."),
-  value: z.string().min(1, "Please select an amount >= 1.").transform((value) => {
-    const normalizedValue = value.replace(',', '.');
-    return parseFloat(normalizedValue);
-  }),
+  value: z
+    .string()
+    .min(1, "Please select an amount >= 1.")
+    .transform((value) => {
+      return parseFloat(value.replace(/\./g, "").replace(",", "."));
+    }),
   label: z.object({
     id: z.number(),
     name: z.string().min(1, "Please select a label."),
@@ -18,16 +20,5 @@ export const newTransactionFormSchema = z.object({
   updateWallet: z.boolean().default(false),
   recurring: z.boolean().default(false),
 });
-
-// title?: string;
-// description?: string;
-// label_id?: Number;
-// value: number;
-// date?: string;
-// updateWallet: boolean;
-// type: TypeOption;
-// recurrent: boolean;
-// amount?: number;
-// duration?: DurationOption;
 
 export type NewTransactionFormData = z.infer<typeof newTransactionFormSchema>;

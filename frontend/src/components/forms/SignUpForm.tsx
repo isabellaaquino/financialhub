@@ -81,6 +81,7 @@ function SignUpForm() {
                 fullWidth
                 autoComplete="new-password"
                 size="small"
+                defaultValue={""}
                 autoFocus
                 helperText={error ? error.message : null}
                 error={!!error}
@@ -100,6 +101,7 @@ function SignUpForm() {
                 fullWidth
                 autoComplete="new-password"
                 size="small"
+                defaultValue={""}
                 autoFocus
                 helperText={error ? error.message : null}
                 error={!!error}
@@ -120,6 +122,7 @@ function SignUpForm() {
               fullWidth
               autoComplete="new-password"
               size="small"
+              defaultValue={""}
               autoFocus
               helperText={error ? error.message : null}
               error={!!error}
@@ -139,6 +142,7 @@ function SignUpForm() {
               fullWidth
               autoComplete="new-password"
               size="small"
+              defaultValue={""}
               autoFocus
               helperText={error ? error.message : null}
               error={!!error}
@@ -159,6 +163,7 @@ function SignUpForm() {
               fullWidth
               autoComplete="new-password"
               size="small"
+              defaultValue={""}
               autoFocus
               helperText={error ? error.message : null}
               error={!!error}

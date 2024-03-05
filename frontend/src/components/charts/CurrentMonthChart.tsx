@@ -1,6 +1,6 @@
+import { ApexOptions } from "apexcharts";
 import { useEffect, useMemo, useState } from "react";
 import Chart from "react-apexcharts";
-import { ApexOptions } from "apexcharts";
 import {
   Box,
   FormControl,
@@ -13,8 +13,9 @@ import { grey } from "@mui/material/colors";
 import { darkTheme } from "../../theme";
 import { useQuery } from "@tanstack/react-query";
 import { useTransactions } from "../../hooks/api/useTransactions";
+import { getStartDate, rangeOptionMask } from "../../utils/utils";
 
-enum RangeOptions {
+export enum RangeOptions {
   LastWeek = 0,
   LastTwoWeeks = 1,
   LastMonth = 2,
@@ -24,37 +25,13 @@ function CurrentMonthChart() {
   const { getTransactions } = useTransactions();
   const [range, setRange] = useState<RangeOptions>(RangeOptions.LastWeek);
   const [lineChartData, setLineChartData] = useState<
-    { x: string; y: string | number }[] | null
-  >(null);
+    { x: string; y: string | number }[]
+  >([]);
 
   const formatDataForCharts = true;
-  const endDate = new Date("2024-03-04");
+  const endDate = new Date("2024-03-04"); //TO-DO
   const startDate = useMemo(() => {
-    if (range === RangeOptions.LastWeek) {
-      const today = new Date();
-      const lastWeek = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate() - 6
-      );
-      return lastWeek;
-    } else if (range === RangeOptions.LastTwoWeeks) {
-      const today = new Date();
-      const lastTwoWeeks = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate() - 13
-      );
-      return lastTwoWeeks;
-    } else {
-      const today = new Date();
-      const lastMonth = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate() - 29
-      );
-      return lastMonth;
-    }
+    return getStartDate(range);
   }, [range]);
 
   const { data: transactions } = useQuery({
@@ -62,75 +39,77 @@ function CurrentMonthChart() {
     queryFn: () => getTransactions(0, startDate, endDate, formatDataForCharts),
   });
 
-  const [state, setState] = useState<{
-    options: ApexOptions;
-    series: ApexOptions["series"];
-  }>({
-    options: {
-      chart: {
-        toolbar: { show: false },
-        id: "bar",
-      },
-      plotOptions: {
-        bar: {
-          columnWidth: "70%",
+  const state = useMemo(() => {
+    return {
+      options: {
+        chart: {
+          toolbar: { show: false },
+          id: "bar",
         },
-      },
-      colors: [darkTheme.palette.primary.main],
-      legend: {
-        show: false,
-      },
-      xaxis: {
-        type: "numeric",
-        labels: {
-          style: {
-            colors: grey[700],
+        plotOptions: {
+          bar: {
+            columnWidth: "70%",
           },
+        },
+        colors: [darkTheme.palette.primary.main],
+        legend: {
+          show: false,
+        },
+        xaxis: {
+          type: "numeric",
+          labels: {
+            style: {
+              colors: grey[700],
+            },
+            show: true,
+            formatter: function (value: string) {
+              return new Date(value).toLocaleString("pt-BR", {
+                day: "2-digit",
+                month: "2-digit",
+              });
+            },
+          },
+        },
+        yaxis: {
+          stepSize: 250,
+          labels: {
+            show: true,
+            style: {
+              colors: grey[700],
+            },
+            formatter: function (val) {
+              return val.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              });
+            },
+          },
+        },
+        grid: {
           show: true,
-          formatter: function (value: string) {
-            return new Date(value).toLocaleString("pt-BR", {
-              day: "2-digit",
-              month: "2-digit",
-            });
+          borderColor: grey[900],
+        },
+        dataLabels: { enabled: false },
+        tooltip: {
+          theme: "dark",
+          x: {
+            formatter(val) {
+              return String(val);
+            },
           },
         },
       },
-      yaxis: {
-        stepSize: 250,
-        labels: {
-          show: true,
-          style: {
-            colors: grey[700],
-          },
-          formatter: function (val) {
-            return val.toLocaleString("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            });
-          },
+      series: [
+        {
+          name: "",
+          data: lineChartData ?? [],
         },
-      },
-      grid: {
-        show: true,
-        borderColor: grey[900],
-      },
-      dataLabels: { enabled: false },
-      tooltip: {
-        theme: "dark",
-        x: {
-          formatter(val) {
-            return String(val);
-          },
-        },
-      },
-    },
-    series: [
-      {
-        name: "",
-        data: [],
-      },
-    ],
-  });
+      ],
+    } as {
+      options: ApexOptions;
+      series: ApexOptions["series"];
+    };
+  }, [lineChartData]);
 
   useEffect(() => {
     const dataSet = transactions
@@ -139,36 +118,9 @@ function CurrentMonthChart() {
             return { x: t.date, y: t.value };
           })
           .sort((a, b) => new Date(a.x).getTime() - new Date(b.x).getTime())
-      : null;
+      : [];
     setLineChartData(dataSet);
   }, [transactions, range]);
-
-  useEffect(() => {
-    setState((prevState) => {
-      return {
-        options: {
-          ...prevState.options,
-        },
-        series: [
-          {
-            ...prevState.series,
-            data: lineChartData ?? [],
-          },
-        ],
-      };
-    });
-  }, [lineChartData]);
-
-  function rangeOptionMask(option: RangeOptions) {
-    switch (option) {
-      case RangeOptions.LastMonth:
-        return "Last month";
-      case RangeOptions.LastWeek:
-        return "Last week";
-      case RangeOptions.LastTwoWeeks:
-        return "Last two weeks";
-    }
-  }
 
   return (
     <Box
@@ -209,13 +161,28 @@ function CurrentMonthChart() {
         </FormControl>
       </Box>
 
-      <Chart
-        options={state.options}
-        series={state.series}
-        type="bar"
-        width="100%"
-        height="300px"
-      />
+      {lineChartData.every((obj) => obj.y === 0) ? (
+        <Typography
+          component="p"
+          variant="body1"
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            mt: 14,
+            textAlign: "center",
+          }}
+        >
+          Unable to load chart due to insufficient data.
+        </Typography>
+      ) : (
+        <Chart
+          options={state.options}
+          series={state.series}
+          type="bar"
+          width="100%"
+          height="300px"
+        />
+      )}
     </Box>
   );
 }

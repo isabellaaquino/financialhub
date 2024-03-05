@@ -153,7 +153,7 @@ class Wallet(models.Model):
     def get_saving_plans(self):
         pass
 
-    def get_labels(self) -> QuerySet['CustomerLabel']:
+    def get_labels(self) -> QuerySet['CustomLabel']:
         return self.labels.all()
 
 

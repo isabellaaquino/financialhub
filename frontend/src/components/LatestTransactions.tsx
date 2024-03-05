@@ -95,9 +95,7 @@ function LatestTransactions(props: Props) {
     mutationFn: deleteTransaction,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          "transactions",
-        ],
+        queryKey: ["transactions"],
       });
       queryClient.invalidateQueries({
         queryKey: ["wallet"],

@@ -38,7 +38,12 @@ function SignInForm() {
       }}
     >
       <Box>
-        <Typography variant="h5" component="h1" fontWeight={600} lineHeight={1.8}>
+        <Typography
+          variant="h5"
+          component="h1"
+          fontWeight={600}
+          lineHeight={1.8}
+        >
           Welcome back
         </Typography>
         <Typography variant="body2" component="p" color={grey[500]}>
@@ -62,7 +67,7 @@ function SignInForm() {
               size="small"
               autoFocus
               helperText={error ? error.message : null}
-              // size="small"
+              defaultValue={""}
               error={!!error}
               onChange={onChange}
               value={value}
@@ -81,7 +86,7 @@ function SignInForm() {
               size="small"
               autoFocus
               helperText={error ? error.message : null}
-              // size="small"
+              defaultValue={""}
               error={!!error}
               onChange={onChange}
               value={value}
@@ -94,7 +99,12 @@ function SignInForm() {
         <Button type="submit" variant="contained" size="medium">
           Sign In
         </Button>
-        <Typography color="gray" variant="body2" component="p" textAlign="center">
+        <Typography
+          color="gray"
+          variant="body2"
+          component="p"
+          textAlign="center"
+        >
           Don't have an account? <Link to="/auth/sign-up">Sign up</Link>
         </Typography>
       </form>

@@ -30,6 +30,7 @@ import { useSnackbar } from "notistack";
 import { useTransactions } from "../../hooks/api/useTransactions";
 import dayjs from "dayjs";
 import { TypeOption, typeOptionMask } from "../../models/Transaction";
+import { formatCurrency } from "../../utils/utils";
 
 function NewTransactionForm() {
   const queryClient = useQueryClient();
@@ -59,11 +60,13 @@ function NewTransactionForm() {
 
   const { mutateAsync } = useMutation({
     mutationFn: createTransaction,
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       setSearchParams((state) => {
         state.delete("transaction");
         return state;
       });
+      //get transaction id
+      // queryClient.setQueryData(['transactions', { id: variables.transaction. }], data)
       queryClient.invalidateQueries({
         queryKey: ["transactions"],
       });
@@ -90,14 +93,6 @@ function NewTransactionForm() {
     await mutateAsync({ transaction: data });
   }
 
-  function formatCurrency(value: string) {
-    let formattedValue = value.replace(/\D/g, "");
-    formattedValue = formattedValue.replace(/(\d)(\d{2})$/, "$1,$2");
-    formattedValue = formattedValue.replace(/(?=(\d{3})+(\D))\B/g, ".");
-
-    return formattedValue;
-  }
-
   return (
     <form
       onSubmit={handleSubmit(addNewTransaction)}
@@ -119,6 +114,7 @@ function NewTransactionForm() {
             helperText={errors.title ? errors.title.message : " "}
             error={!!errors.title}
             onChange={onChange}
+            defaultValue={""}
             value={value}
             label="Title"
             variant="outlined"
@@ -178,15 +174,16 @@ function NewTransactionForm() {
               autoFocus
               helperText={errors.value ? errors.value.message : " "}
               error={!!errors.value}
+              defaultValue={""}
               onChange={(e) => {
                 const formattedValue = formatCurrency(e.target.value);
                 onChange(formattedValue);
               }}
               value={value === 0 ? "" : value}
-              placeholder="0,00"
               label="Amount"
               variant="outlined"
               size="small"
+              placeholder="0,00"
               InputProps={{
                 style: { fontSize: "14px", height: "40px" },
                 startAdornment: (
@@ -207,6 +204,7 @@ function NewTransactionForm() {
                   label="Date"
                   value={value}
                   onChange={onChange}
+                  defaultValue={""}
                   slotProps={{
                     textField: {
                       size: "small",
@@ -237,9 +235,10 @@ function NewTransactionForm() {
               value={value}
               onChange={onChange}
             >
-              {Object.values(TypeOption).map((item) => {
+              {Object.values(TypeOption).map((item, i) => {
                 return (
                   <FormControlLabel
+                    key={i}
                     value={item}
                     control={<Radio />}
                     label={typeOptionMask(item)}

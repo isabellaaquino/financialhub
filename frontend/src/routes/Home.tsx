@@ -23,10 +23,16 @@ function Home() {
     queryFn: () => getTransactions(QUERY_LIMIT),
   });
 
-  const { data: wallet } = useQuery({
+  const {
+    data: wallet,
+    isPending,
+    isError,
+  } = useQuery({
     queryKey: ["wallet"],
     queryFn: () => getWallet(),
   });
+
+  console.log(isError);
 
   return (
     <>
@@ -78,7 +84,11 @@ function Home() {
         </Box>
       </Box>
       <Grid mt={2} container spacing={2} alignItems={"stretch"}>
-        <WalletGridRow />
+        <WalletGridRow
+          wallet={wallet}
+          isPending={isPending}
+          isError={isError}
+        />
         <Grid item xs={12} lg={6}>
           {transactions ? (
             <CurrentMonthChart />
