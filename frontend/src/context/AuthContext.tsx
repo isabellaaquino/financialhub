@@ -1,7 +1,7 @@
-import { createContext, useEffect, useState } from "react";
-import authService from "../api/services/AuthService";
-import { User } from "../models/User";
 import { jwtDecode } from "jwt-decode";
+import { createContext, useState } from "react";
+import { api } from "../api/services/Api";
+import { User } from "../models/User";
 import { UserInput } from "../routes/SignUp";
 
 interface AuthContextData {
@@ -13,8 +13,9 @@ interface AuthContextData {
     email: string;
     password: string;
   }): Promise<void>;
-  SignUp(user: UserInput): Promise<string | null>;
+  SignUp({ user }: { user: UserInput }): Promise<string | null>;
   SignOut(): void;
+  refresh: () => Promise<void>;
   authTokens: AuthTokens | null;
 }
 
@@ -29,17 +30,8 @@ interface AuthTokens {
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 export const AuthProvider = ({ children }: Props) => {
-  let [loading, setLoading] = useState(true);
-  let [authTokens, setAuthTokens] = useState<AuthTokens | null>(() =>
-    localStorage.getItem("authTokens")
-      ? JSON.parse(localStorage.getItem("authTokens")!)
-      : null
-  );
-  let [loggedUser, setLoggedUser] = useState<User | null>(() =>
-    localStorage.getItem("authTokens")
-      ? jwtDecode(localStorage.getItem("authTokens")!)
-      : null
-  );
+  let [authTokens, setAuthTokens] = useState<AuthTokens | null>(null);
+  let [loggedUser, setLoggedUser] = useState<User | null>(null);
 
   async function SignIn({
     email,
@@ -48,47 +40,58 @@ export const AuthProvider = ({ children }: Props) => {
     email: string;
     password: string;
   }) {
-    const response = (await authService.signIn(email, password)) as AuthTokens;
-    setAuthTokens(response);
-    setLoggedUser(jwtDecode(response.access));
-    localStorage.setItem("authTokens", JSON.stringify(response));
+    try {
+      const response = await api.post(
+        "/token/",
+        {
+          email: email,
+          password: password,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+      const data = await response.data;
+      setAuthTokens(data);
+      setLoggedUser(jwtDecode(data.access));
+    } catch (error) {
+      console.log(error);
+    }
   }
 
-  async function SignUp(user: UserInput) {
-    return await authService.signUp(user);
+  async function SignUp({ user }: { user: UserInput }) {
+    try {
+      const response = await api.post("/register/", user);
+      if (response.status !== 200) return null;
+      return (await response.data) as string;
+    } catch (error) {
+      console.log(error);
+    }
+
+    return null;
   }
 
   function SignOut() {
     setAuthTokens(null);
     setLoggedUser(null);
-    localStorage.removeItem("authTokens");
   }
 
-  async function RefreshToken() {
-    try {
-      const response = (await authService.refreshToken(
-        authTokens?.refresh
-      )) as AuthTokens;
-
-      setAuthTokens(response);
-      setLoggedUser(jwtDecode(response.access));
-      localStorage.setItem("authTokens", JSON.stringify(response));
-    } catch {
-      SignOut();
-    }
-
-    if (loading) setLoading(false);
+  async function refresh() {
+    console.log("old aT: " + authTokens?.access);
+    const response = await api.post(
+      "/token/refresh/",
+      { refresh: authTokens?.refresh },
+      {
+        withCredentials: true,
+      }
+    );
+    setAuthTokens({
+      access: response.data.access_token,
+      refresh: response.data.refresh_token,
+    });
+    setLoggedUser(jwtDecode(response.data.access_token));
+    return response.data.access_token;
   }
-
-  useEffect(() => {
-    if (loading) RefreshToken();
-
-    let interval = setInterval(() => {
-      if (authTokens) RefreshToken();
-    }, 1000 * 60 * 4); //5 minutes
-
-    return () => clearInterval(interval);
-  }, [authTokens, loading]);
 
   return (
     <AuthContext.Provider
@@ -97,6 +100,7 @@ export const AuthProvider = ({ children }: Props) => {
         SignIn,
         SignUp,
         SignOut,
+        refresh,
         authTokens,
       }}
     >

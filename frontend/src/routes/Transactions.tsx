@@ -1,9 +1,9 @@
-import dateService from "../api/services/DateService";
-import { useAuth } from "../hooks/useAuth";
-import { Box, InputAdornment, TextField, Typography } from "@mui/material";
-import LatestTransactions from "../components/LatestTransactions";
 import SearchIcon from "@mui/icons-material/Search";
+import { Box, InputAdornment, TextField, Typography } from "@mui/material";
 import { grey } from "@mui/material/colors";
+import dateService from "../api/services/DateService";
+import LatestTransactions from "../components/LatestTransactions";
+import { useAuth } from "../hooks/useAuth";
 import { useTransactions } from "../hooks/useTransactions";
 
 function Transactions() {
@@ -12,7 +12,7 @@ function Transactions() {
     authTokens!.access,
     dateService.currentYear()
   );
-  
+
   return (
     <>
       <Typography component="h1" variant="h4" fontWeight={600} mb={4}>

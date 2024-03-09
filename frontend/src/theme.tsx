@@ -1,6 +1,6 @@
+import "@fontsource/inter";
 import { Components, createTheme, PaletteOptions } from "@mui/material";
 import { TypographyOptions } from "@mui/material/styles/createTypography";
-import "@fontsource/inter";
 
 export const darkTheme = createTheme({
   palette: {

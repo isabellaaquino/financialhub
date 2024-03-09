@@ -12,6 +12,7 @@ export interface Transaction {
   recurrent: boolean;
   amount?: number;
   duration?: DurationOption;
+  imported?: boolean;
 }
 
 export interface AggregatedExpense {
@@ -22,8 +23,7 @@ export interface AggregatedExpense {
 
 export enum TypeOption {
   EXPENSE = "EXPENSE",
-  TRANSFER = "TRANSFER",
-  INCOME = "INCOME",
+  EARNING = "EARNING",
 }
 
 export function typeOptionMask(type: TypeOption) {
@@ -38,13 +38,9 @@ export function typeOptionColor(type: TypeOption) {
       color = "#f25659";
       bgColor = "#f2565936";
       break;
-    case TypeOption.INCOME:
+    case TypeOption.EARNING:
       color = "#48cc90";
       bgColor = "#48cc9030";
-      break;
-    case TypeOption.TRANSFER:
-      color = "#d16bff";
-      bgColor = "#d16bff3d";
       break;
   }
   return { bgColor, color };

@@ -1,6 +1,8 @@
+import { RangeOptions } from "../components/charts/ProfileChart";
+
 export function formatValue(value: number, limit: number): string {
   if (value < limit) {
-    return parseInt(value.toString()).toLocaleString("pt-BR", {
+    return parseFloat(value.toString()).toLocaleString("pt-BR", {
       style: "currency",
       currency: "BRL",
     });
@@ -17,14 +19,49 @@ export function formatValue(value: number, limit: number): string {
   return "R$" + value.toFixed(2) + abbreviations[abbreviationIndex];
 }
 
-export function getKeyByEnumValue(myEnum: any, enumValue: number | string) {
-  let keys = Object.keys(myEnum).filter((x) => myEnum[x] == enumValue);
-  return keys.length > 0 ? keys[0] : "";
+export function formatCurrency(value: string) {
+  let formattedValue = value.replace(/\D/g, "");
+  formattedValue = formattedValue.replace(/(\d)(\d{2})$/, "$1,$2");
+  formattedValue = formattedValue.replace(/(?=(\d{3})+(\D))\B/g, ".");
+
+  return formattedValue;
 }
 
-export type ResponseType = { [key: string]: string };
+export function getStartDate(range: RangeOptions) {
+  if (range === RangeOptions.LastWeek) {
+    const today = new Date();
+    const lastWeek = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() - 6
+    );
+    return lastWeek;
+  } else if (range === RangeOptions.LastTwoWeeks) {
+    const today = new Date();
+    const lastTwoWeeks = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() - 13
+    );
+    return lastTwoWeeks;
+  } else {
+    const today = new Date();
+    const lastMonth = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() - 29
+    );
+    return lastMonth;
+  }
+}
 
-export function capitalizeStr(type: string) {
-  const typeStr = type?.toString().toLowerCase();
-  return typeStr.charAt(0).toUpperCase() + typeStr.slice(1);
+export function rangeOptionMask(option: RangeOptions) {
+  switch (option) {
+    case RangeOptions.LastMonth:
+      return "Last month";
+    case RangeOptions.LastWeek:
+      return "Last week";
+    case RangeOptions.LastTwoWeeks:
+      return "Last two weeks";
+  }
 }

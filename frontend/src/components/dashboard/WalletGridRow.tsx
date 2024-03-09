@@ -102,11 +102,11 @@ function WalletGridRow() {
           height={"100%"}
         >
           <Typography component="h2" variant="body1" mb={1}>
-            Monthly Income
+            Monthly Earnings
           </Typography>
           <Box display="flex" alignItems="center" gap={2}>
             <Typography component="span" variant="h5" fontWeight={600}>
-              +{formatValue(wallet.monthly_incomes, 10_000)}
+              +{formatValue(wallet.monthly_earnings, 10_000)}
             </Typography>
           </Box>
         </Box>

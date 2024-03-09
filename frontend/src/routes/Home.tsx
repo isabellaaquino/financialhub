@@ -9,6 +9,7 @@ import ProfileChart from "../components/charts/ProfileChart";
 import WalletGridRow from "../components/dashboard/WalletGridRow";
 import AddLabel from "../components/modals/AddLabel";
 import AddTransaction from "../components/modals/AddTransaction";
+import ImportInvoice from "../components/modals/ImportInvoices";
 import { useAuth } from "../hooks/useAuth";
 import { useTransactions } from "../hooks/useTransactions";
 import { useWallet } from "../hooks/useWallet";
@@ -120,6 +121,7 @@ function Home() {
         </Grid>
       </Grid>
 
+      <ImportInvoice />
       <AddTransaction />
       <AddLabel />
     </>
