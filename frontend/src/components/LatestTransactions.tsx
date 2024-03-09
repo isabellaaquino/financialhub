@@ -11,10 +11,8 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
 import React from "react";
-import dateService from "../api/services/DateService";
-import transactionService from "../api/services/TransactionService";
-import { useAuth } from "../hooks/useAuth";
 import { Transaction, typeOptionColor } from "../models/Transaction";
+import { useTransactions } from "../hooks/api/useTransactions";
 
 const MAX_ROWS = 10;
 
@@ -25,7 +23,7 @@ interface Props {
 
 function LatestTransactions(props: Props) {
   const queryClient = useQueryClient();
-  const { authTokens } = useAuth();
+  const { deleteTransaction } = useTransactions();
   const { enqueueSnackbar } = useSnackbar();
 
   const columns: GridColDef[] = [
@@ -63,7 +61,7 @@ function LatestTransactions(props: Props) {
       headerName: "Value",
       width: 300,
       valueFormatter: (params: GridValueFormatterParams) => {
-        return parseFloat(params.value.toString()).toLocaleString("pt-BR", {
+        return parseFloat(params.value).toLocaleString("pt-BR", {
           style: "currency",
           currency: "BRL",
         });
@@ -94,17 +92,13 @@ function LatestTransactions(props: Props) {
   ];
 
   const { mutateAsync } = useMutation({
-    mutationFn: transactionService.deleteTransactionAPI,
+    mutationFn: deleteTransaction,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          "transactions",
-          authTokens!.access,
-          dateService.currentYear(),
-        ],
+        queryKey: ["transactions"],
       });
       queryClient.invalidateQueries({
-        queryKey: ["wallet", authTokens!.access],
+        queryKey: ["wallet"],
       });
       enqueueSnackbar("Transaction deleted successfully!", {
         variant: "success",
@@ -127,8 +121,7 @@ function LatestTransactions(props: Props) {
   async function handleDeleteTransaction(id: GridRowId) {
     // TODO: Add are you sure alert
     await mutateAsync({
-      accessToken: authTokens!.access,
-      transaction_pk: Number(id),
+      transactionId: Number(id),
     });
     setRows(
       rows &&

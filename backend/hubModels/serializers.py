@@ -3,8 +3,8 @@ from .models import Transaction, SavingPlan, Wallet, CustomLabel
 
 from django.utils import timezone
 
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
+from rest_framework_simplejwt.exceptions import InvalidToken
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -17,10 +17,23 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         return token
 
+class MyTokenRefreshSerializer(TokenRefreshSerializer):
+    refresh = None
+    def validate(self, attrs):
+        attrs['refresh'] = self.context['request'].COOKIES.get('refresh_token')
+        if attrs['refresh']:
+            return super().validate(attrs)
+        else:
+            raise InvalidToken('No valid token found in cookie \'refresh_token\'')
+class LabelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomLabel
+        fields = ('id', 'name', 'color')
 
 class WalletSerializer(serializers.ModelSerializer):
     monthly_incomes = serializers.SerializerMethodField(source='get_monthly_incomes')
     monthly_expenses = serializers.SerializerMethodField(source='get_monthly_expenses')
+    labels = LabelSerializer(many=True)
     aggregated_expenses = serializers.SerializerMethodField(source='get_aggregated_expenses')
 
     class Meta:
@@ -40,14 +53,8 @@ class WalletSerializer(serializers.ModelSerializer):
         return obj.get_aggregated_expenses()
 
 
-class LabelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomLabel
-        fields = ('id', 'name', 'color')
-
-
 class TransactionSerializer(serializers.ModelSerializer):
-    date = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S")
+    date = serializers.DateField(format="%m-%d-%Y", input_formats=['%m-%d-%Y'])
     value = serializers.DecimalField(decimal_places=2, max_digits=10)
     amount = serializers.SerializerMethodField()
     duration = serializers.SerializerMethodField()

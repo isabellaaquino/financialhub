@@ -1,17 +1,26 @@
 import Autocomplete from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
-import TextField from "@mui/material/TextField";
 import { useQuery } from "@tanstack/react-query";
-import * as React from "react";
-import labelService from "../api/services/LabelService";
-import { useAuth } from "../hooks/useAuth";
+import { CustomLabel } from "../models/CustomLabel";
+import { useState } from "react";
+import { TextField } from "@mui/material";
+import React from "react";
+import { useWallet } from "../hooks/api/useWallet";
 
-export default function AsyncAutocomplete({ onChange, value }: any) {
-  const { authTokens } = useAuth();
-  const [open, setOpen] = React.useState(false);
-  const { data: labels, isLoading } = useQuery({
-    queryKey: ["labels", authTokens!.access],
-    queryFn: () => labelService.getUserLoggedLabels(authTokens!.access),
+interface Props {
+  onChange: any;
+  value: CustomLabel | null;
+  helperText?: string;
+  error?: boolean;
+}
+
+export default function AsyncAutocomplete(props: Props) {
+  const { getWallet } = useWallet();
+  const [open, setOpen] = useState(false);
+
+  const { data: wallet, isLoading } = useQuery({
+    queryKey: ["wallet"],
+    queryFn: () => getWallet(),
     enabled: open,
   });
 
@@ -22,15 +31,17 @@ export default function AsyncAutocomplete({ onChange, value }: any) {
       open={open}
       onOpen={() => setOpen(true)}
       onClose={() => setOpen(false)}
-      options={labels ?? []}
+      options={wallet?.labels ?? []}
       getOptionLabel={(option) => option.name}
       isOptionEqualToValue={(option, value) => option.name === value.name}
-      onChange={(_, data) => onChange(data)}
-      value={value}
+      onChange={(_, data) => props.onChange(data)}
+      value={props.value}
       renderInput={(params) => (
         <TextField
           {...params}
           label="Label"
+          error={props.error}
+          helperText={props.helperText}
           InputProps={{
             ...params.InputProps,
             endAdornment: (
