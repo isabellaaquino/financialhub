@@ -6,7 +6,7 @@ from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.base_user import AbstractBaseUser
 from .managers import HubUserManager
 
-from datetime import date
+from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 
 
@@ -110,6 +110,12 @@ class Wallet(models.Model):
         """
         return self.transactions.filter(recurrent=False)
 
+    def get_transactions_in_range(self, start_date: date, end_date: date) -> QuerySet['Transaction']:
+        """
+        Return a QuerySet of all Transactions related to a Wallet in a specific range
+        """
+        return self.transactions.filter(date__range=[start_date, end_date]).order_by('date')
+
     def get_transactions_by_year(self, year) -> QuerySet['Transaction']:
         """
         Return a QuerySet of all Transactions related to a Wallet from specific year
@@ -121,34 +127,34 @@ class Wallet(models.Model):
         Return a QuerySet of all Transactions related to a Wallet
         that has their `date` less than 1 month ago and ordered by date
         """
-        three_months = date.today() + relativedelta(months=+1)
+        three_months = date.today() + relativedelta(months=3)
         return self.transactions.filter(date__lt=three_months).order_by('date')
     
-    def get_monthly_incomes(self):
+    def get_monthly_earnings(self):
         """
-        Returns the monthly income value of a user's Wallet
+        Returns the monthly earnings value of a user's Wallet
         """
-        one_month = date.today() - relativedelta(months=1)
-        return self.transactions.filter(date__gte=one_month, type="INCOME") \
+        this_month = datetime.now().month
+        return self.transactions.filter(date__month=this_month, type="EARNING") \
             .aggregate(Sum('value')).get('value__sum') or 0
     
     def get_monthly_expenses(self):
         """
         Returns the monthly debt value of a user's Wallet
         """
-        one_month = date.today() - relativedelta(months=1)
-        return self.transactions.filter(date__gte=one_month, type="EXPENSE")\
+        this_month = datetime.now().month
+        return self.transactions.filter(date__month=this_month, type="EXPENSE")\
             .aggregate(Sum('value')).get('value__sum') or 0
 
     def get_aggregated_expenses(self):
         """
-        Returns the top 5 expenses of a user's Wallet grouped by label
+        Returns the top 5 expenses of a user's Wallet grouped by label from the past 90 days
         """
-        one_month = date.today() - relativedelta(months=1)
-        return (self.transactions.filter(date__gte=one_month, type="EXPENSE")
+        three_months = date.today() - relativedelta(months=3)
+        return (self.transactions.filter(date__gte=three_months, type="EXPENSE")
                 .values(label_name=F("label__name"), label_color=F("label__color"))
                 .annotate(total_amount=Sum('value'))
-                .order_by('-total_amount'))[:5]
+                .order_by('-total_amount', 'imported'))[:5]
             
     def get_saving_plans(self):
         pass
@@ -242,19 +248,19 @@ class TransactionRecurrency(models.Model):
 class Transaction(WalletBasedModel):
     TRANSACTION_TYPES = [
         ('EXPENSE', 'Expense'),
-        ('TRANSFER', 'Transfer'),
-        ('INCOME', 'Income'),
+        ('EARNING', 'Earning'),
     ]
 
     title = models.CharField(max_length=200, blank=False, null=False)
     wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False, related_name='transactions')
     value = models.DecimalField(decimal_places=2, max_digits=15)
     date = models.DateTimeField(auto_now=False)
-    type = models.CharField(max_length=100, choices=TRANSACTION_TYPES)
+    type = models.CharField(max_length=7, choices=TRANSACTION_TYPES, null=True)
     label = models.ForeignKey(CustomLabel, on_delete=models.SET_NULL, null=True, blank=True)
+    imported = models.BooleanField(default=False, null=True, blank=True)
     # Django convention is to avoid setting null=True to CharFields
-    description = models.CharField(max_length=200, blank=True, null=True)  # TODO: review if description should exist
-    update_wallet = models.BooleanField(default=True)
+    update_wallet = models.BooleanField(default=False)
+
     # Recurrency section
     recurrent = models.BooleanField(default=False)
     recurrency = models.OneToOneField(TransactionRecurrency, on_delete=models.CASCADE, null=True, related_name='+')
@@ -263,7 +269,7 @@ class Transaction(WalletBasedModel):
     def save(self, is_first_save=False, **kwargs):
         # Cloned transactions will never update wallet, since will they will only be a base transaction for future ones
         if self.update_wallet and is_first_save and not self.recurrent:
-            amount = self.value if self.type == 'INCOME' else (-self.value)
+            amount = self.value if self.type == 'EARNING' else (-self.value)
             self.wallet.update_balance(amount)
             
         return super().save(**kwargs)
@@ -273,7 +279,7 @@ class Transaction(WalletBasedModel):
         if self.update_wallet:
             # If transaction doesn't have fk to a base
             if not self.recurrent:
-                amount = (-self.value) if self.type == 'INCOME' else self.value
+                amount = (-self.value) if self.type == 'EARNING' else self.value
                 self.wallet.update_balance(amount)
             
         return super().delete(**kwargs)
@@ -353,6 +359,33 @@ class Transaction(WalletBasedModel):
             transaction.save(is_first_save=True)
 
         return transaction
+
+    @staticmethod
+    def create_from_import(data, user):
+        """
+        Creates a transaction from a frontend request
+        @params:
+            data : dict
+        """
+        user_wallet = user.get_wallet()
+
+        if not user_wallet:
+            raise PermissionError()
+
+        transaction = Transaction()
+        transaction.wallet = user_wallet
+        # Imported transactions will always be flagged as imported until they have all the fields completed
+        transaction.imported = True
+
+        # Empty fields section
+        transaction.title = ''
+        transaction.type = None
+
+        # Invoice dict section
+        transaction.value = data.get("value")
+        transaction.date = data.get("date")
+
+        transaction.save()
 
     def is_recurrent(self):
         return self.recurrent

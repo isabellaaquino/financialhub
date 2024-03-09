@@ -6,7 +6,7 @@ from faker.providers import DynamicProvider
 
 transaction_types_provider = DynamicProvider(
     provider_name="transaction_type",
-    elements=["EXPENSE", "TRANSFER", "INCOME"],
+    elements=["EXPENSE", "EARNING"],
 )
 
 duration_type_provider = DynamicProvider(
