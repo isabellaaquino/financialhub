@@ -32,8 +32,6 @@ function Home() {
     queryFn: () => getWallet(),
   });
 
-  console.log(isError);
-
   return (
     <>
       <Box

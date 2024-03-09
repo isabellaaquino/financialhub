@@ -10,6 +10,7 @@ import App from "./App";
 import PersistLogin from "./components/auth/PersistLogin";
 import "./main.css";
 import AuthRoot from "./routes/AuthRoot";
+import Settings from "./routes/Settings";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -26,6 +27,10 @@ export const router = createBrowserRouter([
           {
             path: "transactions",
             element: <Transactions />,
+          },
+          {
+            path: "settings",
+            element: <Settings />,
           },
         ],
       },

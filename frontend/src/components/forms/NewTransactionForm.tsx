@@ -60,7 +60,7 @@ function NewTransactionForm() {
 
   const { mutateAsync } = useMutation({
     mutationFn: createTransaction,
-    onSuccess: (data, variables) => {
+    onSuccess: () => {
       setSearchParams((state) => {
         state.delete("transaction");
         return state;
@@ -274,7 +274,7 @@ function NewTransactionForm() {
           }
           label="Update wallet"
         />
-        <FormControlLabel
+        {/* <FormControlLabel
           control={
             <Controller
               name="recurring"
@@ -290,7 +290,7 @@ function NewTransactionForm() {
             />
           }
           label="Recurring"
-        />
+        /> */}
       </FormGroup>
 
       <Button type="submit" variant="contained">

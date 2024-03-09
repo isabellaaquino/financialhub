@@ -36,7 +36,7 @@ function NewLabelForm() {
         return state;
       });
       queryClient.invalidateQueries({
-        queryKey: ["labels"],
+        queryKey: ["wallet"],
       });
       enqueueSnackbar("Label created successfully!", {
         variant: "success",

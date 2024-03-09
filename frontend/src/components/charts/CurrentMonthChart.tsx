@@ -29,13 +29,13 @@ function CurrentMonthChart() {
   >([]);
 
   const formatDataForCharts = true;
-  const endDate = new Date("2024-03-04"); //TO-DO
+  const endDate = new Date(new Date()); //TO-DO
   const startDate = useMemo(() => {
     return getStartDate(range);
   }, [range]);
 
   const { data: transactions } = useQuery({
-    queryKey: ["transactions", startDate, endDate, formatDataForCharts],
+    queryKey: ["transactions", startDate],
     queryFn: () => getTransactions(0, startDate, endDate, formatDataForCharts),
   });
 
@@ -71,7 +71,7 @@ function CurrentMonthChart() {
           },
         },
         yaxis: {
-          stepSize: 250,
+          tickAmount: 5,
           labels: {
             show: true,
             style: {
