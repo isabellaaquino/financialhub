@@ -20,9 +20,9 @@ export const navigation: NavigationItem[] = [
     path: "/transactions",
     icon: <ReceiptIcon />,
   },
-  {
-    label: "SavingPlans",
-    path: "/saving-plans",
-    icon: <SavingsIcon />,
-  },
+  // {
+  //   label: "SavingPlans",
+  //   path: "/saving-plans",
+  //   icon: <SavingsIcon />,
+  // },
 ];

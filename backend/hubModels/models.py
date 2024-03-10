@@ -1,12 +1,12 @@
 from decimal import Decimal
-from django.db import models, transaction
-from django.db.models import QuerySet, Sum, Count, F
+from django.db import models
+from django.db.models import QuerySet, Sum, F
 from django.core.mail import send_mail
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.base_user import AbstractBaseUser
 from .managers import HubUserManager
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
 
@@ -88,7 +88,7 @@ class HubUser(AbstractBaseUser, PermissionsMixin):
 class Wallet(models.Model):
     user = models.ForeignKey(HubUser, on_delete=models.CASCADE)
     current_amount = models.DecimalField(decimal_places=2, max_digits=15)
-    
+
     constraints = [
         models.UniqueConstraint(fields=['user'], name='unique wallet per user')
     ]
@@ -118,9 +118,9 @@ class Wallet(models.Model):
 
     def get_transactions_by_year(self, year) -> QuerySet['Transaction']:
         """
-        Return a QuerySet of all Transactions related to a Wallet from specific year
+        Return a QuerySet of all Transactions related to a Wallet in a specific range
         """
-        return self.transactions.filter(date__year=year).order_by('date')
+        return self.transactions.filter(date__range=[start_date, end_date]).order_by('date')
 
     def get_latest_transactions(self) -> QuerySet['Transaction']:
         """
@@ -129,7 +129,7 @@ class Wallet(models.Model):
         """
         three_months = date.today() + relativedelta(months=3)
         return self.transactions.filter(date__lt=three_months).order_by('date')
-    
+
     def get_monthly_earnings(self):
         """
         Returns the monthly earnings value of a user's Wallet
@@ -137,7 +137,7 @@ class Wallet(models.Model):
         this_month = datetime.now().month
         return self.transactions.filter(date__month=this_month, type="EARNING") \
             .aggregate(Sum('value')).get('value__sum') or 0
-    
+
     def get_monthly_expenses(self):
         """
         Returns the monthly debt value of a user's Wallet
@@ -155,11 +155,11 @@ class Wallet(models.Model):
                 .values(label_name=F("label__name"), label_color=F("label__color"))
                 .annotate(total_amount=Sum('value'))
                 .order_by('-total_amount', 'imported'))[:5]
-            
+
     def get_saving_plans(self):
         pass
 
-    def get_labels(self) -> QuerySet['CustomerLabel']:
+    def get_labels(self) -> QuerySet['CustomLabel']:
         return self.labels.all()
 
 
@@ -183,10 +183,12 @@ class WalletBasedModel(models.Model):
 
 class CustomLabel(WalletBasedModel):
     # OVERRIDE
-    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False, related_name='labels')
+    wallet = models.ForeignKey(
+        Wallet, on_delete=models.CASCADE, null=False, related_name='labels')
 
     name = models.CharField(max_length=30, blank=False, null=False)
-    color = models.CharField(max_length=7, blank=False, null=False)  # HEX FIELD
+    color = models.CharField(max_length=7, blank=False,
+                             null=False)  # HEX FIELD
 
     def __str__(self):
         return self.name
@@ -234,15 +236,15 @@ class TransactionRecurrency(models.Model):
     amount = models.IntegerField()
     duration = models.CharField(max_length=6, choices=DURATION_TYPES)
     end_date = models.DateTimeField(blank=True, null=True)
-    
+
     def trigger_async_instantiation(self):
         pass
-    
+
     def get_amount(self):
         return self.amount
 
     def get_duration(self):
-        return self.duration        
+        return self.duration
 
 
 class Transaction(WalletBasedModel):
@@ -252,28 +254,30 @@ class Transaction(WalletBasedModel):
     ]
 
     title = models.CharField(max_length=200, blank=False, null=False)
-    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, null=False, related_name='transactions')
+    wallet = models.ForeignKey(
+        Wallet, on_delete=models.CASCADE, null=False, related_name='transactions')
     value = models.DecimalField(decimal_places=2, max_digits=15)
-    date = models.DateTimeField(auto_now=False)
+    date = models.DateField(auto_now=False)
     type = models.CharField(max_length=7, choices=TRANSACTION_TYPES, null=True)
     label = models.ForeignKey(CustomLabel, on_delete=models.SET_NULL, null=True, blank=True)
     imported = models.BooleanField(default=False, null=True, blank=True)
     # Django convention is to avoid setting null=True to CharFields
     update_wallet = models.BooleanField(default=False)
-
     # Recurrency section
     recurrent = models.BooleanField(default=False)
-    recurrency = models.OneToOneField(TransactionRecurrency, on_delete=models.CASCADE, null=True, related_name='+')
-    base_transaction = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
+    recurrency = models.OneToOneField(
+        TransactionRecurrency, on_delete=models.CASCADE, null=True, blank=True, related_name='+')
+    base_transaction = models.ForeignKey(
+        'self', on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, is_first_save=False, **kwargs):
         # Cloned transactions will never update wallet, since will they will only be a base transaction for future ones
         if self.update_wallet and is_first_save and not self.recurrent:
             amount = self.value if self.type == 'EARNING' else (-self.value)
             self.wallet.update_balance(amount)
-            
+
         return super().save(**kwargs)
-        
+
     def delete(self, **kwargs):
         # Rollback for the wallet's previous update
         if self.update_wallet:
@@ -281,7 +285,7 @@ class Transaction(WalletBasedModel):
             if not self.recurrent:
                 amount = (-self.value) if self.type == 'EARNING' else self.value
                 self.wallet.update_balance(amount)
-            
+
         return super().delete(**kwargs)
 
     @staticmethod
@@ -310,14 +314,16 @@ class Transaction(WalletBasedModel):
             transaction.title = data.get("title")
 
         if data.get("label"):
-            custom_label = CustomLabel.objects.get(pk=data.get("label").get("id"))
+            print(data)
+            custom_label = CustomLabel.objects.get(
+                pk=data.get("label").get("id"))
             if custom_label.get_wallet() != user_wallet:
                 raise PermissionError()
             transaction.label = custom_label
-            
+
         if data.get("description"):
             transaction.description = data.get("description")
-            
+
         # Value section
         if data.get("value") is not None:
             transaction.value = data.get("value")
@@ -327,10 +333,13 @@ class Transaction(WalletBasedModel):
         if data.get("type"):
             transaction.type = data.get("type")
         if data.get("date"):
-            transaction.date = data.get("date")
+            date_string = data.get("date")
+            date_object = datetime.strptime(
+                date_string, "%Y-%m-%dT%H:%M:%S.%fZ")
+            transaction.date = date_object.date()
         if data.get("updateWallet") is not None:
             transaction.update_wallet = data.get("updateWallet")
-        
+
         # Recurrency section
         if data.get("recurrent") is True:
             transaction.recurrent = data.get("recurrent")
@@ -338,14 +347,14 @@ class Transaction(WalletBasedModel):
             # for recurrency editions
             if not data.get("amount"):
                 raise PermissionError()  # TODO: Update exception
-            
+
             if not data.get("duration"):
                 raise PermissionError()  # TODO: Update exception
-            
+
             # TODO: Move this instantiation + fk's handling to another method
 
             transaction.save(is_first_save=True)
-            
+
             recurrency = TransactionRecurrency.objects.create(
                 transaction=transaction,
                 amount=data.get("amount"),
@@ -354,7 +363,7 @@ class Transaction(WalletBasedModel):
 
             transaction.recurrency = recurrency
             transaction.save()
-            
+
         else:
             transaction.save(is_first_save=True)
 
@@ -395,7 +404,8 @@ class Transaction(WalletBasedModel):
 
 
 class SavingPlan(WalletBasedModel):
-    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name='saving_plans')
+    wallet = models.ForeignKey(
+        Wallet, on_delete=models.CASCADE, related_name='saving_plans')
     title = models.CharField(max_length=50)
     amount = models.DecimalField(decimal_places=2, max_digits=15)
     active = models.BooleanField(default=True)

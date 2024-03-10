@@ -1,8 +1,8 @@
 import AddIcon from "@mui/icons-material/Add";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import { Box, Button, Grid, Typography } from "@mui/material";
+import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
-import dateService from "../api/services/DateService";
 import LatestTransactions from "../components/LatestTransactions";
 import CurrentMonthChart from "../components/charts/CurrentMonthChart";
 import ProfileChart from "../components/charts/ProfileChart";
@@ -10,21 +10,28 @@ import WalletGridRow from "../components/dashboard/WalletGridRow";
 import AddLabel from "../components/modals/AddLabel";
 import AddTransaction from "../components/modals/AddTransaction";
 import ImportInvoice from "../components/modals/ImportInvoices";
-import { useAuth } from "../hooks/useAuth";
-import { useTransactions } from "../hooks/useTransactions";
-import { useWallet } from "../hooks/useWallet";
-import { SummaryOption } from "../models/Summary";
+import { useTransactions } from "../hooks/api/useTransactions";
+import { useWallet } from "../hooks/api/useWallet";
 
+const QUERY_LIMIT = 10;
 function Home() {
-  const { authTokens } = useAuth();
+  const { getTransactions } = useTransactions();
+  const { getWallet } = useWallet();
   const [_, setSearchParams] = useSearchParams();
 
-  const { data: transactions } = useTransactions(
-    authTokens!.access,
-    dateService.currentYear()
-  );
+  const { data: transactions } = useQuery({
+    queryKey: ["transactions"],
+    queryFn: () => getTransactions(QUERY_LIMIT),
+  });
 
-  const { data: wallet } = useWallet(authTokens!.access);
+  const {
+    data: wallet,
+    isPending,
+    isError,
+  } = useQuery({
+    queryKey: ["wallet"],
+    queryFn: () => getWallet(),
+  });
 
   return (
     <>
@@ -76,13 +83,14 @@ function Home() {
         </Box>
       </Box>
       <Grid mt={2} container spacing={2} alignItems={"stretch"}>
-        <WalletGridRow />
+        <WalletGridRow
+          wallet={wallet}
+          isPending={isPending}
+          isError={isError}
+        />
         <Grid item xs={12} lg={6}>
           {transactions ? (
-            <CurrentMonthChart
-              data={transactions}
-              option={SummaryOption.Month}
-            />
+            <CurrentMonthChart />
           ) : (
             <Typography component="p" variant="body1">
               Unable to load chart due to insufficient data.

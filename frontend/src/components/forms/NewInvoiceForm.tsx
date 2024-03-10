@@ -4,9 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
 import { Controller, useForm } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
-import dateService from "../../api/services/DateService";
-import invoiceService from "../../api/services/InvoiceService";
-import { useAuth } from "../../hooks/useAuth";
+import { useInvoice } from "../../hooks/api/useInvoice";
 import { BankInstitutions } from "../../models/Invoices";
 import {
   NewInvoiceImportFormData,
@@ -15,7 +13,7 @@ import {
 
 function NewTransactionForm() {
   const queryClient = useQueryClient();
-  const { authTokens } = useAuth();
+  const { uploadInvoice } = useInvoice();
   const { enqueueSnackbar } = useSnackbar();
   const [_, setSearchParams] = useSearchParams();
   const {
@@ -27,25 +25,19 @@ function NewTransactionForm() {
     resolver: zodResolver(newInvoiceImportSchema),
     defaultValues: {
       invoices: undefined,
+      institution: BankInstitutions.SANTANDER,
     },
   });
 
   const { mutateAsync } = useMutation({
-    mutationFn: invoiceService.sendPDFFile,
+    mutationFn: uploadInvoice,
     onSuccess: () => {
       setSearchParams((state) => {
         state.delete("invoice");
         return state;
       });
       queryClient.invalidateQueries({
-        queryKey: [
-          "transactions",
-          authTokens!.access,
-          dateService.currentYear(),
-        ],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["wallet", authTokens!.access],
+        queryKey: ["transactions"],
       });
       enqueueSnackbar("Transactions imported successfully!", {
         variant: "success",
@@ -66,8 +58,7 @@ function NewTransactionForm() {
   async function importFiles(data: NewInvoiceImportFormData) {
     console.log("chegou");
     await mutateAsync({
-      accessToken: authTokens!.access,
-      files: data.invoices,
+      invoices: data.invoices,
       institution: BankInstitutions.SANTANDER,
     });
   }

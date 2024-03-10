@@ -1,4 +1,4 @@
-import { RangeOptions } from "../components/charts/ProfileChart";
+import { RangeOptions } from "../enums/Enums";
 
 export function formatValue(value: number, limit: number): string {
   if (value < limit) {
@@ -16,7 +16,9 @@ export function formatValue(value: number, limit: number): string {
     abbreviationIndex++;
   }
 
-  return "R$" + value.toFixed(2) + abbreviations[abbreviationIndex];
+  return value
+    ? "R$" + value.toFixed(2) + abbreviations[abbreviationIndex]
+    : "";
 }
 
 export function formatCurrency(value: string) {

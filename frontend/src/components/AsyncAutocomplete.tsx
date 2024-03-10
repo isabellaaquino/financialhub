@@ -1,14 +1,28 @@
 import Autocomplete from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
-import TextField from "@mui/material/TextField";
-import * as React from "react";
-import { useAuth } from "../hooks/useAuth";
-import { useWallet } from "../hooks/useWallet";
+import { useQuery } from "@tanstack/react-query";
+import { CustomLabel } from "../models/CustomLabel";
+import { useState } from "react";
+import { TextField } from "@mui/material";
+import React from "react";
+import { useWallet } from "../hooks/api/useWallet";
 
-export default function AsyncAutocomplete({ onChange, value }: any) {
-  const { authTokens } = useAuth();
-  const [open, setOpen] = React.useState(false);
-  const { data: wallet, isLoading } = useWallet(authTokens!.access);
+interface Props {
+  onChange: any;
+  value: CustomLabel | null;
+  helperText?: string;
+  error?: boolean;
+}
+
+export default function AsyncAutocomplete(props: Props) {
+  const { getWallet } = useWallet();
+  const [open, setOpen] = useState(false);
+
+  const { data: wallet, isLoading } = useQuery({
+    queryKey: ["wallet"],
+    queryFn: () => getWallet(),
+    enabled: open,
+  });
 
   return (
     <Autocomplete
@@ -20,12 +34,14 @@ export default function AsyncAutocomplete({ onChange, value }: any) {
       options={wallet?.labels ?? []}
       getOptionLabel={(option) => option.name}
       isOptionEqualToValue={(option, value) => option.name === value.name}
-      onChange={(_, data) => onChange(data)}
-      value={value}
+      onChange={(_, data) => props.onChange(data)}
+      value={props.value}
       renderInput={(params) => (
         <TextField
           {...params}
           label="Label"
+          error={props.error}
+          helperText={props.helperText}
           InputProps={{
             ...params.InputProps,
             endAdornment: (

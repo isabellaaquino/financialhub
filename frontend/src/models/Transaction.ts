@@ -1,3 +1,4 @@
+import { TypeOption } from "../enums/Enums";
 import { CustomLabel } from "./CustomLabel";
 
 export interface Transaction {
@@ -19,11 +20,6 @@ export interface AggregatedExpense {
   label_name: string;
   label_color: string;
   total_amount: number;
-}
-
-export enum TypeOption {
-  EXPENSE = "EXPENSE",
-  EARNING = "EARNING",
 }
 
 export function typeOptionMask(type: TypeOption) {

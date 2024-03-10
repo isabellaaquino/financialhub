@@ -10,7 +10,6 @@ class InvoiceService {
     files: FileList;
     institution?: String;
   }): Promise<{ [key: string]: string } | null> {
-    console.log("teste");
     try {
       const response = await api.post(`/import/${institution}`, files, {
         headers: {

@@ -11,19 +11,14 @@ import { useQuery } from "@tanstack/react-query";
 import { ApexOptions } from "apexcharts";
 import { useEffect, useMemo, useState } from "react";
 import Chart from "react-apexcharts";
-import { useTransactions } from "../../hooks/useTransactions";
+import { RangeOptions } from "../../enums/Enums";
+import { useTransactions } from "../../hooks/api/useTransactions";
 import { AggregatedExpense } from "../../models/Transaction";
 import { darkTheme } from "../../theme";
 import { getStartDate, rangeOptionMask } from "../../utils/utils";
 
 interface Props {
   data: AggregatedExpense[];
-}
-
-export enum RangeOptions {
-  LastWeek = 0,
-  LastTwoWeeks = 1,
-  LastMonth = 2,
 }
 
 function ProfileChart(props: Props) {
@@ -45,6 +40,8 @@ function ProfileChart(props: Props) {
     queryKey: ["transactions", startDate],
     queryFn: () => getTransactions(0, startDate, endDate, true),
   });
+
+  console.log(transactions);
 
   const [state, setState] = useState<{
     series: ApexAxisChartSeries | ApexNonAxisChartSeries;
@@ -126,13 +123,28 @@ function ProfileChart(props: Props) {
           </Select>
         </FormControl>
       </Box>
-      <Chart
-        options={state.options}
-        series={state.series}
-        type="pie"
-        width="100%"
-        height="100%"
-      />
+      {data?.length !== 0 ? (
+        <Chart
+          options={state.options}
+          series={state.series}
+          type="pie"
+          width="100%"
+          height="100%"
+        />
+      ) : (
+        <Typography
+          component="p"
+          variant="body1"
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            mt: 14,
+            textAlign: "center",
+          }}
+        >
+          Unable to load chart due to insufficient data.
+        </Typography>
+      )}
     </Box>
   );
 }

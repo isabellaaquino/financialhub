@@ -3,18 +3,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
 import { useSnackbar } from "notistack";
 import {
   NewLabelFormData,
   newLabelFormSchema,
 } from "../../schemas/newLabelSchema";
-import labelService from "../../api/services/LabelService";
 import { grey } from "@mui/material/colors";
+import { useLabels } from "../../hooks/api/useLabels";
 
 function NewLabelForm() {
   const queryClient = useQueryClient();
-  const { authTokens } = useAuth();
+  const { createLabel } = useLabels();
   const { enqueueSnackbar } = useSnackbar();
   const [_, setSearchParams] = useSearchParams();
   const {
@@ -23,17 +22,21 @@ function NewLabelForm() {
     formState: { errors },
   } = useForm<NewLabelFormData>({
     resolver: zodResolver(newLabelFormSchema),
+    values: {
+      name: "",
+      color: "#000000",
+    },
   });
 
   const { mutateAsync } = useMutation({
-    mutationFn: labelService.createLabelAPI,
+    mutationFn: createLabel,
     onSuccess: () => {
       setSearchParams((state) => {
         state.delete("label");
         return state;
       });
       queryClient.invalidateQueries({
-        queryKey: ["labels", authTokens!.access],
+        queryKey: ["wallet"],
       });
       enqueueSnackbar("Label created successfully!", {
         variant: "success",
@@ -52,7 +55,7 @@ function NewLabelForm() {
   });
 
   async function addNewLabel(data: NewLabelFormData) {
-    await mutateAsync({ accessToken: authTokens!.access, label: data });
+    await mutateAsync({ label: data });
   }
 
   return (
@@ -69,14 +72,15 @@ function NewLabelForm() {
       <Controller
         name="name"
         control={control}
-        render={({ field: { onChange, value }, fieldState: { error } }) => (
+        render={({ field: { onChange, value } }) => (
           <TextField
             fullWidth
             autoFocus
-            helperText={error ? error.message : null}
-            error={!!error}
+            helperText={errors.name ? errors.name.message : " "}
+            error={!!errors.name}
             onChange={onChange}
             value={value}
+            defaultValue = {''}
             label="Name"
             variant="outlined"
             size="small"
@@ -94,18 +98,15 @@ function NewLabelForm() {
         <Controller
           name="color"
           control={control}
-          render={({
-            field: { onChange, value, name },
-            fieldState: { error },
-          }) => (
+          render={({ field: { onChange, value, name } }) => (
             <>
-              <Typography>{value ?? "#000000"}</Typography>
+              <Typography>{value}</Typography>
               <TextField
                 name={name}
-                error={!!error}
                 onChange={onChange}
-                value={value ?? "#000000"}
+                value={value}
                 label="Color"
+                defaultValue = {''}
                 variant="outlined"
                 size="small"
                 type="color"

@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import { useAuth } from "../hooks/useAuth";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function UserDropdown() {
   const { user, SignOut } = useAuth();
@@ -81,10 +82,20 @@ export default function UserDropdown() {
       >
         <Divider />
         <MenuItem onClick={handleClose}>
-          <ListItemIcon>
-            <Settings fontSize="small" />
-          </ListItemIcon>
-          Settings
+          <Link
+            to="settings"
+            style={{
+              textDecoration: "none",
+              color: "white",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <ListItemIcon>
+              <Settings fontSize="small" />
+            </ListItemIcon>
+            Settings
+          </Link>
         </MenuItem>
         <MenuItem onClick={SignOut}>
           <ListItemIcon>

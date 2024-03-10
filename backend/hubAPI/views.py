@@ -2,7 +2,7 @@ import os
 from django.http import JsonResponse
 from django.db.models import QuerySet, Sum
 from .utils import custom_server_error_response, custom_success_response, custom_user_error_response
-from hubModels.serializers import MyTokenObtainPairSerializer
+from hubModels.serializers import MyTokenObtainPairSerializer, MyTokenRefreshSerializer
 from hubModels.models import HubUser, Transaction
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -23,6 +23,57 @@ from django.db.models.functions import TruncDate
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
+
+    def finalize_response(self, request, response, *args, **kwargs):
+        print("aT: " + response.data.get('access'))
+        if response.data.get('refresh'):
+            response.set_cookie(
+                key=settings.SIMPLE_JWT["AUTH_COOKIE"],
+                value=response.data['refresh'],
+                # domain=settings.SIMPLE_JWT["AUTH_COOKIE_DOMAIN"],
+                # path=settings.SIMPLE_JWT["AUTH_COOKIE_PATH"],
+                expires=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"],
+                secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
+                httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
+                samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
+            )
+            del response.data['refresh']
+        return super().finalize_response(request, response, *args, **kwargs)
+
+
+class MyTokenRefreshView(TokenRefreshView):
+    serializer_class = MyTokenRefreshSerializer
+
+    def post(self, request):
+        refresh_token = request.COOKIES.get('refresh_token')
+
+        if not refresh_token:
+            print('error: Refresh token is required')
+            return Response({'error': 'Refresh token is required'}, status=403)
+
+        try:
+            token = RefreshToken(refresh_token)
+            access_token = str(token.access_token)
+            print("new aT: " + access_token)
+            return Response({'access_token': access_token, 'refresh_token': refresh_token})
+        except Exception as e:
+            print(str(e))
+            return Response({'error': str(e)}, status=403)
+
+    def finalize_response(self, request, response, *args, **kwargs):
+        if response.data.get('refresh'):
+            response.set_cookie(
+                key=settings.SIMPLE_JWT["AUTH_COOKIE"],
+                value=response.data['refresh'],
+                # domain=settings.SIMPLE_JWT["AUTH_COOKIE_DOMAIN"],
+                # path=settings.SIMPLE_JWT["AUTH_COOKIE_PATH"],
+                expires=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"],
+                secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
+                httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
+                samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
+            )
+            del response.data['refresh']
+        return super().finalize_response(request, response, *args, **kwargs)
 
 
 class WalletAPIView(APIView):
@@ -145,7 +196,7 @@ class ImportInvoicesAPIView(APIView):
 
             try:
                 Transaction.create_from_import(invoice_dict, user)
-            except Exception as e:
+            except:
                 return custom_user_error_response('Something went wrong. Please try again.')
 
         return custom_success_response('Invoices were successfully imported. Please finish updating your transactions.')
@@ -160,7 +211,6 @@ def get_routes(request):
         '/api/wallet',
         '/api/savingplans',
         '/api/transactions',
-        '/api/latesttransactions',
         '/api/transaction',
     ]
 
@@ -226,9 +276,9 @@ def get_transactions(request):
         for d in all_dates:
             if d not in all_transactions_dates:
                 grouped_transactions_list.append({'date': d, 'value': 0})
-
+                
         for item in grouped_transactions_list:
-            item['date'] = item.get('date').strftime('%m-%d-%Y')
+            item['date'] = item['date'].strftime('%m-%d-%Y')
 
         return Response(grouped_transactions_list)
 

@@ -1,18 +1,16 @@
 import SearchIcon from "@mui/icons-material/Search";
 import { Box, InputAdornment, TextField, Typography } from "@mui/material";
 import { grey } from "@mui/material/colors";
-import dateService from "../api/services/DateService";
+import { useQuery } from "@tanstack/react-query";
 import LatestTransactions from "../components/LatestTransactions";
-import { useAuth } from "../hooks/useAuth";
-import { useTransactions } from "../hooks/useTransactions";
+import { useTransactions } from "../hooks/api/useTransactions";
 
 function Transactions() {
-  const { authTokens } = useAuth();
-  const { data: transactions } = useTransactions(
-    authTokens!.access,
-    dateService.currentYear()
-  );
-
+  const { getTransactions } = useTransactions();
+  const { data: transactions } = useQuery({
+    queryKey: ["transactions"],
+    queryFn: () => getTransactions(),
+  });
   return (
     <>
       <Typography component="h1" variant="h4" fontWeight={600} mb={4}>
