@@ -1,5 +1,6 @@
 import {
   BarChartRangeOptions,
+  BarChartRangeType,
   PieChartRangeOptions,
   PieChartRangeType,
 } from "../enums/Enums";
@@ -33,35 +34,7 @@ export function formatCurrency(value: string) {
   return formattedValue;
 }
 
-export function getStartDateBarChart(range: BarChartRangeOptions) {
-  if (range === BarChartRangeOptions.LastWeek) {
-    const today = new Date();
-    const lastWeek = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate() - 6
-    );
-    return lastWeek;
-  } else if (range === BarChartRangeOptions.LastTwoWeeks) {
-    const today = new Date();
-    const lastTwoWeeks = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate() - 13
-    );
-    return lastTwoWeeks;
-  } else {
-    const today = new Date();
-    const lastMonth = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate() - 29
-    );
-    return lastMonth;
-  }
-}
-
-export function getStartDatePieChart(range: PieChartRangeType) {
+export function getStartDate(range: BarChartRangeType | PieChartRangeType) {
   const today = new Date();
 
   const startDate = new Date(
@@ -73,7 +46,7 @@ export function getStartDatePieChart(range: PieChartRangeType) {
   return startDate;
 }
 
-export function barRangeOptionMask(option: BarChartRangeOptions) {
+export function barRangeOptionMask(option: BarChartRangeType) {
   switch (option) {
     case BarChartRangeOptions.LastMonth:
       return "Last month";

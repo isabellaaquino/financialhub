@@ -1,10 +1,13 @@
-from datetime import timedelta
+import datetime
+from datetime import timedelta, date
 
 from django.contrib.auth.base_user import BaseUserManager
 from django.apps import apps
 
 from django.db import models
 from django.db.models import QuerySet, Sum, F
+
+from django.db.models.functions import TruncMonth
 
 
 class HubUserManager(BaseUserManager):
@@ -64,11 +67,17 @@ class TransactionsQueryset(models.QuerySet):
     def values_dates(self):
         return self.values('date')
 
+    def values_months(self, year=datetime.datetime.now().year):
+        return self.filter(date__year=year).annotate(month=TruncMonth('date')).values('month')
+
     def annotate_values(self):
-        return self.annotate(value=Sum('value'))
+        return self.annotate(value=Sum('value')).order_by()
 
     def group_by_dates(self):
         return self.values_dates().annotate_values()
+
+    def group_by_months(self):
+        return self.values_months().annotate_values()
 
     def group_by_labels(self):
         return self.values_labels().annotate_values()
@@ -89,6 +98,18 @@ class TransactionsQueryset(models.QuerySet):
 
         for item in grouped_transactions_list:
             item['date'] = item['date'].strftime('%m-%d-%Y')
+
+        return grouped_transactions_list
+
+    def add_empty_months(self):
+        grouped_transactions_list = list(self)
+
+        all_transactions_months = [
+            item.get('month').month for item in grouped_transactions_list]
+
+        for month in range(1, 13):
+            if month not in all_transactions_months:
+                grouped_transactions_list.append({'month': month, 'value': 0})
 
         return grouped_transactions_list
 

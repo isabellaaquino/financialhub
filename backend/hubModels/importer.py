@@ -87,12 +87,5 @@ class BancoDoBrasilInvoiceProcessor(InvoiceProcessor):
 
 class NubankInvoiceProcessor(InvoiceProcessor):
     def generate_dict(self, text, invoice_dict):
-        chunks = text.split('\n')
-        for chunk in chunks:
-            if chunk.split()[0] == 'VALOR:':
-                invoice_dict['value'] = float(chunk.split()[1])
-
-            if chunk.split()[0] == 'DATA:':
-                invoice_dict['date'] = chunk.split()[1]
-
-        return invoice_dict
+        # TODO: Implement Nubank importing routine
+        raise NotImplementedError()

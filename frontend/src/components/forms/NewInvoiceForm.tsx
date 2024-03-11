@@ -53,7 +53,7 @@ function NewTransactionForm() {
 
   const { mutateAsync } = useMutation({
     mutationFn: uploadInvoices,
-    onSuccess: () => {
+    onSuccess: (response: any) => {
       setSearchParams((state) => {
         state.delete("invoice");
         return state;
@@ -61,15 +61,14 @@ function NewTransactionForm() {
       queryClient.invalidateQueries({
         queryKey: ["transactions"],
       });
-      enqueueSnackbar("Transactions imported successfully!", {
+      enqueueSnackbar(response.message, {
         variant: "success",
         autoHideDuration: 3000,
         anchorOrigin: { horizontal: "right", vertical: "bottom" },
       });
     },
-    onError: (err) => {
-      console.log(err);
-      enqueueSnackbar("No server response", {
+    onError: (err: any) => {
+      enqueueSnackbar(err.response.data.message, {
         variant: "error",
         autoHideDuration: 3000,
         anchorOrigin: { horizontal: "right", vertical: "bottom" },

@@ -181,6 +181,10 @@ class ImportInvoicesAPIView(APIView):
         update_wallet = bool(request.query_params.get('updateWallet', False))
         transaction_type = request.query_params.get('type', None)
 
+        if update_wallet and not transaction_type:
+            # Update wallet has no effect if transaction type is None
+            update_wallet = False
+
         file_path = 'hubAPI/imported_files/buffer.pdf'
 
         for uploaded_file in files_list:
@@ -191,7 +195,7 @@ class ImportInvoicesAPIView(APIView):
 
             try:
                 invoice_dict = PDFInvoiceImporter(file_path, institution).process_file()
-            except InvoiceProcessingException:
+            except:
                 os.remove(file_path)
                 return custom_user_error_response(InvoiceProcessingException.message)
 

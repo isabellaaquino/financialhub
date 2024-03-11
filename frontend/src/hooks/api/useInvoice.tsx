@@ -21,11 +21,10 @@ export function useInvoice() {
       if (updateWallet) endpoint += `&updateWallet=${updateWallet ? 1 : 0}`;
       const response = await axiosPrivate.post(endpoint, invoices);
 
-      console.log(response);
-
       return await response.data;
     } catch (error: any) {
-      return error.response.data;
+      console.log(error);
+      throw error;
     }
   }
 

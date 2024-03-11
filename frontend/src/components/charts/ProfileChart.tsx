@@ -19,7 +19,7 @@ import {
 import { useTransactions } from "../../hooks/api/useTransactions";
 import { AggregatedExpense } from "../../models/Transaction";
 import { darkTheme } from "../../theme";
-import { getStartDatePieChart, pieRangeOptionMask } from "../../utils/utils";
+import { getStartDate, pieRangeOptionMask } from "../../utils/utils";
 
 function ProfileChart() {
   const { getTransactions } = useTransactions();
@@ -30,7 +30,7 @@ function ProfileChart() {
 
   const endDate = new Date(new Date()); //TO-DO
   const startDate = useMemo(() => {
-    return getStartDatePieChart(range);
+    return getStartDate(range);
   }, [range]);
 
   type PromiseType<T> = T extends Promise<infer U> ? U : T;

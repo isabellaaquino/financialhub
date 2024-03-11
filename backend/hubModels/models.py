@@ -373,7 +373,7 @@ class Transaction(WalletBasedModel):
         transaction.value = imported_data.get("value")
         transaction.date = imported_data.get("date")
 
-        transaction.save()
+        transaction.save(is_first_save=True)
 
     def is_recurrent(self):
         return self.recurrent

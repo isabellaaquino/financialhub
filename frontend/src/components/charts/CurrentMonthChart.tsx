@@ -11,15 +11,19 @@ import { useQuery } from "@tanstack/react-query";
 import { ApexOptions } from "apexcharts";
 import { useEffect, useMemo, useState } from "react";
 import Chart from "react-apexcharts";
-import { BarChartRangeOptions } from "../../enums/Enums";
+import {
+  BarChartRangeOptions,
+  BarChartRangeType,
+  getBarChartOptionsById,
+} from "../../enums/Enums";
 import { useTransactions } from "../../hooks/api/useTransactions";
 import { Transaction } from "../../models/Transaction";
 import { darkTheme } from "../../theme";
-import { barRangeOptionMask, getStartDateBarChart } from "../../utils/utils";
+import { barRangeOptionMask, getStartDate } from "../../utils/utils";
 
 function CurrentMonthChart() {
   const { getTransactions } = useTransactions();
-  const [range, setRange] = useState<BarChartRangeOptions>(
+  const [range, setRange] = useState<BarChartRangeType>(
     BarChartRangeOptions.LastWeek
   );
   const [lineChartData, setLineChartData] = useState<
@@ -28,7 +32,7 @@ function CurrentMonthChart() {
 
   const endDate = new Date(new Date()); //TO-DO
   const startDate = useMemo(() => {
-    return getStartDateBarChart(range);
+    return getStartDate(range);
   }, [range]);
 
   type PromiseType<T> = T extends Promise<infer U> ? U : T;
@@ -143,16 +147,18 @@ function CurrentMonthChart() {
           <InputLabel>Range</InputLabel>
           <Select
             size="small"
-            value={range}
+            value={range.id}
             label="Range"
-            onChange={(e) => setRange(Number(e.target.value))}
+            onChange={(e) =>
+              setRange(getBarChartOptionsById(Number(e.target.value)))
+            }
           >
-            {Object.keys(BarChartRangeOptions)
+            {Object.values(BarChartRangeOptions)
               .filter((key) => isNaN(Number(key)))
-              .map((_, index) => {
+              .map((item, index) => {
                 return (
-                  <MenuItem key={index} value={index}>
-                    {barRangeOptionMask(index)}
+                  <MenuItem key={index} value={item.id}>
+                    {barRangeOptionMask(item)}
                   </MenuItem>
                 );
               })}
