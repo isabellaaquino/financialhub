@@ -19,5 +19,5 @@ urlpatterns = [
     path('transactions/', get_transactions, name='transactions'),
     path('transaction/', TransactionAPIView.as_view(), name='transaction'),
     path('transaction/<int:transaction_pk>', TransactionAPIView.as_view(), name='transaction'),
-    path('import/<str:institution>', ImportInvoicesAPIView.as_view(), name='import')
+    path('import/', ImportInvoicesAPIView.as_view(), name='import')
 ]

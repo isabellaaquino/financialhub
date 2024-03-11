@@ -40,8 +40,6 @@ function ProfileChart() {
     queryFn: () => getTransactions(0, 2, startDate, endDate),
   }) as { data: PromiseType<AggregatedExpense[]> };
 
-  console.log(transactions);
-
   const colors = transactions
     ? transactions.map((obj: AggregatedExpense) => obj.label_color)
     : [];
@@ -91,10 +89,6 @@ function ProfileChart() {
       },
     };
   }, [transactions]);
-
-  // useEffect(() => {
-  //   setState({ series: amounts, options: { labels: labels, colors: colors } });
-  // }, [transactions, range]);
 
   return (
     <Box

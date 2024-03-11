@@ -1,11 +1,31 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, TextField } from "@mui/material";
+import { HelpOutlineRounded } from "@mui/icons-material";
+import {
+  Box,
+  Button,
+  Checkbox,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
+  FormLabel,
+  InputLabel,
+  MenuItem,
+  Radio,
+  RadioGroup,
+  Select,
+  TextField,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import { grey } from "@mui/material/colors";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
 import { Controller, useForm } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
+import { TypeOption } from "../../enums/Enums";
 import { useInvoice } from "../../hooks/api/useInvoice";
 import { BankInstitutions } from "../../models/Invoices";
+import { typeOptionMask } from "../../models/Transaction";
 import {
   NewInvoiceImportFormData,
   newInvoiceImportSchema,
@@ -13,7 +33,7 @@ import {
 
 function NewTransactionForm() {
   const queryClient = useQueryClient();
-  const { uploadInvoice } = useInvoice();
+  const { uploadInvoices } = useInvoice();
   const { enqueueSnackbar } = useSnackbar();
   const [_, setSearchParams] = useSearchParams();
   const {
@@ -26,11 +46,13 @@ function NewTransactionForm() {
     defaultValues: {
       invoices: undefined,
       institution: BankInstitutions.SANTANDER,
+      type: undefined,
+      updateWallet: undefined,
     },
   });
 
   const { mutateAsync } = useMutation({
-    mutationFn: uploadInvoice,
+    mutationFn: uploadInvoices,
     onSuccess: () => {
       setSearchParams((state) => {
         state.delete("invoice");
@@ -56,10 +78,11 @@ function NewTransactionForm() {
   });
 
   async function importFiles(data: NewInvoiceImportFormData) {
-    console.log("chegou");
     await mutateAsync({
       invoices: data.invoices,
-      institution: BankInstitutions.SANTANDER,
+      institution: data.institution,
+      type: data?.type,
+      updateWallet: data?.updateWallet,
     });
   }
 
@@ -71,42 +94,133 @@ function NewTransactionForm() {
         flexDirection: "column",
         gap: 20,
         width: "500px",
-        marginTop: 20,
+        marginTop: 10,
       }}
     >
       <Controller
         name="invoices"
         control={control}
         render={() => (
-          <TextField
-            fullWidth
-            autoFocus
-            type="file"
-            helperText={errors.invoices?.message}
-            error={!!errors.invoices}
-            onChange={(e: any) => {
-              setValue("invoices", e.target.files);
-            }}
-            size="small"
-            inputProps={{ multiple: true }}
-          />
+          <FormControl sx={{ width: "100%" }}>
+            <TextField
+              fullWidth
+              autoFocus
+              type="file"
+              helperText={errors.invoices?.message}
+              error={!!errors.invoices}
+              onChange={(e: any) => {
+                setValue("invoices", e.target.files);
+              }}
+              size="small"
+              inputProps={{ multiple: true }}
+            />
+          </FormControl>
         )}
       />
 
       <Controller
         name="institution"
         control={control}
-        render={({ field: { onChange } }) => (
-          <TextField
-            fullWidth
-            autoFocus
-            helperText={errors.institution?.message}
-            error={!!errors.institution}
-            onChange={onChange}
-            size="small"
-          />
+        render={({ field: { onChange, value } }) => (
+          <FormControl sx={{ width: "100%" }}>
+            <InputLabel>Bank Institution</InputLabel>
+            <Select
+              size="small"
+              value={value}
+              label="Bank Institution"
+              onChange={onChange}
+            >
+              {Object.values(BankInstitutions).map((item, index) => {
+                return (
+                  <MenuItem key={index} value={item}>
+                    {item}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </FormControl>
         )}
       />
+
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-start",
+        }}
+      >
+        <Typography component="h2">Global optional options</Typography>
+        <Tooltip
+          title="Changes made below will apply to every transaction imported."
+          arrow
+          placement="top"
+        >
+          <HelpOutlineRounded
+            sx={{
+              fontSize: "16px",
+              marginLeft: 0.5,
+            }}
+          />
+        </Tooltip>
+      </Box>
+
+      <Controller
+        name="type"
+        control={control}
+        render={({ field: { onChange, value, name } }) => (
+          <FormControl>
+            <FormLabel
+              sx={{ mb: 1, "&.Mui-disabled": { color: "white" } }}
+              disabled={true}
+              about="teste"
+            >
+              Type
+            </FormLabel>
+            <RadioGroup
+              defaultValue={undefined}
+              name={name}
+              value={value}
+              onChange={onChange}
+            >
+              {Object.values(TypeOption).map((item, i) => {
+                return (
+                  <FormControlLabel
+                    key={i}
+                    value={item}
+                    control={<Radio />}
+                    label={typeOptionMask(item)}
+                    sx={{
+                      backgroundColor: grey[900],
+                      p: 1,
+                      m: 0.5,
+                      borderRadius: 2,
+                    }}
+                  />
+                );
+              })}
+            </RadioGroup>
+          </FormControl>
+        )}
+      />
+      <FormGroup>
+        <FormControlLabel
+          control={
+            <Controller
+              name="updateWallet"
+              control={control}
+              render={({ field: { onChange, value, name } }) => (
+                <Checkbox
+                  name={name}
+                  checked={value}
+                  onChange={onChange}
+                  inputProps={{ "aria-label": "controlled" }}
+                />
+              )}
+            />
+          }
+          label="Update wallet"
+        />
+      </FormGroup>
 
       <Button type="submit" variant="contained">
         Import

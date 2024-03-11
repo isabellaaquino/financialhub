@@ -348,7 +348,7 @@ class Transaction(WalletBasedModel):
         return transaction
 
     @staticmethod
-    def create_from_import(data, user):
+    def create_from_import(imported_data, optional_data, user):
         """
         Creates a transaction from a frontend request
         @params:
@@ -366,11 +366,12 @@ class Transaction(WalletBasedModel):
 
         # Empty fields section
         transaction.title = ''
-        transaction.type = None
+        transaction.type = optional_data.get('type')
+        transaction.update_wallet = optional_data.get('update_wallet')
 
         # Invoice dict section
-        transaction.value = data.get("value")
-        transaction.date = data.get("date")
+        transaction.value = imported_data.get("value")
+        transaction.date = imported_data.get("date")
 
         transaction.save()
 

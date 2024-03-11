@@ -11,7 +11,6 @@ export function useTransactions() {
     startDate?: Date,
     endDate?: Date
   ): Promise<Transaction[] | AggregatedExpense[]> {
-    console.log("teste", chartType);
     try {
       let endpoint = `/transactions?limit=${limit}&chart_type=${chartType}`;
       if (startDate)
@@ -20,16 +19,10 @@ export function useTransactions() {
         endpoint += `&end_date=${endDate.toISOString().split("T")[0]}`;
       const response = await axiosPrivate.get(endpoint);
 
-      if (chartType === 1) {
-        const transactions = response.data.map((t: Transaction) => {
-          return { ...t, value: Number(t.value) } as Transaction;
-        });
-        return transactions as Transaction[];
-      } else if (chartType === 2) {
+      if (chartType === 2) {
         return response.data as AggregatedExpense[];
-      } else {
-        return response.data as Transaction[];
       }
+      return response.data as Transaction[];
     } catch (error) {
       console.log(error);
       throw error;

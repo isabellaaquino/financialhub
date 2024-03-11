@@ -172,16 +172,22 @@ class LabelAPIView(APIView):
 class ImportInvoicesAPIView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request, institution):
+    def post(self, request):
         user: HubUser = request.user
 
         files_list = request.FILES.getlist('files[]')
+
+        institution = request.query_params.get('institution')
+        update_wallet = bool(request.query_params.get('updateWallet', False))
+        transaction_type = request.query_params.get('type', None)
 
         file_path = 'hubAPI/imported_files/buffer.pdf'
 
         for uploaded_file in files_list:
             with open(file_path, 'wb') as file:
                 file.write(uploaded_file.read())
+
+            optional_data = {'update_wallet': update_wallet, 'type': transaction_type}
 
             try:
                 invoice_dict = PDFInvoiceImporter(file_path, institution).process_file()
@@ -195,7 +201,7 @@ class ImportInvoicesAPIView(APIView):
                 return custom_user_error_response(InvoiceProcessingException.message)
 
             try:
-                Transaction.create_from_import(invoice_dict, user)
+                Transaction.create_from_import(imported_data=invoice_dict, optional_data=optional_data, user=user)
             except:
                 return custom_user_error_response('Something went wrong. Please try again.')
 
@@ -260,7 +266,7 @@ def get_transactions(request):
     if limit and int(limit) > 0:
         transactions = transactions[:int(limit)]
 
-    if not chart_type or int(chart_type) not in [1, 2]:
+    if int(chart_type) == 0:
         transactions_serialized = TransactionSerializer(transactions, many=True)
         return Response(transactions_serialized.data)
 
