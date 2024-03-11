@@ -4,7 +4,7 @@ from django.db.models import QuerySet, Sum, F
 from django.core.mail import send_mail
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.base_user import AbstractBaseUser
-from .managers import HubUserManager
+from .managers import HubUserManager, TransactionsManager, TransactionsQueryset
 
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -104,31 +104,17 @@ class Wallet(models.Model):
     def get_current_amount(self):
         return self.current_amount
 
-    def get_transactions(self) -> QuerySet['Transaction']:
+    def get_transactions(self) -> TransactionsQueryset:
         """
         Return a QuerySet of all non-recurrent Transactions related to a Wallet
         """
         return self.transactions.filter(recurrent=False)
 
-    def get_transactions_in_range(self, start_date: date, end_date: date) -> QuerySet['Transaction']:
+    def get_expenses(self) -> TransactionsQueryset:
         """
-        Return a QuerySet of all Transactions related to a Wallet in a specific range
+        Return a QuerySet of all non-recurrent Transactions related to a Wallet
         """
-        return self.transactions.filter(date__range=[start_date, end_date]).order_by('date')
-
-    def get_transactions_by_year(self, year) -> QuerySet['Transaction']:
-        """
-        Return a QuerySet of all Transactions related to a Wallet in a specific range
-        """
-        return self.transactions.filter(date__range=[start_date, end_date]).order_by('date')
-
-    def get_latest_transactions(self) -> QuerySet['Transaction']:
-        """
-        Return a QuerySet of all Transactions related to a Wallet
-        that has their `date` less than 1 month ago and ordered by date
-        """
-        three_months = date.today() + relativedelta(months=3)
-        return self.transactions.filter(date__lt=three_months).order_by('date')
+        return self.get_transactions().expenses()
 
     def get_monthly_earnings(self):
         """
@@ -145,16 +131,6 @@ class Wallet(models.Model):
         this_month = datetime.now().month
         return self.transactions.filter(date__month=this_month, type="EXPENSE")\
             .aggregate(Sum('value')).get('value__sum') or 0
-
-    def get_aggregated_expenses(self):
-        """
-        Returns the top 5 expenses of a user's Wallet grouped by label from the past 90 days
-        """
-        three_months = date.today() - relativedelta(months=3)
-        return (self.transactions.filter(date__gte=three_months, type="EXPENSE")
-                .values(label_name=F("label__name"), label_color=F("label__color"))
-                .annotate(total_amount=Sum('value'))
-                .order_by('-total_amount', 'imported'))[:5]
 
     def get_saving_plans(self):
         pass
@@ -269,6 +245,8 @@ class Transaction(WalletBasedModel):
         TransactionRecurrency, on_delete=models.CASCADE, null=True, blank=True, related_name='+')
     base_transaction = models.ForeignKey(
         'self', on_delete=models.SET_NULL, null=True, blank=True)
+    # Manager section
+    objects = TransactionsManager()
 
     def save(self, is_first_save=False, **kwargs):
         # Cloned transactions will never update wallet, since will they will only be a base transaction for future ones

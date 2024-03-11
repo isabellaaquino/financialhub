@@ -19,7 +19,7 @@ export interface Transaction {
 export interface AggregatedExpense {
   label_name: string;
   label_color: string;
-  total_amount: number;
+  value: number;
 }
 
 export function typeOptionMask(type: TypeOption) {

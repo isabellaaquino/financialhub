@@ -18,7 +18,6 @@ class WalletService {
         current_amount: 0,
         monthly_expenses: 0,
         monthly_earnings: 0,
-        aggregated_expenses: [],
         labels: [],
       } as Wallet;
     }

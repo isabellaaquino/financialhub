@@ -98,13 +98,7 @@ function Home() {
           )}
         </Grid>
         <Grid item xs={12} lg={6}>
-          {wallet?.aggregated_expenses ? (
-            <ProfileChart data={wallet.aggregated_expenses} />
-          ) : (
-            <Typography component="p" variant="body1">
-              Unable to load chart due to insufficient data.
-            </Typography>
-          )}
+          <ProfileChart />
         </Grid>
         <Grid item xs={12}>
           <Box height={"auto"}>

@@ -1,4 +1,8 @@
-import { RangeOptions } from "../enums/Enums";
+import {
+  BarChartRangeOptions,
+  PieChartRangeOptions,
+  PieChartRangeType,
+} from "../enums/Enums";
 
 export function formatValue(value: number, limit: number): string {
   if (value < limit) {
@@ -29,8 +33,8 @@ export function formatCurrency(value: string) {
   return formattedValue;
 }
 
-export function getStartDate(range: RangeOptions) {
-  if (range === RangeOptions.LastWeek) {
+export function getStartDateBarChart(range: BarChartRangeOptions) {
+  if (range === BarChartRangeOptions.LastWeek) {
     const today = new Date();
     const lastWeek = new Date(
       today.getFullYear(),
@@ -38,7 +42,7 @@ export function getStartDate(range: RangeOptions) {
       today.getDate() - 6
     );
     return lastWeek;
-  } else if (range === RangeOptions.LastTwoWeeks) {
+  } else if (range === BarChartRangeOptions.LastTwoWeeks) {
     const today = new Date();
     const lastTwoWeeks = new Date(
       today.getFullYear(),
@@ -57,13 +61,36 @@ export function getStartDate(range: RangeOptions) {
   }
 }
 
-export function rangeOptionMask(option: RangeOptions) {
+export function getStartDatePieChart(range: PieChartRangeType) {
+  const today = new Date();
+
+  const startDate = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate() - range.amount
+  );
+
+  return startDate;
+}
+
+export function barRangeOptionMask(option: BarChartRangeOptions) {
   switch (option) {
-    case RangeOptions.LastMonth:
+    case BarChartRangeOptions.LastMonth:
       return "Last month";
-    case RangeOptions.LastWeek:
+    case BarChartRangeOptions.LastWeek:
       return "Last week";
-    case RangeOptions.LastTwoWeeks:
+    case BarChartRangeOptions.LastTwoWeeks:
       return "Last two weeks";
+  }
+}
+
+export function pieRangeOptionMask(option: PieChartRangeType) {
+  switch (option) {
+    case PieChartRangeOptions.Last30Days:
+      return "Last 30 days";
+    case PieChartRangeOptions.Last90Days:
+      return "Last 90 days";
+    case PieChartRangeOptions.Last180Days:
+      return "Last 180 days";
   }
 }

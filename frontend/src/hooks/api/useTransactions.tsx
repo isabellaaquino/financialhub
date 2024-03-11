@@ -1,29 +1,35 @@
-import { Transaction } from "../../models/Transaction";
-import useAxiosPrivate from "../useAxiosPrivate";
+import { AggregatedExpense, Transaction } from "../../models/Transaction";
 import { NewTransactionFormData } from "../../schemas/newTransactionSchema";
+import useAxiosPrivate from "../useAxiosPrivate";
 
 export function useTransactions() {
   const axiosPrivate = useAxiosPrivate();
 
   async function getTransactions(
     limit: number = 0,
+    chartType: number = 0,
     startDate?: Date,
-    endDate?: Date,
-    formatDataForCharts: boolean = false
-  ): Promise<Transaction[]> {
+    endDate?: Date
+  ): Promise<Transaction[] | AggregatedExpense[]> {
+    console.log("teste", chartType);
     try {
-      let endpoint = `/transactions?limit=${limit}&chart_data=${
-        formatDataForCharts ? 1 : 0
-      }`;
+      let endpoint = `/transactions?limit=${limit}&chart_type=${chartType}`;
       if (startDate)
         endpoint += `&start_date=${startDate.toISOString().split("T")[0]}`;
       if (endDate)
         endpoint += `&end_date=${endDate.toISOString().split("T")[0]}`;
       const response = await axiosPrivate.get(endpoint);
-      const transactions = response.data.map((t: Transaction) => {
-        return { ...t, value: Number(t.value) } as Transaction;
-      });
-      return transactions;
+
+      if (chartType === 1) {
+        const transactions = response.data.map((t: Transaction) => {
+          return { ...t, value: Number(t.value) } as Transaction;
+        });
+        return transactions as Transaction[];
+      } else if (chartType === 2) {
+        return response.data as AggregatedExpense[];
+      } else {
+        return response.data as Transaction[];
+      }
     } catch (error) {
       console.log(error);
       throw error;

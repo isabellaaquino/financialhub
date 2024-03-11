@@ -93,6 +93,21 @@ function NewTransactionForm() {
         )}
       />
 
+      <Controller
+        name="institution"
+        control={control}
+        render={({ field: { onChange } }) => (
+          <TextField
+            fullWidth
+            autoFocus
+            helperText={errors.institution?.message}
+            error={!!errors.institution}
+            onChange={onChange}
+            size="small"
+          />
+        )}
+      />
+
       <Button type="submit" variant="contained">
         Import
       </Button>

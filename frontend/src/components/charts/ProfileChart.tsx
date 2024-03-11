@@ -9,81 +9,92 @@ import {
 import { grey } from "@mui/material/colors";
 import { useQuery } from "@tanstack/react-query";
 import { ApexOptions } from "apexcharts";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Chart from "react-apexcharts";
-import { RangeOptions } from "../../enums/Enums";
+import {
+  PieChartRangeOptions,
+  PieChartRangeType,
+  getPieChartOptionById,
+} from "../../enums/Enums";
 import { useTransactions } from "../../hooks/api/useTransactions";
 import { AggregatedExpense } from "../../models/Transaction";
 import { darkTheme } from "../../theme";
-import { getStartDate, rangeOptionMask } from "../../utils/utils";
+import { getStartDatePieChart, pieRangeOptionMask } from "../../utils/utils";
 
-interface Props {
-  data: AggregatedExpense[];
-}
-
-function ProfileChart(props: Props) {
-  const { data } = props;
+function ProfileChart() {
   const { getTransactions } = useTransactions();
 
-  const colors = data.map((obj) => obj.label_color);
-  const amounts = data.map((obj) => obj.total_amount);
-  const labels = data.map((obj) => obj.label_name);
-
-  const [range, setRange] = useState<RangeOptions>(RangeOptions.LastMonth);
+  const [range, setRange] = useState<PieChartRangeType>(
+    PieChartRangeOptions.Last30Days
+  );
 
   const endDate = new Date(new Date()); //TO-DO
   const startDate = useMemo(() => {
-    return getStartDate(range);
+    return getStartDatePieChart(range);
   }, [range]);
+
+  type PromiseType<T> = T extends Promise<infer U> ? U : T;
 
   const { data: transactions } = useQuery({
     queryKey: ["transactions", startDate],
-    queryFn: () => getTransactions(0, startDate, endDate, true),
-  });
+    queryFn: () => getTransactions(0, 2, startDate, endDate),
+  }) as { data: PromiseType<AggregatedExpense[]> };
 
   console.log(transactions);
 
-  const [state, setState] = useState<{
+  const colors = transactions
+    ? transactions.map((obj: AggregatedExpense) => obj.label_color)
+    : [];
+  const amounts = transactions
+    ? transactions.map((obj: AggregatedExpense) => obj.value)
+    : [];
+  const labels = transactions
+    ? transactions.map((obj: AggregatedExpense) => obj.label_name)
+    : [];
+
+  const state = useMemo<{
     series: ApexAxisChartSeries | ApexNonAxisChartSeries;
     options: ApexOptions;
-  }>({
-    series: amounts,
-    options: {
-      labels: labels,
-      colors: colors,
-      chart: {
-        id: "pie",
-        toolbar: { show: false },
-      },
-      dataLabels: {
-        enabled: false,
-      },
-      legend: {
-        show: true,
-        position: "left",
-        labels: {
-          colors: grey[600],
+  }>(() => {
+    return {
+      series: amounts,
+      options: {
+        labels: labels,
+        colors: colors,
+        chart: {
+          id: "pie",
+          toolbar: { show: false },
         },
-      } as ApexLegend,
-      yaxis: {
-        labels: {
-          formatter: function (val) {
-            return val.toLocaleString("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            });
+        dataLabels: {
+          enabled: false,
+        },
+        legend: {
+          show: true,
+          position: "left",
+          labels: {
+            colors: grey[600],
+          },
+        } as ApexLegend,
+        yaxis: {
+          labels: {
+            formatter: function (val) {
+              return val.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              });
+            },
           },
         },
+        stroke: {
+          show: false,
+        },
       },
-      stroke: {
-        show: false,
-      },
-    },
-  });
+    };
+  }, [transactions]);
 
-  useEffect(() => {
-    setState({ series: amounts, options: { labels: labels, colors: colors } });
-  }, [props.data]);
+  // useEffect(() => {
+  //   setState({ series: amounts, options: { labels: labels, colors: colors } });
+  // }, [transactions, range]);
 
   return (
     <Box
@@ -96,7 +107,7 @@ function ProfileChart(props: Props) {
       <Box
         sx={{
           display: "flex",
-          alignItems: "left",
+          alignItems: "center",
           justifyContent: "space-between",
         }}
       >
@@ -107,29 +118,29 @@ function ProfileChart(props: Props) {
           <InputLabel>Range</InputLabel>
           <Select
             size="small"
-            value={range}
+            value={range.id}
             label="Range"
-            onChange={(e) => setRange(Number(e.target.value))}
+            onChange={(e) =>
+              setRange(getPieChartOptionById(Number(e.target.value)))
+            }
           >
-            {Object.keys(RangeOptions)
-              .filter((key) => isNaN(Number(key)))
-              .map((_, index) => {
-                return (
-                  <MenuItem key={index} value={index}>
-                    {rangeOptionMask(index)}
-                  </MenuItem>
-                );
-              })}
+            {Object.values(PieChartRangeOptions).map((item, index) => {
+              return (
+                <MenuItem key={index} value={item.id}>
+                  {pieRangeOptionMask(item)}
+                </MenuItem>
+              );
+            })}
           </Select>
         </FormControl>
       </Box>
-      {data?.length !== 0 ? (
+      {transactions ? (
         <Chart
           options={state.options}
           series={state.series}
           type="pie"
-          width="100%"
-          height="100%"
+          width="90%"
+          height="300px"
         />
       ) : (
         <Typography

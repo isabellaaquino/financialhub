@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { TypeOption } from "../enums/Enums";
+import { BankInstitutions } from "../models/Invoices";
 
 const MAX_FILE_SIZE = 300000;
 const ACCEPTED_DOC_TYPES = ["application/pdf"];
@@ -14,7 +16,10 @@ export const newInvoiceImportSchema = z.object({
       (files) => ACCEPTED_DOC_TYPES.includes(files?.[0]?.type),
       "Only .PDF files are accepted."
     ),
-  institution: z.string(),
+  institution: z.nativeEnum(BankInstitutions),
+  // global option attributes
+  updateWallet: z.optional(z.boolean()),
+  type: z.nativeEnum(TypeOption),
 });
 
 export type NewInvoiceImportFormData = z.infer<typeof newInvoiceImportSchema>;

@@ -39,11 +39,10 @@ class WalletSerializer(serializers.ModelSerializer):
     monthly_earnings = serializers.SerializerMethodField(source='get_monthly_earnings')
     monthly_expenses = serializers.SerializerMethodField(source='get_monthly_expenses')
     labels = LabelSerializer(many=True)
-    aggregated_expenses = serializers.SerializerMethodField(source='get_aggregated_expenses')
 
     class Meta:
         model = Wallet
-        fields = ('current_amount', 'monthly_earnings', 'monthly_expenses', 'aggregated_expenses', 'labels')
+        fields = ('current_amount', 'monthly_earnings', 'monthly_expenses', 'labels')
 
     @staticmethod
     def get_monthly_earnings(obj):
@@ -52,10 +51,6 @@ class WalletSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_monthly_expenses(obj):
         return obj.get_monthly_expenses()
-
-    @staticmethod
-    def get_aggregated_expenses(obj):
-        return obj.get_aggregated_expenses()
 
 
 class TransactionSerializer(serializers.ModelSerializer):
