@@ -1,22 +1,32 @@
+import { TypeOption } from "../../enums/Enums";
 import useAxiosPrivate from "../useAxiosPrivate";
 
 export function useInvoice() {
   const axiosPrivate = useAxiosPrivate();
 
-  async function uploadInvoice({
-    files,
+  async function uploadInvoices({
+    invoices,
     institution,
+    type,
+    updateWallet,
   }: {
-    files: File[];
+    invoices: FileList;
     institution?: String;
+    type?: TypeOption;
+    updateWallet?: boolean;
   }): Promise<{ [key: string]: string } | null> {
     try {
-      const response = await axiosPrivate.post(`/import/${institution}`, files);
+      let endpoint = `/import/?institution=${institution}`;
+      if (type) endpoint += `&type=${type}`;
+      if (updateWallet) endpoint += `&updateWallet=${updateWallet ? 1 : 0}`;
+      const response = await axiosPrivate.post(endpoint, invoices);
+
       return await response.data;
     } catch (error: any) {
-      return error.response.data;
+      console.log(error);
+      throw error;
     }
   }
 
-  return { uploadInvoice };
+  return { uploadInvoices };
 }

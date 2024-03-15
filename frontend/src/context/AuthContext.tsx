@@ -1,8 +1,8 @@
-import { createContext, useState } from "react";
-import { User } from "../models/User";
 import { jwtDecode } from "jwt-decode";
+import { createContext, useState } from "react";
+import { api } from "../api/services/Api";
+import { User } from "../models/User";
 import { UserInput } from "../routes/SignUp";
-import { api } from "../api/services/api";
 
 interface AuthContextData {
   user: User | null;

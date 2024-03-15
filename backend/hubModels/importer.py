@@ -1,3 +1,4 @@
+import datetime
 from abc import abstractmethod, ABC
 
 from pypdf import PdfReader
@@ -37,6 +38,18 @@ class InvoiceProcessor(ABC):
         text = file.pages[0].extract_text()
         invoice_dict = self.generate_dict(text, invoice_dict)
 
+        # Handling brazilian currency values
+        import re
+
+        pattern = r'\d+(\.\d+)?'
+        match = re.search(pattern, invoice_dict.get('value'))
+
+        if match:
+            invoice_dict['value'] = float(match.group().replace('.', ''))
+
+        if isinstance(invoice_dict.get('date'), str):
+            invoice_dict['date'] = datetime.datetime.strptime(invoice_dict.get('date'), "%d/%m/%Y - %H:%M:%S")
+
         return invoice_dict
 
     @abstractmethod
@@ -74,12 +87,5 @@ class BancoDoBrasilInvoiceProcessor(InvoiceProcessor):
 
 class NubankInvoiceProcessor(InvoiceProcessor):
     def generate_dict(self, text, invoice_dict):
-        chunks = text.split('\n')
-        for chunk in chunks:
-            if chunk.split()[0] == 'VALOR:':
-                invoice_dict['value'] = float(chunk.split()[1])
-
-            if chunk.split()[0] == 'DATA:':
-                invoice_dict['date'] = chunk.split()[1]
-
-        return invoice_dict
+        # TODO: Implement Nubank importing routine
+        raise NotImplementedError()

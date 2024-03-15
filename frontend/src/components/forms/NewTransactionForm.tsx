@@ -19,18 +19,19 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import dayjs from "dayjs";
+import { useSnackbar } from "notistack";
 import { Controller, useForm } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
+import { TypeOption } from "../../enums/Enums";
+import { useTransactions } from "../../hooks/api/useTransactions";
+import { typeOptionMask } from "../../models/Transaction";
 import {
   NewTransactionFormData,
   newTransactionFormSchema,
 } from "../../schemas/newTransactionSchema";
-import AsyncAutocomplete from "../AsyncAutocomplete";
-import { useSnackbar } from "notistack";
-import { useTransactions } from "../../hooks/api/useTransactions";
-import dayjs from "dayjs";
-import { TypeOption, typeOptionMask } from "../../models/Transaction";
 import { formatCurrency } from "../../utils/utils";
+import AsyncAutocomplete from "../AsyncAutocomplete";
 
 function NewTransactionForm() {
   const queryClient = useQueryClient();

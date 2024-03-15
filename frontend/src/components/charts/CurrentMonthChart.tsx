@@ -1,6 +1,3 @@
-import { ApexOptions } from "apexcharts";
-import { useEffect, useMemo, useState } from "react";
-import Chart from "react-apexcharts";
 import {
   Box,
   FormControl,
@@ -10,34 +7,40 @@ import {
   Typography,
 } from "@mui/material";
 import { grey } from "@mui/material/colors";
-import { darkTheme } from "../../theme";
 import { useQuery } from "@tanstack/react-query";
+import { ApexOptions } from "apexcharts";
+import { useEffect, useMemo, useState } from "react";
+import Chart from "react-apexcharts";
+import {
+  BarChartRangeOptions,
+  BarChartRangeType,
+  getBarChartOptionsById,
+} from "../../enums/Enums";
 import { useTransactions } from "../../hooks/api/useTransactions";
-import { getStartDate, rangeOptionMask } from "../../utils/utils";
-
-export enum RangeOptions {
-  LastWeek = 0,
-  LastTwoWeeks = 1,
-  LastMonth = 2,
-}
+import { Transaction } from "../../models/Transaction";
+import { darkTheme } from "../../theme";
+import { barRangeOptionMask, getStartDate } from "../../utils/utils";
 
 function CurrentMonthChart() {
   const { getTransactions } = useTransactions();
-  const [range, setRange] = useState<RangeOptions>(RangeOptions.LastWeek);
+  const [range, setRange] = useState<BarChartRangeType>(
+    BarChartRangeOptions.LastWeek
+  );
   const [lineChartData, setLineChartData] = useState<
     { x: string; y: string | number }[]
   >([]);
 
-  const formatDataForCharts = true;
   const endDate = new Date(new Date()); //TO-DO
   const startDate = useMemo(() => {
     return getStartDate(range);
   }, [range]);
 
+  type PromiseType<T> = T extends Promise<infer U> ? U : T;
+
   const { data: transactions } = useQuery({
     queryKey: ["transactions", startDate],
-    queryFn: () => getTransactions(0, startDate, endDate, formatDataForCharts),
-  });
+    queryFn: () => getTransactions(0, 1, startDate, endDate),
+  }) as { data: PromiseType<Transaction[]>; isLoading: boolean };
 
   const state = useMemo(() => {
     return {
@@ -144,16 +147,18 @@ function CurrentMonthChart() {
           <InputLabel>Range</InputLabel>
           <Select
             size="small"
-            value={range}
+            value={range.id}
             label="Range"
-            onChange={(e) => setRange(Number(e.target.value))}
+            onChange={(e) =>
+              setRange(getBarChartOptionsById(Number(e.target.value)))
+            }
           >
-            {Object.keys(RangeOptions)
+            {Object.values(BarChartRangeOptions)
               .filter((key) => isNaN(Number(key)))
-              .map((_, index) => {
+              .map((item, index) => {
                 return (
-                  <MenuItem key={index} value={index}>
-                    {rangeOptionMask(index)}
+                  <MenuItem key={index} value={item.id}>
+                    {barRangeOptionMask(item)}
                   </MenuItem>
                 );
               })}

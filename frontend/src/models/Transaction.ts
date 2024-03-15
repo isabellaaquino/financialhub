@@ -1,3 +1,4 @@
+import { TypeOption } from "../enums/Enums";
 import { CustomLabel } from "./CustomLabel";
 
 export interface Transaction {
@@ -12,18 +13,13 @@ export interface Transaction {
   recurrent: boolean;
   amount?: number;
   duration?: DurationOption;
+  imported?: boolean;
 }
 
 export interface AggregatedExpense {
   label_name: string;
   label_color: string;
-  total_amount: number;
-}
-
-export enum TypeOption {
-  EXPENSE = "EXPENSE",
-  TRANSFER = "TRANSFER",
-  INCOME = "INCOME",
+  value: number;
 }
 
 export function typeOptionMask(type: TypeOption) {
@@ -38,13 +34,9 @@ export function typeOptionColor(type: TypeOption) {
       color = "#f25659";
       bgColor = "#f2565936";
       break;
-    case TypeOption.INCOME:
+    case TypeOption.EARNING:
       color = "#48cc90";
       bgColor = "#48cc9030";
-      break;
-    case TypeOption.TRANSFER:
-      color = "#d16bff";
-      bgColor = "#d16bff3d";
       break;
   }
   return { bgColor, color };

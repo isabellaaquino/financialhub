@@ -1,15 +1,16 @@
+import AddIcon from "@mui/icons-material/Add";
+import FileUploadIcon from "@mui/icons-material/FileUpload";
+import { Box, Button, Grid, Typography } from "@mui/material";
+import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
+import LatestTransactions from "../components/LatestTransactions";
 import CurrentMonthChart from "../components/charts/CurrentMonthChart";
 import ProfileChart from "../components/charts/ProfileChart";
-import AddIcon from "@mui/icons-material/Add";
-import { Box, Button, Grid, Typography } from "@mui/material";
-import FileUploadIcon from "@mui/icons-material/FileUpload";
 import WalletGridRow from "../components/dashboard/WalletGridRow";
 import AddLabel from "../components/modals/AddLabel";
-import { useQuery } from "@tanstack/react-query";
-import { useTransactions } from "../hooks/api/useTransactions";
-import LatestTransactions from "../components/LatestTransactions";
 import AddTransaction from "../components/modals/AddTransaction";
+import ImportInvoice from "../components/modals/ImportInvoices";
+import { useTransactions } from "../hooks/api/useTransactions";
 import { useWallet } from "../hooks/api/useWallet";
 
 const QUERY_LIMIT = 10;
@@ -97,13 +98,7 @@ function Home() {
           )}
         </Grid>
         <Grid item xs={12} lg={6}>
-          {wallet?.aggregated_expenses ? (
-            <ProfileChart data={wallet.aggregated_expenses} />
-          ) : (
-            <Typography component="p" variant="body1">
-              Unable to load chart due to insufficient data.
-            </Typography>
-          )}
+          <ProfileChart />
         </Grid>
         <Grid item xs={12}>
           <Box height={"auto"}>
@@ -128,6 +123,7 @@ function Home() {
         </Grid>
       </Grid>
 
+      <ImportInvoice />
       <AddTransaction />
       <AddLabel />
     </>

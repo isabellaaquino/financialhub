@@ -1,10 +1,10 @@
 import { CssBaseline, ThemeProvider } from "@mui/material";
-import { AuthProvider } from "./context/AuthContext";
-import { RouterProvider } from "react-router-dom";
-import { router } from "./main";
-import { darkTheme } from "./theme";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SnackbarProvider } from "notistack";
+import { RouterProvider } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { router } from "./main";
+import { darkTheme } from "./theme";
 
 function App() {
   const queryClient = new QueryClient({

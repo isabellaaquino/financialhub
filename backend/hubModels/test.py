@@ -44,26 +44,25 @@ class TransactionTestCase(TestCase):
         self.assertEqual(recurrency.amount, 2)
         self.assertEqual(recurrency.duration, "WEEKS")
 
-    def test_get_monthly_incomes(self):
+    def test_get_monthly_earnings(self):
         one_month_ago = datetime.datetime.today() - relativedelta(months=1)
         out_of_range = one_month_ago - relativedelta(days=1)
         in_range = one_month_ago + relativedelta(days=1)
 
-        income_in_range = self.factory.create_transaction_filled(self.wallet, type="INCOME", value=150)
-        income_in_range2 = self.factory.create_transaction_filled(self.wallet, type="INCOME", value=50, date=in_range)
-        income_in_range3 = self.factory.create_transaction_filled(self.wallet, type="INCOME", value=300,
+        earnings_in_range = self.factory.create_transaction_filled(self.wallet, type="EARNING", value=150)
+        earning_in_range2 = self.factory.create_transaction_filled(self.wallet, type="EARNING", value=50, date=in_range)
+        earning_in_range3 = self.factory.create_transaction_filled(self.wallet, type="EARNING", value=300,
                                                                   date=one_month_ago)
 
-        income_out_of_range = self.factory.create_transaction_filled(self.wallet, type="INCOME", date=out_of_range)
+        earning_out_of_range = self.factory.create_transaction_filled(self.wallet, type="EARNING", date=out_of_range)
 
-        # these transactions shouldn't be considered in the queryset since it's not an income
+        # these transactions shouldn't be considered in the queryset since it's not an earning
         expense_in_range = self.factory.create_transaction_filled(self.wallet, type="EXPENSE", date=in_range)
-        transfer_in_range = self.factory.create_transaction_filled(self.wallet, type="TRANSFER", date=in_range)
 
         # Sum of all set transactions values
         expected_value = 500
-        monthly_income = self.wallet.get_monthly_incomes()
-        self.assertEqual(expected_value, monthly_income)
+        monthly_earning = self.wallet.get_monthly_earnings()
+        self.assertEqual(expected_value, monthly_earning)
 
     def test_get_monthly_expenses(self):
         one_month_ago = datetime.datetime.today() - relativedelta(months=1)
@@ -76,10 +75,9 @@ class TransactionTestCase(TestCase):
                                                                    date=one_month_ago)
         expense_out_of_range = self.factory.create_transaction_filled(self.wallet, type="EXPENSE",date=out_of_range)
 
-        # this transaction shouldn't be considered in the queryset since it's an income
-        income_in_range = self.factory.create_transaction_filled(self.wallet, type="INCOME", date=in_range)
-        transfer_in_range = self.factory.create_transaction_filled(self.wallet, type="TRANSFER", date=in_range)
+        # this transaction shouldn't be considered in the queryset since it's an earning
+        earning_in_range = self.factory.create_transaction_filled(self.wallet, type="EARNING", date=in_range)
 
         expected_value = 500
-        monthly_income = self.wallet.get_monthly_expenses()
-        self.assertEqual(expected_value, monthly_income)
+        monthly_earning = self.wallet.get_monthly_expenses()
+        self.assertEqual(expected_value, monthly_earning)

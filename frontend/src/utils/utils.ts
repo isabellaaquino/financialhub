@@ -1,4 +1,9 @@
-import { RangeOptions } from "../components/charts/CurrentMonthChart";
+import {
+  BarChartRangeOptions,
+  BarChartRangeType,
+  PieChartRangeOptions,
+  PieChartRangeType,
+} from "../enums/Enums";
 
 export function formatValue(value: number, limit: number): string {
   if (value < limit) {
@@ -16,7 +21,9 @@ export function formatValue(value: number, limit: number): string {
     abbreviationIndex++;
   }
 
-  return "R$" + value.toFixed(2) + abbreviations[abbreviationIndex];
+  return value
+    ? "R$" + value.toFixed(2) + abbreviations[abbreviationIndex]
+    : "";
 }
 
 export function formatCurrency(value: string) {
@@ -27,41 +34,36 @@ export function formatCurrency(value: string) {
   return formattedValue;
 }
 
-export function getStartDate(range: RangeOptions) {
-  if (range === RangeOptions.LastWeek) {
-    const today = new Date();
-    const lastWeek = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate() - 6
-    );
-    return lastWeek;
-  } else if (range === RangeOptions.LastTwoWeeks) {
-    const today = new Date();
-    const lastTwoWeeks = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate() - 13
-    );
-    return lastTwoWeeks;
-  } else {
-    const today = new Date();
-    const lastMonth = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate() - 29
-    );
-    return lastMonth;
+export function getStartDate(range: BarChartRangeType | PieChartRangeType) {
+  const today = new Date();
+
+  const startDate = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate() - range.amount
+  );
+
+  return startDate;
+}
+
+export function barRangeOptionMask(option: BarChartRangeType) {
+  switch (option) {
+    case BarChartRangeOptions.LastMonth:
+      return "Last month";
+    case BarChartRangeOptions.LastWeek:
+      return "Last week";
+    case BarChartRangeOptions.LastTwoWeeks:
+      return "Last two weeks";
   }
 }
 
-export function rangeOptionMask(option: RangeOptions) {
+export function pieRangeOptionMask(option: PieChartRangeType) {
   switch (option) {
-    case RangeOptions.LastMonth:
-      return "Last month";
-    case RangeOptions.LastWeek:
-      return "Last week";
-    case RangeOptions.LastTwoWeeks:
-      return "Last two weeks";
+    case PieChartRangeOptions.Last30Days:
+      return "Last 30 days";
+    case PieChartRangeOptions.Last90Days:
+      return "Last 90 days";
+    case PieChartRangeOptions.Last180Days:
+      return "Last 180 days";
   }
 }

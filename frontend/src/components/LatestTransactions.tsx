@@ -1,4 +1,5 @@
-import { Chip } from "@mui/material";
+import { WarningAmberRounded } from "@mui/icons-material";
+import { Chip, Tooltip } from "@mui/material";
 import {
   DataGrid,
   GridActionsCellItem,
@@ -11,8 +12,8 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
 import React from "react";
-import { Transaction, typeOptionColor } from "../models/Transaction";
 import { useTransactions } from "../hooks/api/useTransactions";
+import { Transaction, typeOptionColor } from "../models/Transaction";
 
 const MAX_ROWS = 10;
 
@@ -27,37 +28,45 @@ function LatestTransactions(props: Props) {
   const { enqueueSnackbar } = useSnackbar();
 
   const columns: GridColDef[] = [
-    { field: "col1", headerName: "Name", width: 300 },
     {
-      field: "col2",
+      field: "title",
+      headerName: "Name",
+      width: 300,
+    },
+    {
+      field: "label",
       headerName: "Label",
       width: 300,
       renderCell: (params) => {
         return (
-          <Chip
-            label={params.value.name}
-            variant="outlined"
-            style={{ borderColor: params.value.color }}
-          />
+          params.value && (
+            <Chip
+              label={params.value.name}
+              variant="outlined"
+              style={{ borderColor: params.value.color }}
+            />
+          )
         );
       },
     },
     {
-      field: "col3",
+      field: "type",
       headerName: "Type",
       width: 300,
       renderCell: (params) => {
         const { bgColor, color } = typeOptionColor(params.value);
         return (
-          <Chip
-            label={params.value}
-            style={{ color, backgroundColor: bgColor }}
-          />
+          params.value && (
+            <Chip
+              label={params.value}
+              style={{ color, backgroundColor: bgColor }}
+            />
+          )
         );
       },
     },
     {
-      field: "col4",
+      field: "value",
       headerName: "Value",
       width: 300,
       valueFormatter: (params: GridValueFormatterParams) => {
@@ -68,15 +77,15 @@ function LatestTransactions(props: Props) {
       },
     },
     {
-      field: "col5",
+      field: "date",
       headerName: "Date",
-      width: 300,
+      width: 200,
     },
     {
       field: "actions",
       type: "actions",
       headerName: "Actions",
-      width: 100,
+      width: 200,
       cellClassName: "actions",
       getActions: ({ id }) => {
         return [
@@ -87,6 +96,20 @@ function LatestTransactions(props: Props) {
             color="inherit"
           />,
         ];
+      },
+    },
+    {
+      field: "imported",
+      headerName: "",
+      width: 100,
+      renderCell: (params) => {
+        return (
+          params.value && (
+            <Tooltip title="This transaction was imported. Please finish filling out the remaining fields.">
+              <WarningAmberRounded color="warning" />
+            </Tooltip>
+          )
+        );
       },
     },
   ];
@@ -135,11 +158,12 @@ function LatestTransactions(props: Props) {
     return data
       ? data.map((item) => ({
           id: item.id,
-          col1: item.title,
-          col2: item.label || "",
-          col3: item.type,
-          col4: item.value,
-          col5: new Date(item.date).toLocaleDateString(),
+          title: item.title,
+          label: item.label || "",
+          type: item.type,
+          value: item.value,
+          date: new Date(item.date).toLocaleDateString(),
+          imported: item.imported || false,
         }))
       : [];
   }

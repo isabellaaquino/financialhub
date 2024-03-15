@@ -1,11 +1,10 @@
+import { TextField } from "@mui/material";
 import Autocomplete from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useQuery } from "@tanstack/react-query";
-import { CustomLabel } from "../models/CustomLabel";
-import { useState } from "react";
-import { TextField } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import { useWallet } from "../hooks/api/useWallet";
+import { CustomLabel } from "../models/CustomLabel";
 
 interface Props {
   onChange: any;
@@ -21,7 +20,7 @@ export default function AsyncAutocomplete(props: Props) {
   const { data: wallet, isLoading } = useQuery({
     queryKey: ["wallet"],
     queryFn: () => getWallet(),
-    enabled: open,
+    enabled: true,
   });
 
   return (

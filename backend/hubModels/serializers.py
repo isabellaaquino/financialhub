@@ -6,6 +6,7 @@ from django.utils import timezone
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 from rest_framework_simplejwt.exceptions import InvalidToken
 
+
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
@@ -17,6 +18,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         return token
 
+
 class MyTokenRefreshSerializer(TokenRefreshSerializer):
     refresh = None
     def validate(self, attrs):
@@ -25,32 +27,30 @@ class MyTokenRefreshSerializer(TokenRefreshSerializer):
             return super().validate(attrs)
         else:
             raise InvalidToken('No valid token found in cookie \'refresh_token\'')
+
+
 class LabelSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomLabel
         fields = ('id', 'name', 'color')
 
+
 class WalletSerializer(serializers.ModelSerializer):
-    monthly_incomes = serializers.SerializerMethodField(source='get_monthly_incomes')
+    monthly_earnings = serializers.SerializerMethodField(source='get_monthly_earnings')
     monthly_expenses = serializers.SerializerMethodField(source='get_monthly_expenses')
     labels = LabelSerializer(many=True)
-    aggregated_expenses = serializers.SerializerMethodField(source='get_aggregated_expenses')
 
     class Meta:
         model = Wallet
-        fields = ('current_amount', 'monthly_incomes', 'monthly_expenses', 'aggregated_expenses', 'labels')
+        fields = ('current_amount', 'monthly_earnings', 'monthly_expenses', 'labels')
 
     @staticmethod
-    def get_monthly_incomes(obj):
-        return obj.get_monthly_incomes()
+    def get_monthly_earnings(obj):
+        return obj.get_monthly_earnings()
 
     @staticmethod
     def get_monthly_expenses(obj):
         return obj.get_monthly_expenses()
-
-    @staticmethod
-    def get_aggregated_expenses(obj):
-        return obj.get_aggregated_expenses()
 
 
 class TransactionSerializer(serializers.ModelSerializer):
@@ -58,12 +58,11 @@ class TransactionSerializer(serializers.ModelSerializer):
     value = serializers.DecimalField(decimal_places=2, max_digits=10)
     amount = serializers.SerializerMethodField()
     duration = serializers.SerializerMethodField()
-    label = LabelSerializer(source='get_label',read_only=True)
+    label = LabelSerializer(read_only=True)
 
     class Meta:
         model = Transaction
-        fields = ('id', 'value', 'date', 'type', 'title', 'label', 'description', 'recurrent',
-                  'amount', 'duration')
+        fields = ('id', 'value', 'date', 'type', 'title', 'label', 'recurrent', 'amount', 'duration', 'imported')
 
     @staticmethod
     def get_amount(obj):

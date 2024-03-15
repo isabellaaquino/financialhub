@@ -1,9 +1,9 @@
-import { Box, InputAdornment, TextField, Typography } from "@mui/material";
-import LatestTransactions from "../components/LatestTransactions";
 import SearchIcon from "@mui/icons-material/Search";
+import { Box, InputAdornment, TextField, Typography } from "@mui/material";
 import { grey } from "@mui/material/colors";
-import { useTransactions } from "../hooks/api/useTransactions";
 import { useQuery } from "@tanstack/react-query";
+import LatestTransactions from "../components/LatestTransactions";
+import { useTransactions } from "../hooks/api/useTransactions";
 
 function Transactions() {
   const { getTransactions } = useTransactions();

@@ -3,8 +3,8 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-from .views import MyTokenObtainPairView, MyTokenRefreshView, TransactionAPIView, get_saving_plans, get_transactions, \
-    get_latest_transactions, get_routes, create_user, WalletAPIView, LabelAPIView, ImportInvoicesAPIView
+from .views import (MyTokenObtainPairView, MyTokenRefreshView, TransactionAPIView, get_saving_plans, get_transactions,
+                    get_routes, create_user, WalletAPIView, LabelAPIView, ImportInvoicesAPIView)
 
 urlpatterns = [
     path('', get_routes),
@@ -17,9 +17,7 @@ urlpatterns = [
     path('labels/<int:label_pk>', LabelAPIView.as_view(), name='label'),
     path('savingplans/', get_saving_plans, name='saving_plans'),
     path('transactions/', get_transactions, name='transactions'),
-    path('latesttransactions/', get_latest_transactions,
-         name='latest_transactions'),
     path('transaction/', TransactionAPIView.as_view(), name='transaction'),
     path('transaction/<int:transaction_pk>', TransactionAPIView.as_view(), name='transaction'),
-    path('import/<str:institution>', ImportInvoicesAPIView.as_view(), name='import')
+    path('import/', ImportInvoicesAPIView.as_view(), name='import')
 ]

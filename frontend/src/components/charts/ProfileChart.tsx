@@ -1,21 +1,59 @@
-import { Box, Typography } from "@mui/material";
+import {
+  Box,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Typography,
+} from "@mui/material";
 import { grey } from "@mui/material/colors";
+import { useQuery } from "@tanstack/react-query";
 import { ApexOptions } from "apexcharts";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Chart from "react-apexcharts";
+import {
+  PieChartRangeOptions,
+  PieChartRangeType,
+  getPieChartOptionById,
+} from "../../enums/Enums";
+import { useTransactions } from "../../hooks/api/useTransactions";
 import { AggregatedExpense } from "../../models/Transaction";
 import { darkTheme } from "../../theme";
+import { getStartDate, pieRangeOptionMask } from "../../utils/utils";
 
-interface Props {
-  data: AggregatedExpense[];
-}
+function ProfileChart() {
+  const { getTransactions } = useTransactions();
 
-function ProfileChart(props: Props) {
-  const colors = props.data.map((obj) => obj.label_color);
-  const amounts = props.data.map((obj) => obj.total_amount);
-  const labels = props.data.map((obj) => obj.label_name);
+  const [range, setRange] = useState<PieChartRangeType>(
+    PieChartRangeOptions.Last30Days
+  );
 
-  const state = useMemo(() => {
+  const endDate = new Date(new Date()); //TO-DO
+  const startDate = useMemo(() => {
+    return getStartDate(range);
+  }, [range]);
+
+  type PromiseType<T> = T extends Promise<infer U> ? U : T;
+
+  const { data: transactions } = useQuery({
+    queryKey: ["transactions", startDate],
+    queryFn: () => getTransactions(0, 2, startDate, endDate),
+  }) as { data: PromiseType<AggregatedExpense[]> };
+
+  const colors = transactions
+    ? transactions.map((obj: AggregatedExpense) => obj.label_color)
+    : [];
+  const amounts = transactions
+    ? transactions.map((obj: AggregatedExpense) => obj.value)
+    : [];
+  const labels = transactions
+    ? transactions.map((obj: AggregatedExpense) => obj.label_name)
+    : [];
+
+  const state = useMemo<{
+    series: ApexAxisChartSeries | ApexNonAxisChartSeries;
+    options: ApexOptions;
+  }>(() => {
     return {
       series: amounts,
       options: {
@@ -35,16 +73,6 @@ function ProfileChart(props: Props) {
             colors: grey[600],
           },
         } as ApexLegend,
-        title: {
-          text: "Profile distribution",
-          align: "left",
-          style: {
-            fontFamily: "Inter",
-            fontSize: "16px",
-            fontWeight: "medium",
-            color: "white",
-          },
-        } as ApexTitleSubtitle,
         yaxis: {
           labels: {
             formatter: function (val) {
@@ -59,11 +87,9 @@ function ProfileChart(props: Props) {
           show: false,
         },
       },
-    } as {
-      series: ApexAxisChartSeries | ApexNonAxisChartSeries;
-      options: ApexOptions;
     };
-  }, [props.data]);
+  }, [transactions]);
+
   return (
     <Box
       border="1px solid"
@@ -72,27 +98,57 @@ function ProfileChart(props: Props) {
       padding={3}
       height={380}
     >
-      {props.data.length === 0 ? (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Typography component="h2" variant="body1" mb={1}>
+          Expenses Distribution
+        </Typography>
+        <FormControl sx={{ width: "20%" }}>
+          <InputLabel>Range</InputLabel>
+          <Select
+            size="small"
+            value={range.id}
+            label="Range"
+            onChange={(e) =>
+              setRange(getPieChartOptionById(Number(e.target.value)))
+            }
+          >
+            {Object.values(PieChartRangeOptions).map((item, index) => {
+              return (
+                <MenuItem key={index} value={item.id}>
+                  {pieRangeOptionMask(item)}
+                </MenuItem>
+              );
+            })}
+          </Select>
+        </FormControl>
+      </Box>
+      {transactions ? (
+        <Chart
+          options={state.options}
+          series={state.series}
+          type="pie"
+          width="90%"
+          height="300px"
+        />
+      ) : (
         <Typography
           component="p"
           variant="body1"
           sx={{
             display: "flex",
             justifyContent: "center",
-            mt: 19,
+            mt: 14,
             textAlign: "center",
           }}
         >
           Unable to load chart due to insufficient data.
         </Typography>
-      ) : (
-        <Chart
-          options={state.options}
-          series={state.series}
-          type="pie"
-          width="100%"
-          height="100%"
-        />
       )}
     </Box>
   );

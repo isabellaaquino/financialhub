@@ -1,6 +1,6 @@
 import { useEffect } from "react";
+import { apiPrivate } from "../api/services/Api";
 import { useAuth } from "./useAuth";
-import { apiPrivate } from "../api/services/api";
 
 function useAxiosPrivate() {
   const { authTokens, SignOut, refresh } = useAuth();

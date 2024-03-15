@@ -4,10 +4,10 @@ import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import { Box, Grid, IconButton, Skeleton, Typography } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { useState } from "react";
+import { Wallet } from "../../models/Wallet";
 import { darkTheme } from "../../theme";
 import { formatValue } from "../../utils/utils";
 import EditBalanceForm from "../forms/EditBalanceForm";
-import { Wallet } from "../../models/Wallet";
 
 interface Props {
   wallet?: Wallet;
@@ -112,7 +112,7 @@ function WalletGridRow(props: Props) {
           height={"100%"}
         >
           <Typography component="h2" variant="body1" mb={1}>
-            Monthly Income
+            Monthly Earnings
           </Typography>
           {props.isPending ? (
             <Skeleton variant="rectangular" width={210} height={50} />
@@ -132,7 +132,7 @@ function WalletGridRow(props: Props) {
           ) : (
             <Box display="flex" alignItems="center" gap={2}>
               <Typography component="span" variant="h5" fontWeight={600}>
-                +{formatValue(props.wallet!.monthly_incomes, 10_000)}
+                +{formatValue(props.wallet!.monthly_earnings, 10_000)}
               </Typography>
             </Box>
           )}
