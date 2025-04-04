@@ -100,3 +100,106 @@ This project will be soon licensed under the MIT License. You are free to use, m
 ## Authors ✍️
 
 This project is thought, planned and implemented by [Isabella Aquino](https://github.com/isabellaaquino) (backend heavy) & [Pedro Dell'Olio](https://github.com/pedrodellolio) (frontend heavy)
+
+
+
+## ReadMe Maintenance
+
+# FinancialHub - Fork SL/SC/PL
+![image](https://github.com/isabellaaquino/financialhub/assets/76221367/7b7dc6e9-4279-4fff-9e19-04b4394252e9)
+
+## Présentation 📝
+
+Ce dépôt contient une application web de gestion financière développée avec **Django** et **React.js**. L’objectif initial du projet est de proposer une solution simple et intuitive pour gérer ses finances personnelles, suivre ses transactions et analyser ses revenus et dépenses.
+ 
+Bien que l’application ne soit pas encore hébergée en ligne, il est possible de la tester en local en suivant les instructions ci-dessous.
+
+---
+
+## Fonctionnalités principales 🚀
+
+### Gestion des transactions 💸
+
+- Création de transactions (revenus, dépenses, virements)
+- Suivi des détails : date, montant, description
+- Création d’étiquettes personnalisées pour filtrer les transactions
+- Import de factures de paiement (uniquement via le système brésilien PIX)
+- Création de transactions récurrentes ❗
+
+### Analyse mensuelle des revenus et dépenses 📈
+
+- Visualisation des finances sous forme de graphiques interactifs
+- Analyse des tendances et habitudes de dépenses
+- Recommandations pour améliorer sa gestion budgétaire
+
+### Plans d’épargne 🐖 ❗
+
+- Création de plans d’épargne personnalisés selon les objectifs de l’utilisateur
+- Suivi des objectifs et rappels automatiques
+- Notifications pour rester motivé
+
+> ❗ : Fonctionnalité commencée mais non finalisée ou non encore disponible
+
+---
+
+## 🛠️ Objectif du Fork : Amélioration de FinancialHub
+
+Ce fork vise à stabiliser et améliorer l’application existante. Le travail est mené en équipe de 3 personnes, en se concentrant sur la correction de bugs, la fluidité de l’interface et l’expérience utilisateur.
+
+### ✅ Périmètre de maintenance initial :
+
+**1. Stabilité & correction de bugs**
+- Résolution des erreurs critiques empêchant le bon fonctionnement global
+- Meilleure gestion des données échangées entre le front et le back
+- Stabilisation de l’import des factures PIX et des transactions récurrentes
+
+**2. Ergonomie et accessibilité**
+- Interface plus fluide, responsive sur tous supports
+- Meilleure navigation au clavier, contraste et accessibilité générale
+
+**3. Sécurité**
+- Vérification des pratiques de sécurité côté API
+- Renforcement de la gestion des sessions et de l’authentification
+
+### 🔧 Évolutions envisagées si la base devient stable :
+- Finalisation des fonctionnalités en attente (❗)
+- Ajout d’une fonctionnalité de **budget mensuel**
+- Amélioration du tableau de bord avec filtres dynamiques
+- Meilleure gestion des utilisateurs
+
+---
+
+## 👥 Rôles et organisation de l’équipe (MOE)
+
+
+Initiales
+Rôle principal
+Missions techniques confiées
+SL
+Frontend / UI/UX
+Interface, responsive design, ergonomie, accessibilité
+PL
+Frontend / UI/UX
+Composants réutilisables, navigation, cohérence visuelle
+SC
+Backend / API
+Debug API Django, logique métier, gestion des données
+SL / PL / SC
+Intégration / QA
+Lancement local, tests fonctionnels, validation des interfaces et des flux
+
+|
+
+> 📌 Les rôles sont susceptibles d’évoluer selon les besoins et les avancées du projet.
+
+---
+
+## Installation en local ⚙️
+
+Pour lancer l’application en local :
+
+1. Cloner le dépôt :
+
+   ```bash
+   git clone https://github.com/ton-fork/financialhub.git
+
